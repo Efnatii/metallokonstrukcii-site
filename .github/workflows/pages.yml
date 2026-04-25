@@ -27,7 +27,7 @@ jobs:
       B2E_ADDRESS: ${{ vars.B2E_ADDRESS || 'Санкт-Петербург, ул. Седова, 57, лит. В' }}
       B2E_YANDEX_MAP_URL: ${{ vars.B2E_YANDEX_MAP_URL }}
       B2E_YANDEX_MAP_EMBED_URL: ${{ vars.B2E_YANDEX_MAP_EMBED_URL }}
-      B2E_LEAD_ENDPOINT: ${{ secrets.B2E_LEAD_ENDPOINT }}
+      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || secrets.B2E_LEAD_ENDPOINT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

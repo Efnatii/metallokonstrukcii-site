@@ -1,8 +1,10 @@
 .env
 .env.*
 !.env.example
+worker/.dev.vars
 dist/
 node_modules/
+worker/node_modules/
 .codex-server.pid
 *.log
 techtask

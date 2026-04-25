@@ -1,0 +1,12 @@
+# Copy to .dev.vars for local Worker testing only.
+# Do not commit real secrets.
+
+# Generic webhook destination, e.g. CRM/Make/Zapier endpoint.
+LEAD_WEBHOOK_URL=
+
+# Telegram delivery destination.
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_CHAT_ID=
+
+# Optional Cloudflare Turnstile server-side validation secret.
+TURNSTILE_SECRET_KEY=

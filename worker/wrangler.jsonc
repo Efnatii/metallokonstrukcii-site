@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "b2e-leads",
+  "main": "src/index.js",
+  "compatibility_date": "2026-04-25",
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ALLOWED_ORIGIN": "https://efnatii.github.io",
+    "SITE_LABEL": "ООО В2е",
+    "LEAD_SUBJECT": "Новая заявка с сайта В2е"
+  }
+}

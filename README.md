@@ -30,9 +30,32 @@ npm.cmd start
 - `B2E_ADDRESS`: адрес производства/офиса.
 - `B2E_YANDEX_MAP_URL`: ссылка на Яндекс Карты.
 - `B2E_YANDEX_MAP_EMBED_URL`: ссылка для iframe Яндекс Карт.
-- `B2E_LEAD_ENDPOINT`: webhook для отправки форм. Лучше хранить как GitHub Secret.
+- `B2E_LEAD_ENDPOINT`: публичный URL Cloudflare Worker для отправки форм.
 
 Если `B2E_LEAD_ENDPOINT` не задан, формы используют fallback через `mailto:` на `B2E_CONTACT_EMAIL`.
+
+## Cloudflare Worker для заявок
+
+Код бесплатного proxy лежит в `worker/`. Он принимает заявки с GitHub Pages и пересылает их в Telegram или CRM/webhook, а приватные токены хранит в Cloudflare Worker Secrets.
+
+```powershell
+npm --prefix worker install
+npx --prefix worker wrangler login
+npm --prefix worker run deploy
+```
+
+После деплоя добавьте URL Worker в GitHub Actions variable `B2E_LEAD_ENDPOINT` и перезапустите workflow Pages.
+
+Секреты Worker:
+
+```powershell
+npm --prefix worker run secret:telegram-token
+npm --prefix worker run secret:telegram-chat
+# или
+npm --prefix worker run secret:webhook
+```
+
+`B2E_LEAD_ENDPOINT` сам по себе не является секретом. Секретными должны оставаться `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `LEAD_WEBHOOK_URL` и похожие значения внутри Cloudflare.
 
 ## GitHub Pages
 
