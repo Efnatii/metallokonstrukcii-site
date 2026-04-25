@@ -284,10 +284,25 @@
 
   function setupLazyMap() {
     const iframe = $('[data-map-lazy="true"]');
+    const wrap = iframe?.closest('.map-wrap');
 
     if (!iframe) {
       return;
     }
+
+    let loaded = false;
+
+    iframe.addEventListener('load', () => {
+      loaded = true;
+      wrap?.classList.remove('is-unavailable');
+      wrap?.classList.add('is-loaded');
+    });
+
+    setTimeout(() => {
+      if (!loaded) {
+        wrap?.classList.add('is-unavailable');
+      }
+    }, 9000);
 
     const loadMap = () => {
       const src = iframe.dataset.resolvedSrc || config[iframe.dataset.configSrc];
@@ -317,6 +332,8 @@
   function setupLocationMap() {
     const iframe = $('[data-map-lazy="true"]');
     const externalLink = $('[data-location-map-link]');
+    const fallbackLink = $('[data-map-fallback-link]');
+    const wrap = iframe?.closest('.map-wrap');
     const cards = $$('.location-card');
     const buttons = $$('.location-card button[data-map-src]');
 
@@ -341,12 +358,22 @@
         iframe.dataset.resolvedSrc = button.dataset.mapSrc;
 
         if (load || iframe.getAttribute('src')) {
+          wrap?.classList.remove('is-loaded', 'is-unavailable');
           iframe.setAttribute('src', button.dataset.mapSrc);
+          setTimeout(() => {
+            if (iframe.getAttribute('src') === button.dataset.mapSrc && !wrap?.classList.contains('is-loaded')) {
+              wrap?.classList.add('is-unavailable');
+            }
+          }, 9000);
         }
       }
 
       if (externalLink && button.dataset.mapUrl) {
         externalLink.setAttribute('href', button.dataset.mapUrl);
+      }
+
+      if (fallbackLink && button.dataset.mapUrl) {
+        fallbackLink.setAttribute('href', button.dataset.mapUrl);
       }
     };
 

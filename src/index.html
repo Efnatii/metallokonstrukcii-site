@@ -432,12 +432,17 @@
             <div class="map-wrap">
               <iframe
                 title="Карта: офис B2E на улице Седова 57, лит. В"
-                loading="lazy"
+                loading="eager"
                 referrerpolicy="no-referrer-when-downgrade"
                 src="https://yandex.ru/map-widget/v1/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16"
                 data-config-src="yandexMapEmbedUrl"
                 data-map-lazy="true"
               ></iframe>
+              <div class="map-fallback" data-map-fallback>
+                <strong>Карта загружается из Яндекса</strong>
+                <span>Если в браузере заблокированы внешние iframe, откройте точку в Яндекс Картах.</span>
+                <a data-map-fallback-link href="https://yandex.ru/maps/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16" target="_blank" rel="noreferrer">Открыть карту</a>
+              </div>
             </div>
             <div class="location-list" aria-label="Адреса и площадки компании">
               <article class="location-card is-active">
