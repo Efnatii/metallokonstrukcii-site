@@ -50,45 +50,6 @@
     }
   }
 
-  function injectStructuredData() {
-    const schema = {
-      '@context': 'https://schema.org',
-      '@type': ['Organization', 'LocalBusiness'],
-      name: 'ООО В2е',
-      legalName: 'ООО В2е',
-      url: config.siteUrl,
-      email: config.email,
-      telephone: config.phone,
-      address: {
-        '@type': 'PostalAddress',
-        addressLocality: 'Санкт-Петербург',
-        streetAddress: config.address,
-        addressCountry: 'RU'
-      },
-      areaServed: ['СЗФО', 'ЦФО'],
-      makesOffer: [
-        'Строительные металлоконструкции',
-        'Закладные детали',
-        'Лестницы металлические',
-        'Навесы',
-        'Ворота',
-        'Резервуары',
-        'Арочные конструкции',
-        'Нестандартные конструкции',
-        'Монтаж металлоконструкций',
-        'Резка металла',
-        'Гибка металла',
-        'Металлообработка',
-        'Порошковая окраска'
-      ]
-    };
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(schema);
-    document.head.append(script);
-  }
-
   function setupNavigation() {
     const navToggle = $('.nav-toggle');
     const nav = $('.site-nav');
@@ -351,7 +312,6 @@
   }
 
   applyConfig();
-  injectStructuredData();
   setupNavigation();
   setupCalculator();
   setupModal();

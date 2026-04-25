@@ -121,6 +121,79 @@ Sitemap: ${config.siteUrl}sitemap.xml
 `;
 }
 
+function makeStructuredData(config) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': ['Organization', 'LocalBusiness'],
+    name: 'ООО В2е',
+    legalName: 'ООО В2е',
+    url: config.siteUrl,
+    email: config.email,
+    telephone: config.phone,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Санкт-Петербург',
+      streetAddress: config.address,
+      addressCountry: 'RU'
+    },
+    areaServed: ['СЗФО', 'ЦФО'],
+    makesOffer: [
+      'Строительные металлоконструкции',
+      'Закладные детали',
+      'Лестницы металлические',
+      'Навесы',
+      'Ворота',
+      'Резервуары',
+      'Арочные конструкции',
+      'Нестандартные конструкции',
+      'Монтаж металлоконструкций',
+      'Резка металла',
+      'Гибка металла',
+      'Металлообработка',
+      'Порошковая окраска'
+    ]
+  };
+}
+
+function makeStructuredDataScript(config) {
+  return `    <script type="application/ld+json">${JSON.stringify(makeStructuredData(config))}</script>`;
+}
+
+function makeIndexHtml(source, config) {
+  const imageUrl = new URL('./assets/metal-production-hero.png', config.siteUrl).href;
+  let html = source
+    .replace(
+      /<link rel="canonical" href="[^"]+">/,
+      `<link rel="canonical" href="${config.siteUrl}">`
+    )
+    .replace(
+      /<meta property="og:image" content="[^"]+">/,
+      `<meta property="og:image" content="${imageUrl}">`
+    )
+    .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/g, '');
+
+  if (html.includes('<meta property="og:url"')) {
+    html = html.replace(
+      /<meta property="og:url" content="[^"]+">/,
+      `<meta property="og:url" content="${config.siteUrl}">`
+    );
+  } else {
+    html = html.replace(
+      /(<meta property="og:type" content="website">)/,
+      `$1\n    <meta property="og:url" content="${config.siteUrl}">`
+    );
+  }
+
+  if (!html.includes('rel="alternate"') || !html.includes('llms.txt')) {
+    html = html.replace(
+      /(<link rel="canonical" href="[^"]+">)/,
+      `$1\n    <link rel="alternate" type="text/plain" href="./llms.txt" title="LLMs.txt">`
+    );
+  }
+
+  return html.replace('</head>', `${makeStructuredDataScript(config)}\n  </head>`);
+}
+
 function makeLlms(config) {
   return `# ООО В2е - производство металлоконструкций
 
@@ -164,6 +237,10 @@ export async function build() {
   await mkdir(distDir, { recursive: true });
   await cp(srcDir, distDir, { recursive: true });
 
+  const indexPath = path.join(distDir, 'index.html');
+  const indexHtml = await readFile(indexPath, 'utf8');
+
+  await writeFile(indexPath, makeIndexHtml(indexHtml, config), 'utf8');
   await writeFile(path.join(distDir, 'config.js'), makeConfigJs(config), 'utf8');
   await writeFile(path.join(distDir, 'sitemap.xml'), makeSitemap(config), 'utf8');
   await writeFile(path.join(distDir, 'robots.txt'), makeRobots(config), 'utf8');

@@ -44,7 +44,8 @@ test('build writes config, sitemap, robots and llms from environment', async () 
   try {
     await build();
 
-    const [configJs, sitemap, robots, llms] = await Promise.all([
+    const [indexHtml, configJs, sitemap, robots, llms] = await Promise.all([
+      readFile(path.join(rootDir, 'dist/index.html'), 'utf8'),
       readFile(path.join(rootDir, 'dist/config.js'), 'utf8'),
       readFile(path.join(rootDir, 'dist/sitemap.xml'), 'utf8'),
       readFile(path.join(rootDir, 'dist/robots.txt'), 'utf8'),
@@ -56,6 +57,11 @@ test('build writes config, sitemap, robots and llms from environment', async () 
     assert.equal(config.phoneHref, 'tel:+79990000000');
     assert.equal(config.emailHref, 'mailto:lead@example.test');
     assert.equal(config.leadEndpoint, 'https://b2e-leads.example.workers.dev');
+    assert.match(indexHtml, /<link rel="canonical" href="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
+    assert.match(indexHtml, /<meta property="og:url" content="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
+    assert.match(indexHtml, /<meta property="og:image" content="https:\/\/example\.test\/metallokonstrukcii-site\/assets\/metal-production-hero\.png">/);
+    assert.match(indexHtml, /<link rel="alternate" type="text\/plain" href="\.\/llms\.txt" title="LLMs\.txt">/);
+    assert.match(indexHtml, /<script type="application\/ld\+json">/);
     assert.match(sitemap, /https:\/\/example\.test\/metallokonstrukcii-site\//);
     assert.match(robots, /Sitemap: https:\/\/example\.test\/metallokonstrukcii-site\/sitemap\.xml/);
     assert.match(llms, /lead@example\.test/);
