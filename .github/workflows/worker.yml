@@ -57,7 +57,7 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          npx wrangler deploy --config worker/wrangler.jsonc \
+          ./worker/node_modules/.bin/wrangler deploy --config worker/wrangler.jsonc \
             --var "ALLOWED_ORIGIN:${WORKER_ALLOWED_ORIGIN}" \
             --var "SITE_LABEL:${WORKER_SITE_LABEL}" \
             --var "LEAD_SUBJECT:${WORKER_LEAD_SUBJECT}"
@@ -94,7 +94,7 @@ jobs:
             exit 0
           fi
 
-          npx wrangler secret bulk worker/.worker-secrets.json --config worker/wrangler.jsonc
+          ./worker/node_modules/.bin/wrangler secret bulk worker/.worker-secrets.json --config worker/wrangler.jsonc
           rm -f worker/.worker-secrets.json
 
       - name: Smoke test Worker CORS
