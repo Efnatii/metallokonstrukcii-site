@@ -64,7 +64,7 @@ function escapeXml(value) {
 
 function makeConfig() {
   const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
-  const defaultMapText = encodeURIComponent(defaultAddress);
+  const defaultMapPoint = encodeURIComponent('30.4230533,59.8864045');
   const phone = env('B2E_CONTACT_PHONE', '+79650578270');
   const phoneDisplay = env('B2E_CONTACT_PHONE_DISPLAY', '+7 965 057 82 70');
   const email = env('B2E_CONTACT_EMAIL', 'zakaz@b2energy.ru');
@@ -84,11 +84,11 @@ function makeConfig() {
     address: env('B2E_ADDRESS', defaultAddress),
     yandexMapUrl: env(
       'B2E_YANDEX_MAP_URL',
-      `https://yandex.ru/maps/?text=${defaultMapText}`
+      `https://yandex.ru/maps/?ll=${defaultMapPoint}&mode=whatshere&whatshere%5Bpoint%5D=${defaultMapPoint}&whatshere%5Bzoom%5D=16&z=16`
     ),
     yandexMapEmbedUrl: env(
       'B2E_YANDEX_MAP_EMBED_URL',
-      `https://yandex.ru/map-widget/v1/?mode=search&text=${defaultMapText}&z=15`
+      `https://yandex.ru/map-widget/v1/?ll=${defaultMapPoint}&mode=whatshere&whatshere%5Bpoint%5D=${defaultMapPoint}&whatshere%5Bzoom%5D=16&z=16`
     ),
     leadEndpoint: env('B2E_LEAD_ENDPOINT', ''),
     generatedAt: new Date().toISOString()

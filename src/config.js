@@ -9,8 +9,8 @@ window.B2E_CONFIG = window.B2E_CONFIG || {
   maxUrl: 'https://max.ru/',
   address: 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3',
   yandexMapUrl:
-    'https://yandex.ru/maps/?text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D1%83%D0%BB.%20%D0%A1%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%2C%2057%2C%20%D0%BB%D0%B8%D1%82.%20%D0%92%2C%20%D0%BF%D0%BE%D0%BC%D0%B5%D1%89.%2011-%D0%9D%2C%20%D0%BA%D0%BE%D0%BC.%203',
+    'https://yandex.ru/maps/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16',
   yandexMapEmbedUrl:
-    'https://yandex.ru/map-widget/v1/?mode=search&text=%D0%A1%D0%B0%D0%BD%D0%BA%D1%82-%D0%9F%D0%B5%D1%82%D0%B5%D1%80%D0%B1%D1%83%D1%80%D0%B3%2C%20%D1%83%D0%BB.%20%D0%A1%D0%B5%D0%B4%D0%BE%D0%B2%D0%B0%2C%2057%2C%20%D0%BB%D0%B8%D1%82.%20%D0%92%2C%20%D0%BF%D0%BE%D0%BC%D0%B5%D1%89.%2011-%D0%9D%2C%20%D0%BA%D0%BE%D0%BC.%203&z=15',
+    'https://yandex.ru/map-widget/v1/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16',
   leadEndpoint: ''
 };

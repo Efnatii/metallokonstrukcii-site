@@ -1,6 +1,6 @@
 (function () {
   const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
-  const defaultMapText = encodeURIComponent(defaultAddress);
+  const officePoint = encodeURIComponent('30.4230533,59.8864045');
 
   const defaults = {
     siteName: 'ООО B2E - производство металлоконструкций',
@@ -12,8 +12,8 @@
     emailHref: 'mailto:zakaz@b2energy.ru',
     maxUrl: 'https://max.ru/',
     address: defaultAddress,
-    yandexMapUrl: `https://yandex.ru/maps/?text=${defaultMapText}`,
-    yandexMapEmbedUrl: `https://yandex.ru/map-widget/v1/?mode=search&text=${defaultMapText}&z=15`,
+    yandexMapUrl: `https://yandex.ru/maps/?ll=${officePoint}&mode=whatshere&whatshere%5Bpoint%5D=${officePoint}&whatshere%5Bzoom%5D=16&z=16`,
+    yandexMapEmbedUrl: `https://yandex.ru/map-widget/v1/?ll=${officePoint}&mode=whatshere&whatshere%5Bpoint%5D=${officePoint}&whatshere%5Bzoom%5D=16&z=16`,
     leadEndpoint: ''
   };
 
