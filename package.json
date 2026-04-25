@@ -2,7 +2,7 @@
   "name": "metallokonstrukcii-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Landing page for ООО В2е metal structures production.",
+  "description": "Landing page for ООО B2E metal structures production.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",

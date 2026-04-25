@@ -1,6 +1,9 @@
 (function () {
+  const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
+  const defaultMapText = encodeURIComponent(defaultAddress);
+
   const defaults = {
-    siteName: 'ООО В2е - производство металлоконструкций',
+    siteName: 'ООО B2E - производство металлоконструкций',
     siteUrl: 'https://efnatii.github.io/metallokonstrukcii-site/',
     phone: '+79650578270',
     phoneDisplay: '+7 965 057 82 70',
@@ -8,9 +11,9 @@
     email: 'zakaz@b2energy.ru',
     emailHref: 'mailto:zakaz@b2energy.ru',
     maxUrl: 'https://max.ru/',
-    address: 'Санкт-Петербург, ул. Седова, 57, лит. В',
-    yandexMapUrl: 'https://yandex.ru/maps/',
-    yandexMapEmbedUrl: 'https://yandex.ru/map-widget/v1/?text=Седова%2057&z=15',
+    address: defaultAddress,
+    yandexMapUrl: `https://yandex.ru/maps/?text=${defaultMapText}`,
+    yandexMapEmbedUrl: `https://yandex.ru/map-widget/v1/?mode=search&text=${defaultMapText}&z=15`,
     leadEndpoint: ''
   };
 
@@ -199,7 +202,7 @@
       };
 
       const openMailFallback = () => {
-        const subject = encodeURIComponent(`Заявка с сайта В2е: ${payload.objectType}`);
+        const subject = encodeURIComponent(`Заявка с сайта B2E: ${payload.objectType}`);
         const body = encodeURIComponent(
           `Имя: ${payload.name}\nТелефон: ${payload.phone}\nТип объекта: ${payload.objectType}\nИсточник: ${payload.source}\nСтраница: ${payload.page}`
         );
@@ -311,11 +314,59 @@
     observer.observe(iframe);
   }
 
+  function setupLocationMap() {
+    const iframe = $('[data-map-lazy="true"]');
+    const externalLink = $('[data-location-map-link]');
+    const cards = $$('.location-card');
+    const buttons = $$('.location-card button[data-map-src]');
+
+    if (!iframe || !buttons.length) {
+      return;
+    }
+
+    const activate = (button, options = {}) => {
+      const { load = false } = options;
+      const card = button.closest('.location-card');
+
+      cards.forEach((item) => item.classList.remove('is-active'));
+      buttons.forEach((item) => item.setAttribute('aria-pressed', 'false'));
+      card?.classList.add('is-active');
+      button.setAttribute('aria-pressed', 'true');
+
+      if (button.dataset.mapTitle) {
+        iframe.setAttribute('title', button.dataset.mapTitle);
+      }
+
+      if (button.dataset.mapSrc) {
+        iframe.dataset.resolvedSrc = button.dataset.mapSrc;
+
+        if (load || iframe.getAttribute('src')) {
+          iframe.setAttribute('src', button.dataset.mapSrc);
+        }
+      }
+
+      if (externalLink && button.dataset.mapUrl) {
+        externalLink.setAttribute('href', button.dataset.mapUrl);
+      }
+    };
+
+    buttons.forEach((button) => {
+      button.setAttribute('aria-pressed', 'false');
+      button.addEventListener('click', () => activate(button, { load: true }));
+    });
+
+    const activeButton = $('.location-card.is-active button[data-map-src]');
+    if (activeButton) {
+      activate(activeButton);
+    }
+  }
+
   applyConfig();
   setupNavigation();
   setupCalculator();
   setupModal();
   setupFloatingActions();
   setupReveal();
+  setupLocationMap();
   setupLazyMap();
 })();

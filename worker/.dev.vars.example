@@ -3,8 +3,8 @@
 
 # Public Worker vars.
 ALLOWED_ORIGIN=https://efnatii.github.io
-SITE_LABEL=ООО В2е
-LEAD_SUBJECT=Новая заявка с сайта В2е
+SITE_LABEL=ООО B2E
+LEAD_SUBJECT=Новая заявка с сайта B2E
 
 # Private delivery secrets.
 # At least one delivery target is required for automatic lead delivery.

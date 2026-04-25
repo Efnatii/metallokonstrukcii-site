@@ -63,7 +63,7 @@ function escapeXml(value) {
 }
 
 function makeConfig() {
-  const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В';
+  const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
   const defaultMapText = encodeURIComponent(defaultAddress);
   const phone = env('B2E_CONTACT_PHONE', '+79650578270');
   const phoneDisplay = env('B2E_CONTACT_PHONE_DISPLAY', '+7 965 057 82 70');
@@ -73,7 +73,7 @@ function makeConfig() {
   );
 
   return {
-    siteName: 'ООО В2е - производство металлоконструкций',
+    siteName: 'ООО B2E - производство металлоконструкций',
     siteUrl,
     phone,
     phoneDisplay,
@@ -88,7 +88,7 @@ function makeConfig() {
     ),
     yandexMapEmbedUrl: env(
       'B2E_YANDEX_MAP_EMBED_URL',
-      `https://yandex.ru/map-widget/v1/?text=${defaultMapText}&z=15`
+      `https://yandex.ru/map-widget/v1/?mode=search&text=${defaultMapText}&z=15`
     ),
     leadEndpoint: env('B2E_LEAD_ENDPOINT', ''),
     generatedAt: new Date().toISOString()
@@ -125,8 +125,8 @@ function makeStructuredData(config) {
   return {
     '@context': 'https://schema.org',
     '@type': ['Organization', 'LocalBusiness'],
-    name: 'ООО В2е',
-    legalName: 'ООО В2е',
+    name: 'ООО B2E',
+    legalName: 'ООО B2E',
     url: config.siteUrl,
     email: config.email,
     telephone: config.phone,
@@ -195,7 +195,7 @@ function makeIndexHtml(source, config) {
 }
 
 function makeLlms(config) {
-  return `# ООО В2е - производство металлоконструкций
+  return `# ООО B2E - производство металлоконструкций
 
 > Одностраничный сайт производственной компании: строительные металлоконструкции, закладные детали, металлические лестницы, навесы, ворота, резервуары, арочные и нестандартные конструкции.
 
@@ -210,6 +210,7 @@ function makeLlms(config) {
 
 - Производственные мощности группы компаний свыше 1000 тонн металлоконструкций в месяц.
 - Производственные площадки: Петрозаводск, Никольское, Рыбацкое.
+- Карта контактов переключает главный офис и производственные направления по площадкам.
 - Более 200 готовых проектных решений КМ и КМД.
 - Собственный инженерный отдел и организация выезда на объект.
 - Онлайн-калькулятор ориентировочного тоннажа здания.
@@ -220,7 +221,7 @@ function makeLlms(config) {
 - Каталог металлоконструкций и услуг.
 - Калькулятор тоннажа.
 - О компании и производственные возможности.
-- Клиенты.
+- Производственные фото, клиенты и партнеры.
 - Контакты и карта.
 
 ## Данные для AI-агентов

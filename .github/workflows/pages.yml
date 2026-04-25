@@ -24,7 +24,7 @@ jobs:
       B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 965 057 82 70' }}
       B2E_CONTACT_EMAIL: ${{ vars.B2E_CONTACT_EMAIL || 'zakaz@b2energy.ru' }}
       B2E_MAX_URL: ${{ vars.B2E_MAX_URL || 'https://max.ru/' }}
-      B2E_ADDRESS: ${{ vars.B2E_ADDRESS || 'Санкт-Петербург, ул. Седова, 57, лит. В' }}
+      B2E_ADDRESS: ${{ vars.B2E_ADDRESS || 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3' }}
       B2E_YANDEX_MAP_URL: ${{ vars.B2E_YANDEX_MAP_URL }}
       B2E_YANDEX_MAP_EMBED_URL: ${{ vars.B2E_YANDEX_MAP_EMBED_URL }}
       B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || secrets.B2E_LEAD_ENDPOINT }}

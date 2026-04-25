@@ -67,7 +67,7 @@ function validateLead(lead) {
 
 function formatLeadText(lead, env) {
   return [
-    env.LEAD_SUBJECT || 'New lead from B2e site',
+    env.LEAD_SUBJECT || 'Новая заявка с сайта B2E',
     '',
     `Name: ${lead.name}`,
     `Phone: ${lead.phone}`,
@@ -135,8 +135,8 @@ async function sendWebhook(lead, env) {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify({
-      site: env.SITE_LABEL || 'OOO B2e',
-      subject: env.LEAD_SUBJECT || 'New lead from B2e site',
+      site: env.SITE_LABEL || 'ООО B2E',
+      subject: env.LEAD_SUBJECT || 'Новая заявка с сайта B2E',
       text: formatLeadText(lead, env),
       lead
     })

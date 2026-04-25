@@ -5,8 +5,8 @@ import worker from '../src/index.js';
 
 const baseEnv = {
   ALLOWED_ORIGIN: 'https://efnatii.github.io',
-  SITE_LABEL: 'OOO B2e',
-  LEAD_SUBJECT: 'New lead from B2e site'
+  SITE_LABEL: 'ООО B2E',
+  LEAD_SUBJECT: 'Новая заявка с сайта B2E'
 };
 
 function makeRequest({ method = 'POST', origin = baseEnv.ALLOWED_ORIGIN, body } = {}) {
