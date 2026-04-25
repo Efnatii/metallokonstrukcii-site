@@ -20,7 +20,7 @@ function corsHeaders(request, env) {
     'Access-Control-Allow-Origin': allowOrigin,
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Vary': 'Origin'
+    Vary: 'Origin'
   };
 }
 
@@ -55,11 +55,11 @@ function normalizeLead(input) {
 
 function validateLead(lead) {
   if (lead.name.length < 2) {
-    return 'Введите имя';
+    return 'Name is required';
   }
 
   if (!/^\+?[\d\s().-]{7,}$/.test(lead.phone)) {
-    return 'Введите корректный телефон';
+    return 'Valid phone is required';
   }
 
   return '';
@@ -67,14 +67,14 @@ function validateLead(lead) {
 
 function formatLeadText(lead, env) {
   return [
-    env.LEAD_SUBJECT || 'Новая заявка с сайта',
+    env.LEAD_SUBJECT || 'New lead from B2e site',
     '',
-    `Имя: ${lead.name}`,
-    `Телефон: ${lead.phone}`,
-    `Тип объекта: ${lead.objectType || '-'}`,
-    `Источник: ${lead.source || '-'}`,
-    `Страница: ${lead.page || '-'}`,
-    `Дата: ${lead.createdAt}`
+    `Name: ${lead.name}`,
+    `Phone: ${lead.phone}`,
+    `Object type: ${lead.objectType || '-'}`,
+    `Source: ${lead.source || '-'}`,
+    `Page: ${lead.page || '-'}`,
+    `Date: ${lead.createdAt}`
   ].join('\n');
 }
 
@@ -135,8 +135,8 @@ async function sendWebhook(lead, env) {
     method: 'POST',
     headers: JSON_HEADERS,
     body: JSON.stringify({
-      site: env.SITE_LABEL || 'ООО В2е',
-      subject: env.LEAD_SUBJECT || 'Новая заявка с сайта',
+      site: env.SITE_LABEL || 'OOO B2e',
+      subject: env.LEAD_SUBJECT || 'New lead from B2e site',
       text: formatLeadText(lead, env),
       lead
     })
@@ -167,9 +167,14 @@ export default {
       return jsonResponse(request, env, { error: 'Forbidden origin' }, { status: 403 });
     }
 
+    const contentLength = Number(request.headers.get('Content-Length') || '0');
+    if (contentLength > 16384) {
+      return jsonResponse(request, env, { error: 'Payload too large' }, { status: 413 });
+    }
+
     let input;
     try {
-      input = await request.json();
+      input = JSON.parse(await request.text());
     } catch {
       return jsonResponse(request, env, { error: 'Invalid JSON' }, { status: 400 });
     }
