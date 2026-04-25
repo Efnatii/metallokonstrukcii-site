@@ -6,8 +6,11 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "check": "node --check scripts/build.mjs && node --check scripts/smoke.mjs && node --check src/main.js && npm test && npm run build && npm --prefix worker run check",
+    "smoke": "node scripts/smoke.mjs",
     "start": "node scripts/serve.mjs",
     "serve": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs && npm --prefix worker test",
     "worker:dev": "npm --prefix worker run dev",
     "worker:deploy": "npm --prefix worker run deploy"
   },

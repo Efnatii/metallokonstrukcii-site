@@ -1,72 +1,111 @@
 # Сайт производства металлоконструкций ООО В2е
 
-Одностраничный статический сайт под GitHub Pages. Контакты, карта, MAX-ссылка и endpoint заявок берутся из переменных окружения на этапе сборки и попадают в `dist/config.js`.
+Статический сайт для GitHub Pages и Cloudflare Worker для приема заявок. Публичные настройки сайта попадают в `dist/config.js` при сборке. Приватные токены не попадают в сайт: они хранятся в GitHub Actions Secrets и при деплое синхронизируются в Cloudflare Worker Secrets.
 
-## Локальный запуск
+## Быстрый старт
 
 ```powershell
 npm run build
 npm start
 ```
 
-Если PowerShell блокирует `npm.ps1`, используйте прямой запуск через `npm.cmd`:
+Если PowerShell блокирует `npm.ps1`, используйте:
 
 ```powershell
 npm.cmd run build
 npm.cmd start
 ```
 
-По умолчанию локальный сервер поднимается на `http://127.0.0.1:4173/`. Если порт занят, скрипт выберет следующий свободный.
+Локальный сервер поднимается на `http://127.0.0.1:4173/` или на следующем свободном порту.
 
-## Переменные окружения
+## Проверки
 
-Скопируйте `.env.example` в `.env` для локальной настройки или задайте переменные в GitHub:
+```powershell
+npm test
+npm run check
+npm run smoke
+```
 
-- `B2E_SITE_URL`: публичный URL сайта.
-- `B2E_CONTACT_PHONE`: телефон для `tel:` ссылки, например `+79650578270`.
-- `B2E_CONTACT_PHONE_DISPLAY`: отображаемый телефон, например `+7 965 057 82 70`.
-- `B2E_CONTACT_EMAIL`: почта для заявок.
-- `B2E_MAX_URL`: реальная ссылка на MAX.
-- `B2E_ADDRESS`: адрес производства/офиса.
-- `B2E_YANDEX_MAP_URL`: ссылка на Яндекс Карты.
-- `B2E_YANDEX_MAP_EMBED_URL`: ссылка для iframe Яндекс Карт.
-- `B2E_LEAD_ENDPOINT`: публичный URL Cloudflare Worker для отправки форм.
+- `npm test` проверяет сборочный конфиг сайта и логику Worker.
+- `npm run check` дополнительно проверяет синтаксис, сборку и `wrangler deploy --dry-run`.
+- `npm run smoke` проверяет опубликованный GitHub Pages сайт, `config.js`, `sitemap.xml` и CORS Cloudflare Worker.
 
-Если `B2E_LEAD_ENDPOINT` не задан, формы используют fallback через `mailto:` на `B2E_CONTACT_EMAIL`.
+## GitHub Actions
 
-## Cloudflare Worker для заявок
+В репозитории два workflow:
 
-Код бесплатного proxy лежит в `worker/`. Он принимает заявки с GitHub Pages и пересылает их в Telegram или CRM/webhook, а приватные токены хранит в Cloudflare Worker Secrets.
+- `.github/workflows/pages.yml` собирает и публикует GitHub Pages.
+- `.github/workflows/worker.yml` тестирует, деплоит Cloudflare Worker и синхронизирует приватные Worker Secrets.
+
+Если `CLOUDFLARE_API_TOKEN` или `CLOUDFLARE_ACCOUNT_ID` не заданы, workflow Worker не падает, а пропускает деплой с warning. Это сделано, чтобы тесты и Pages не ломались из-за еще не добавленных секретов.
+
+## Публичные GitHub Variables
+
+Эти значения можно хранить в `Settings -> Secrets and variables -> Actions -> Variables`. Они не являются секретами и могут оказаться в браузере или логах сборки.
+
+| Variable | Назначение |
+| --- | --- |
+| `B2E_SITE_URL` | Публичный URL сайта для canonical, sitemap и `llms.txt`. |
+| `B2E_CONTACT_PHONE` | Телефон для `tel:` ссылки. |
+| `B2E_CONTACT_PHONE_DISPLAY` | Отображаемый телефон. |
+| `B2E_CONTACT_EMAIL` | Почта для fallback через `mailto:`. |
+| `B2E_MAX_URL` | Ссылка на MAX. |
+| `B2E_ADDRESS` | Адрес компании. |
+| `B2E_YANDEX_MAP_URL` | Ссылка на Яндекс Карты. |
+| `B2E_YANDEX_MAP_EMBED_URL` | URL iframe Яндекс Карты. |
+| `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.egory780.workers.dev`. |
+| `CLOUDFLARE_ACCOUNT_ID` | ID аккаунта Cloudflare для деплоя Worker. |
+| `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://efnatii.github.io`. |
+| `WORKER_SITE_LABEL` | Название сайта в заявках. |
+| `WORKER_LEAD_SUBJECT` | Тема заявки для Telegram/webhook. |
+
+## Приватные GitHub Secrets
+
+Эти значения задаются в `Settings -> Secrets and variables -> Actions -> Secrets`. Их нельзя добавлять в `.env`, `config.js`, README, коммиты или `wrangler.jsonc`.
+
+| Secret | Куда используется |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Деплой Worker из GitHub Actions. Нужны права Workers Scripts Edit. |
+| `WORKER_LEAD_WEBHOOK_URL` | CRM, Make, Zapier, Formspree или другой webhook для заявок. |
+| `WORKER_TELEGRAM_BOT_TOKEN` | Токен Telegram-бота для отправки заявок. |
+| `WORKER_TELEGRAM_CHAT_ID` | ID Telegram-чата/канала. |
+| `WORKER_TURNSTILE_SECRET_KEY` | Опциональный секрет Cloudflare Turnstile. |
+
+Workflow загружает только непустые `WORKER_*` secrets в Cloudflare Worker Secrets. Если ни `WORKER_LEAD_WEBHOOK_URL`, ни Telegram-секреты не заданы, Worker отвечает `503 Lead destination is not configured`, а сайт откатывается на `mailto:` fallback.
+
+## Cloudflare Worker
+
+Код Worker лежит в `worker/`. Он принимает POST-заявки только с `WORKER_ALLOWED_ORIGIN`, валидирует имя/телефон, опционально проверяет Turnstile и отправляет заявку в Telegram или webhook.
+
+Локально:
 
 ```powershell
 npm --prefix worker install
+npm --prefix worker test
+npm --prefix worker run deploy -- --dry-run
+```
+
+Ручной деплой:
+
+```powershell
 npx --prefix worker wrangler login
 npm --prefix worker run deploy
 ```
 
-После деплоя добавьте URL Worker в GitHub Actions variable `B2E_LEAD_ENDPOINT` и перезапустите workflow Pages.
+## Как проверить переменные на сайте
 
-Секреты Worker:
+Откройте:
 
-```powershell
-npm --prefix worker run secret:telegram-token
-npm --prefix worker run secret:telegram-chat
-# или
-npm --prefix worker run secret:webhook
+```text
+https://efnatii.github.io/metallokonstrukcii-site/config.js
 ```
 
-`B2E_LEAD_ENDPOINT` сам по себе не является секретом. Секретными должны оставаться `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `LEAD_WEBHOOK_URL` и похожие значения внутри Cloudflare.
+Если переменная изменена в GitHub Variables, но сайт не поменялся, нужно дождаться или вручную перезапустить workflow `Deploy GitHub Pages`. Статический сайт получает переменные только во время сборки.
 
-## GitHub Pages
+## Безопасность
 
-Workflow уже добавлен в `.github/workflows/pages.yml`.
-
-1. В GitHub откройте `Settings -> Pages`.
-2. В `Build and deployment` выберите `Source: GitHub Actions`.
-3. В `Settings -> Secrets and variables -> Actions -> Variables` добавьте публичные переменные из списка выше.
-4. В `Secrets` добавьте `B2E_LEAD_ENDPOINT`, если заявки должны уходить в CRM/webhook.
-5. Запушьте ветку `main`; workflow соберет `dist` и опубликует сайт.
+Все, что попало в `dist/config.js`, доступно любому посетителю. Поэтому туда можно класть только публичные значения: телефоны, email, URL сайта, URL Worker. Токены Telegram, webhook с ключом доступа, Turnstile secret и Cloudflare API token должны храниться только в GitHub Secrets и Cloudflare Worker Secrets.
 
 ## SEO и AI-доступность
 
-Сайт содержит семантическую структуру, structured data (`Organization`/`LocalBusiness`), `robots.txt`, `sitemap.xml` и `llms.txt`, который генерируется при сборке из текущего конфига.
+Сборка генерирует `config.js`, `sitemap.xml`, `robots.txt`, `llms.txt` и `.nojekyll`. HTML содержит семантические секции и structured data для `Organization`/`LocalBusiness`.

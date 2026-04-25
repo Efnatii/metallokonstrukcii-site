@@ -1,0 +1,112 @@
+name: Deploy Cloudflare Worker
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - worker/**
+      - .github/workflows/worker.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy-worker:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      WORKER_ALLOWED_ORIGIN: ${{ vars.WORKER_ALLOWED_ORIGIN || 'https://efnatii.github.io' }}
+      WORKER_SITE_LABEL: ${{ vars.WORKER_SITE_LABEL || 'OOO B2e' }}
+      WORKER_LEAD_SUBJECT: ${{ vars.WORKER_LEAD_SUBJECT || 'New lead from B2e site' }}
+      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Worker dependencies
+        run: npm ci --prefix worker
+
+      - name: Test Worker
+        run: npm --prefix worker run check
+
+      - name: Check Cloudflare credentials
+        id: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_ACCOUNT_ID variable or CLOUDFLARE_API_TOKEN secret is missing; Worker deploy is skipped."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy Worker
+        if: steps.cloudflare.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler deploy --config worker/wrangler.jsonc \
+            --var "ALLOWED_ORIGIN:${WORKER_ALLOWED_ORIGIN}" \
+            --var "SITE_LABEL:${WORKER_SITE_LABEL}" \
+            --var "LEAD_SUBJECT:${WORKER_LEAD_SUBJECT}"
+
+      - name: Sync Worker secrets
+        if: steps.cloudflare.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WORKER_LEAD_WEBHOOK_URL: ${{ secrets.WORKER_LEAD_WEBHOOK_URL }}
+          WORKER_TELEGRAM_BOT_TOKEN: ${{ secrets.WORKER_TELEGRAM_BOT_TOKEN }}
+          WORKER_TELEGRAM_CHAT_ID: ${{ secrets.WORKER_TELEGRAM_CHAT_ID }}
+          WORKER_TURNSTILE_SECRET_KEY: ${{ secrets.WORKER_TURNSTILE_SECRET_KEY }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const entries = {
+            LEAD_WEBHOOK_URL: process.env.WORKER_LEAD_WEBHOOK_URL,
+            TELEGRAM_BOT_TOKEN: process.env.WORKER_TELEGRAM_BOT_TOKEN,
+            TELEGRAM_CHAT_ID: process.env.WORKER_TELEGRAM_CHAT_ID,
+            TURNSTILE_SECRET_KEY: process.env.WORKER_TURNSTILE_SECRET_KEY
+          };
+          const secrets = Object.fromEntries(
+            Object.entries(entries).filter(([, value]) => value && value.trim())
+          );
+          fs.writeFileSync('worker/.worker-secrets.json', JSON.stringify(secrets), { mode: 0o600 });
+          console.log(`Prepared ${Object.keys(secrets).length} Worker secret(s).`);
+          NODE
+
+          secret_count="$(node -e "console.log(Object.keys(JSON.parse(require('fs').readFileSync('worker/.worker-secrets.json', 'utf8'))).length)")"
+
+          if [ "$secret_count" -eq 0 ]; then
+            echo "No Worker delivery secrets configured; skipping secret sync."
+            rm -f worker/.worker-secrets.json
+            exit 0
+          fi
+
+          npx wrangler secret bulk worker/.worker-secrets.json --config worker/wrangler.jsonc
+          rm -f worker/.worker-secrets.json
+
+      - name: Smoke test Worker CORS
+        if: steps.cloudflare.outputs.enabled == 'true' && env.B2E_LEAD_ENDPOINT != ''
+        run: |
+          status="$(curl -sS -o /dev/null -w "%{http_code}" \
+            -X OPTIONS "$B2E_LEAD_ENDPOINT" \
+            -H "Origin: $WORKER_ALLOWED_ORIGIN" \
+            -H "Access-Control-Request-Method: POST" \
+            -H "Access-Control-Request-Headers: Content-Type")"
+
+          if [ "$status" != "204" ]; then
+            echo "Worker CORS preflight returned $status"
+            exit 1
+          fi

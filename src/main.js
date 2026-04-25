@@ -237,23 +237,37 @@
         createdAt: new Date().toISOString()
       };
 
-      try {
-        if (config.leadEndpoint) {
-          const response = await fetch(config.leadEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
+      const openMailFallback = () => {
+        const subject = encodeURIComponent(`Заявка с сайта В2е: ${payload.objectType}`);
+        const body = encodeURIComponent(
+          `Имя: ${payload.name}\nТелефон: ${payload.phone}\nТип объекта: ${payload.objectType}\nИсточник: ${payload.source}\nСтраница: ${payload.page}`
+        );
+        window.location.href = `${config.emailHref}?subject=${subject}&body=${body}`;
+      };
 
-          if (!response.ok) {
-            throw new Error(`Endpoint responded ${response.status}`);
+      try {
+        let sentAutomatically = false;
+
+        if (config.leadEndpoint) {
+          try {
+            const response = await fetch(config.leadEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            sentAutomatically = response.ok;
+
+            if (!response.ok) {
+              console.error(new Error(`Endpoint responded ${response.status}`));
+            }
+          } catch (endpointError) {
+            console.error(endpointError);
           }
-        } else {
-          const subject = encodeURIComponent(`Заявка с сайта В2е: ${payload.objectType}`);
-          const body = encodeURIComponent(
-            `Имя: ${payload.name}\nТелефон: ${payload.phone}\nТип объекта: ${payload.objectType}\nИсточник: ${payload.source}\nСтраница: ${payload.page}`
-          );
-          window.location.href = `${config.emailHref}?subject=${subject}&body=${body}`;
+        }
+
+        if (!sentAutomatically) {
+          openMailFallback();
         }
 
         if (successTemplate) {
