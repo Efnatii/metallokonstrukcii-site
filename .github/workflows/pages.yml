@@ -1,0 +1,57 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      B2E_SITE_URL: ${{ vars.B2E_SITE_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+      B2E_CONTACT_PHONE: ${{ vars.B2E_CONTACT_PHONE || '+79650578270' }}
+      B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 965 057 82 70' }}
+      B2E_CONTACT_EMAIL: ${{ vars.B2E_CONTACT_EMAIL || 'zakaz@b2energy.ru' }}
+      B2E_MAX_URL: ${{ vars.B2E_MAX_URL || 'https://max.ru/' }}
+      B2E_ADDRESS: ${{ vars.B2E_ADDRESS || 'Санкт-Петербург, ул. Седова, 57, лит. В' }}
+      B2E_YANDEX_MAP_URL: ${{ vars.B2E_YANDEX_MAP_URL }}
+      B2E_YANDEX_MAP_EMBED_URL: ${{ vars.B2E_YANDEX_MAP_EMBED_URL }}
+      B2E_LEAD_ENDPOINT: ${{ secrets.B2E_LEAD_ENDPOINT }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
