@@ -282,6 +282,30 @@
     items.forEach((item) => observer.observe(item));
   }
 
+  function isIframeBlank(iframe) {
+    try {
+      const href = iframe.contentWindow?.location.href;
+      return !href || href === 'about:blank';
+    } catch {
+      return false;
+    }
+  }
+
+  function verifyMapFrame(iframe, wrap) {
+    if (!iframe || !wrap) {
+      return;
+    }
+
+    if (isIframeBlank(iframe)) {
+      wrap.classList.remove('is-loaded');
+      wrap.classList.add('is-unavailable');
+      return;
+    }
+
+    wrap.classList.remove('is-unavailable');
+    wrap.classList.add('is-loaded');
+  }
+
   function setupLazyMap() {
     const iframe = $('[data-map-lazy="true"]');
     const wrap = iframe?.closest('.map-wrap');
@@ -294,15 +318,16 @@
 
     iframe.addEventListener('load', () => {
       loaded = true;
-      wrap?.classList.remove('is-unavailable');
-      wrap?.classList.add('is-loaded');
+      setTimeout(() => verifyMapFrame(iframe, wrap), 500);
     });
 
     setTimeout(() => {
-      if (!loaded) {
+      if (!loaded || isIframeBlank(iframe)) {
         wrap?.classList.add('is-unavailable');
       }
-    }, 9000);
+    }, 2500);
+
+    setTimeout(() => verifyMapFrame(iframe, wrap), 9000);
 
     const loadMap = () => {
       const src = iframe.dataset.resolvedSrc || config[iframe.dataset.configSrc];
@@ -336,6 +361,7 @@
     const wrap = iframe?.closest('.map-wrap');
     const cards = $$('.location-card');
     const buttons = $$('.location-card button[data-map-src]');
+    const previewPins = $$('.map-pin[data-preview-pin]');
 
     if (!iframe || !buttons.length) {
       return;
@@ -350,6 +376,10 @@
       card?.classList.add('is-active');
       button.setAttribute('aria-pressed', 'true');
 
+      if (button.dataset.mapKey) {
+        previewPins.forEach((pin) => pin.classList.toggle('is-active', pin.dataset.previewPin === button.dataset.mapKey));
+      }
+
       if (button.dataset.mapTitle) {
         iframe.setAttribute('title', button.dataset.mapTitle);
       }
@@ -358,11 +388,17 @@
         iframe.dataset.resolvedSrc = button.dataset.mapSrc;
 
         if (load || iframe.getAttribute('src')) {
-          wrap?.classList.remove('is-loaded', 'is-unavailable');
+          wrap?.classList.remove('is-loaded');
+          wrap?.classList.add('is-unavailable');
           iframe.setAttribute('src', button.dataset.mapSrc);
           setTimeout(() => {
-            if (iframe.getAttribute('src') === button.dataset.mapSrc && !wrap?.classList.contains('is-loaded')) {
-              wrap?.classList.add('is-unavailable');
+            if (iframe.getAttribute('src') === button.dataset.mapSrc) {
+              verifyMapFrame(iframe, wrap);
+            }
+          }, 2500);
+          setTimeout(() => {
+            if (iframe.getAttribute('src') === button.dataset.mapSrc) {
+              verifyMapFrame(iframe, wrap);
             }
           }, 9000);
         }

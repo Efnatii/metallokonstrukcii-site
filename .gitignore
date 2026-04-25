@@ -8,5 +8,6 @@ worker/node_modules/
 .codex-server.pid
 .playwright/
 .playwright-cli/
+output/
 *.log
 techtask
