@@ -291,7 +291,7 @@
     }
   }
 
-  function verifyMapFrame(iframe, wrap) {
+  function markMapLoaded(iframe, wrap) {
     if (!iframe || !wrap) {
       return;
     }
@@ -302,6 +302,7 @@
       return;
     }
 
+    iframe.dataset.loadedSrc = iframe.getAttribute('src') || '';
     wrap.classList.remove('is-unavailable');
     wrap.classList.add('is-loaded');
   }
@@ -318,16 +319,20 @@
 
     iframe.addEventListener('load', () => {
       loaded = true;
-      setTimeout(() => verifyMapFrame(iframe, wrap), 500);
+      setTimeout(() => markMapLoaded(iframe, wrap), 500);
     });
+
+    setTimeout(() => {
+      if (isIframeBlank(iframe)) {
+        wrap?.classList.add('is-unavailable');
+      }
+    }, 2500);
 
     setTimeout(() => {
       if (!loaded || isIframeBlank(iframe)) {
         wrap?.classList.add('is-unavailable');
       }
-    }, 2500);
-
-    setTimeout(() => verifyMapFrame(iframe, wrap), 9000);
+    }, 9000);
 
     const loadMap = () => {
       const src = iframe.dataset.resolvedSrc || config[iframe.dataset.configSrc];
@@ -387,18 +392,16 @@
       if (button.dataset.mapSrc) {
         iframe.dataset.resolvedSrc = button.dataset.mapSrc;
 
-        if (load || iframe.getAttribute('src')) {
+        if (load) {
           wrap?.classList.remove('is-loaded');
           wrap?.classList.add('is-unavailable');
           iframe.setAttribute('src', button.dataset.mapSrc);
           setTimeout(() => {
-            if (iframe.getAttribute('src') === button.dataset.mapSrc) {
-              verifyMapFrame(iframe, wrap);
-            }
-          }, 2500);
-          setTimeout(() => {
-            if (iframe.getAttribute('src') === button.dataset.mapSrc) {
-              verifyMapFrame(iframe, wrap);
+            if (
+              iframe.getAttribute('src') === button.dataset.mapSrc &&
+              iframe.dataset.loadedSrc !== button.dataset.mapSrc
+            ) {
+              wrap?.classList.add('is-unavailable');
             }
           }, 9000);
         }
