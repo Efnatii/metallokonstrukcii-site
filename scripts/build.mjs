@@ -69,7 +69,7 @@ function makeConfig() {
   const phoneDisplay = env('B2E_CONTACT_PHONE_DISPLAY', '+7 965 057 82 70');
   const email = env('B2E_CONTACT_EMAIL', 'zakaz@b2energy.ru');
   const siteUrl = withTrailingSlash(
-    env('B2E_SITE_URL', 'https://giy.github.io/metallokonstrukcii-site/')
+    env('B2E_SITE_URL', 'https://efnatii.github.io/metallokonstrukcii-site/')
   );
 
   return {

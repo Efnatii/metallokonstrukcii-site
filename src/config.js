@@ -1,6 +1,6 @@
 window.B2E_CONFIG = window.B2E_CONFIG || {
   siteName: 'ООО В2е - производство металлоконструкций',
-  siteUrl: 'https://giy.github.io/metallokonstrukcii-site/',
+  siteUrl: 'https://efnatii.github.io/metallokonstrukcii-site/',
   phone: '+79650578270',
   phoneDisplay: '+7 965 057 82 70',
   phoneHref: 'tel:+79650578270',
