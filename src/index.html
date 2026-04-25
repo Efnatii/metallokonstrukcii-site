@@ -24,18 +24,10 @@
   </head>
   <body>
     <header class="site-header" id="top">
-      <a class="brand" href="#top">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 64 48" focusable="false">
-            <path class="brand-beam" d="M8 34h48v6H8z"></path>
-            <path class="brand-web" d="M14 34 26 18l12 16 12-16"></path>
-            <path class="brand-column" d="M14 40V16m36 24V16"></path>
-            <text x="32" y="27" text-anchor="middle">B2E</text>
-          </svg>
-        </span>
+      <a class="brand" href="#top" aria-label="B2E - производство металлоконструкций СЗФО и ЦФО">
+        <img class="brand-logo" src="./assets/logo-b2e.svg" alt="" width="184" height="54" aria-hidden="true">
         <span class="brand-copy">
-          <strong>B2E</strong>
-          <span>Производство металлоконструкций СЗФО, ЦФО</span>
+          <span>Металлоконструкции СЗФО и ЦФО</span>
         </span>
       </a>
 
@@ -121,6 +113,26 @@
               </div>
             </dl>
           </div>
+          <aside class="hero-panel reveal" aria-label="Производственный контур B2E">
+            <div class="hero-panel-head">
+              <span>Контур проекта</span>
+              <strong>КМ/КМД → цех → поставка</strong>
+            </div>
+            <div class="capacity-meter" aria-label="Производственная мощность свыше 1000 тонн в месяц">
+              <span>1000+</span>
+              <small>тонн в месяц</small>
+            </div>
+            <ul class="hero-checklist">
+              <li><span></span>Расчет тоннажа и первичная спецификация</li>
+              <li><span></span>Резка, гибка, сварка и металлообработка</li>
+              <li><span></span>Окраска, контроль геометрии, подготовка к монтажу</li>
+            </ul>
+            <div class="platform-strip" aria-label="Производственные направления">
+              <span>Петрозаводск</span>
+              <span>Никольское</span>
+              <span>Рыбацкое</span>
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -136,11 +148,65 @@
         </div>
       </section>
 
+      <section class="section process-section" aria-labelledby="process-title">
+        <div class="container">
+          <div class="section-head section-head-wide">
+            <span class="section-kicker">Как идет работа</span>
+            <h2 id="process-title">Понятный маршрут от заявки до готовой металлоконструкции</h2>
+            <p>Показываем этапы не текстовой стеной, а производственной схемой: что происходит с задачей после обращения и где появляются чертежи, заготовки, сварка и контроль.</p>
+          </div>
+          <div class="process-grid">
+            <article class="process-card reveal">
+              <span class="process-number">01</span>
+              <svg aria-hidden="true" viewBox="0 0 64 64">
+                <path d="M18 10h22l8 8v36H18z"></path>
+                <path d="M40 10v10h10M24 30h18M24 39h14"></path>
+              </svg>
+              <h3>Заявка и исходные данные</h3>
+              <p>Принимаем чертежи, габариты, назначение объекта и требования к покрытию или монтажу.</p>
+            </article>
+            <article class="process-card reveal">
+              <span class="process-number">02</span>
+              <svg aria-hidden="true" viewBox="0 0 64 64">
+                <path d="M12 44h40M16 20h32M18 20l9 24M46 20l-9 24M27 44h10"></path>
+                <path d="M24 14h16"></path>
+              </svg>
+              <h3>КМ/КМД и расчет</h3>
+              <p>Уточняем узлы, тоннаж, производственный маршрут и состав партии.</p>
+            </article>
+            <article class="process-card reveal">
+              <span class="process-number">03</span>
+              <svg aria-hidden="true" viewBox="0 0 64 64">
+                <path d="M10 42h44M18 22h28v20H18zM24 22v20M40 22v20"></path>
+                <path d="M14 50h36"></path>
+              </svg>
+              <h3>Резка, гибка и сварка</h3>
+              <p>Готовим заготовки, собираем конструкции, выполняем металлообработку и окраску.</p>
+            </article>
+            <article class="process-card reveal">
+              <span class="process-number">04</span>
+              <svg aria-hidden="true" viewBox="0 0 64 64">
+                <path d="M14 40h28l8 8H22zM42 40V24H20v16"></path>
+                <path d="M22 50h4M46 50h4M26 30h10M38 30h4"></path>
+              </svg>
+              <h3>Контроль и поставка</h3>
+              <p>Проверяем комплектность, маркировку и готовим изделия к отгрузке или монтажу.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section class="section" id="products" aria-labelledby="products-title">
         <div class="container">
-          <div class="section-head">
-            <span class="section-kicker">Каталог</span>
-            <h2 id="products-title">Металлоконструкции</h2>
+          <div class="section-head section-head-split">
+            <div>
+              <span class="section-kicker">Каталог</span>
+              <h2 id="products-title">Металлоконструкции</h2>
+            </div>
+            <div class="catalog-note">
+              <strong>От узла до каркаса</strong>
+              <span>Каталог сгруппирован по задачам, чтобы быстрее понять, с чем обращаться на расчет.</span>
+            </div>
           </div>
           <div class="product-grid">
             <article class="product-card">
@@ -183,6 +249,13 @@
             <span class="section-kicker">Услуги</span>
             <h2 id="services-title">Производство полного цикла</h2>
             <p>Закрываем ключевые этапы изготовления, обработки и подготовки металлоконструкций к монтажу.</p>
+            <figure class="service-visual">
+              <img src="./assets/workshop/plasma-table.jpg" alt="Плазменная резка металлического листа на производственном столе" loading="lazy" width="800" height="599">
+              <figcaption>
+                <strong>Собираем маршрут производства под изделие</strong>
+                <span>Заготовка → обработка → сборка → покрытие</span>
+              </figcaption>
+            </figure>
           </div>
           <div class="service-list">
             <article>
@@ -260,6 +333,20 @@
             <p>
               ООО B2E работает в составе группы компаний и привлекает несколько производственных площадок для стабильной поставки металлоконструкций под сроки проекта.
             </p>
+            <div class="company-metrics" aria-label="Производственные показатели">
+              <div>
+                <strong>3</strong>
+                <span>площадки</span>
+              </div>
+              <div>
+                <strong>200+</strong>
+                <span>решений КМ/КМД</span>
+              </div>
+              <div>
+                <strong>1000+</strong>
+                <span>т/мес</span>
+              </div>
+            </div>
           </div>
           <div class="company-panels">
             <article>
