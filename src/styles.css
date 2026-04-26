@@ -69,7 +69,7 @@ button {
 }
 
 .container {
-  width: min(1180px, calc(100% - 40px));
+  width: min(1344px, calc(100% - 80px));
   margin: 0 auto;
 }
 
@@ -80,7 +80,7 @@ button {
   right: 0;
   z-index: 40;
   display: grid;
-  grid-template-columns: minmax(210px, 300px) minmax(460px, 1fr) minmax(360px, 430px);
+  grid-template-columns: minmax(210px, 300px) minmax(460px, 1fr) minmax(390px, 460px);
   align-items: center;
   min-height: 86px;
   gap: 20px;
@@ -195,12 +195,12 @@ button {
 
 .header-actions {
   display: grid;
-  grid-template-columns: 42px minmax(128px, auto) auto;
+  grid-template-columns: 42px minmax(138px, auto) 42px auto;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
   min-width: 0;
-  max-width: 430px;
+  max-width: 460px;
 }
 
 .header-contact {
@@ -337,6 +337,16 @@ button {
   color: #fff;
 }
 
+.btn-download::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+  background: currentColor;
+  clip-path: path("M7 1h2v8l3-3 1.4 1.4L8 12.8 2.6 7.4 4 6l3 3V1ZM2 14h12v2H2v-2Z");
+  opacity: .82;
+}
+
 .hero {
   position: relative;
   min-height: 640px;
@@ -368,6 +378,19 @@ button {
   background-size: auto, 96px 100%, auto;
 }
 
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(105deg, transparent 0 42%, rgb(255 196 0 / 9%) 49%, transparent 56%);
+  opacity: .6;
+  pointer-events: none;
+  transform: translateX(-45%);
+  animation: hero-scan 8s ease-in-out infinite;
+}
+
 @keyframes hero-pan {
   from {
     background-position: center center;
@@ -380,12 +403,26 @@ button {
   }
 }
 
+@keyframes hero-scan {
+  0%,
+  42% {
+    transform: translateX(-45%);
+  }
+
+  76%,
+  100% {
+    transform: translateX(45%);
+  }
+}
+
 .hero-inner {
   position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(370px, 430px);
   align-items: end;
-  gap: clamp(34px, 4.2vw, 68px);
+  column-gap: clamp(34px, 4.2vw, 68px);
+  row-gap: clamp(10px, 1.4vw, 18px);
   width: min(1460px, calc(100% - 80px));
   min-height: 640px;
   margin: 0 auto;
@@ -394,6 +431,8 @@ button {
 
 .hero-copy {
   width: min(900px, 100%);
+  padding-top: 28px;
+  padding-left: clamp(36px, 3.7vw, 56px);
 }
 
 .eyebrow,
@@ -430,11 +469,16 @@ p {
 
 h1 {
   margin-bottom: 18px;
-  max-width: 840px;
-  font-size: clamp(48px, 4.45vw, 70px);
-  line-height: 0.95;
+  max-width: 790px;
+  font-family: "Arial Narrow", "Roboto Condensed", Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(50px, 4.15vw, 64px);
+  line-height: 0.96;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+h1 span {
+  display: block;
 }
 
 h2 {
@@ -451,7 +495,7 @@ h3 {
 }
 
 .hero-lead {
-  max-width: 720px;
+  max-width: 690px;
   margin-bottom: 20px;
   color: rgb(255 255 255 / 78%);
   font-size: clamp(17px, 1.55vw, 21px);
@@ -531,9 +575,13 @@ h3 {
 .hero-panel {
   position: relative;
   display: grid;
+  justify-self: end;
   gap: 14px;
-  align-self: center;
-  padding: 22px 28px;
+  width: 360px;
+  align-self: start;
+  margin-top: 18px;
+  margin-right: 40px;
+  padding: 24px 28px;
   border: 1px solid rgb(255 255 255 / 16%);
   border-radius: var(--radius);
   background:
@@ -568,23 +616,25 @@ h3 {
   text-transform: uppercase;
 }
 
-.hero-panel-head strong {
-  font-size: clamp(20px, 2vw, 25px);
-  line-height: 1.12;
-}
-
 .hero-capacity-list {
   display: grid;
 }
 
 .hero-capacity-list div {
   display: grid;
-  grid-template-columns: 42px 1fr;
-  column-gap: 18px;
+  grid-template-columns: 38px 1fr;
+  column-gap: 16px;
   row-gap: 4px;
   align-items: center;
-  padding: 10px 0;
+  padding: 14px 0;
   border-top: 1px solid rgb(255 255 255 / 14%);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.hero-capacity-list div:hover {
+  border-color: rgb(255 196 0 / 36%);
+  background: linear-gradient(90deg, rgb(255 196 0 / 9%), transparent 72%);
+  transform: translateX(4px);
 }
 
 .hero-capacity-list svg {
@@ -594,7 +644,7 @@ h3 {
 
 .hero-capacity-list span {
   color: #fff;
-  font-size: clamp(22px, 2vw, 28px);
+  font-size: clamp(22px, 1.9vw, 27px);
   font-weight: 920;
   line-height: 1;
 }
@@ -633,6 +683,7 @@ h3 {
 }
 
 .hero-workflow {
+  position: relative;
   grid-column: 1 / -1;
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr) 190px;
@@ -643,6 +694,30 @@ h3 {
   background: rgb(11 15 17 / 72%);
   box-shadow: 0 24px 70px rgb(0 0 0 / 28%);
   backdrop-filter: blur(18px);
+  overflow: hidden;
+}
+
+.hero-workflow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 196 0 / 12%), transparent);
+  opacity: .55;
+  transform: translateX(-100%);
+  animation: workflow-glint 6.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes workflow-glint {
+  0%,
+  50% {
+    transform: translateX(-100%);
+  }
+
+  82%,
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .hero-workflow > strong,
@@ -779,7 +854,13 @@ h3 {
 .process-section {
   order: 3;
   background:
-    linear-gradient(180deg, #fff, var(--bg));
+    linear-gradient(135deg, rgb(12 17 19 / 98%), rgb(31 39 43 / 98%)),
+    url("./assets/metal-production-hero.png") center / cover fixed;
+  color: #fff;
+}
+
+.process-section .section-head p {
+  color: rgb(255 255 255 / 68%);
 }
 
 .process-grid {
@@ -796,11 +877,12 @@ h3 {
   align-content: start;
   gap: 14px;
   padding: 24px;
-  border: 1px solid var(--line);
+  border: 1px solid rgb(255 255 255 / 14%);
   border-radius: var(--radius);
   background:
-    linear-gradient(180deg, #fff, rgb(238 241 237 / 70%));
-  box-shadow: 0 18px 48px rgb(24 33 31 / 8%);
+    linear-gradient(180deg, rgb(255 255 255 / 10%), rgb(255 255 255 / 4%));
+  box-shadow: 0 24px 70px rgb(0 0 0 / 22%);
+  backdrop-filter: blur(16px);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
@@ -811,7 +893,7 @@ h3 {
   right: -18px;
   width: 36px;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent-2), transparent);
+  background: linear-gradient(90deg, var(--accent), transparent);
 }
 
 .process-card:last-child::after {
@@ -819,7 +901,7 @@ h3 {
 }
 
 .process-number {
-  color: var(--accent-2);
+  color: var(--accent);
   font-size: 12px;
   font-weight: 900;
 }
@@ -839,8 +921,8 @@ h3 {
 }
 
 .process-card:hover {
-  border-color: rgb(31 143 183 / 24%);
-  box-shadow: 0 26px 62px rgb(16 20 23 / 13%);
+  border-color: rgb(255 196 0 / 42%);
+  box-shadow: 0 34px 90px rgb(0 0 0 / 34%);
   transform: translateY(-4px);
 }
 
@@ -850,7 +932,7 @@ h3 {
 
 .process-card p {
   margin-bottom: 0;
-  color: var(--muted);
+  color: rgb(255 255 255 / 68%);
 }
 
 .product-grid {
@@ -921,7 +1003,7 @@ h3 {
 .product-card {
   position: relative;
   display: grid;
-  align-content: end;
+  align-content: start;
   min-height: 245px;
   padding: 24px;
   overflow: hidden;
@@ -951,7 +1033,7 @@ h3 {
   content: "→";
   position: absolute;
   left: 24px;
-  bottom: 22px;
+  top: 74px;
   color: var(--accent);
   font-size: 30px;
   line-height: 1;
@@ -974,18 +1056,7 @@ h3 {
 }
 
 .product-card > span {
-  position: relative;
-  z-index: 1;
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 34px;
-  margin-bottom: 22px;
-  border-radius: var(--radius);
-  background: rgb(255 196 0 / 96%);
-  color: #101417;
-  font-size: 12px;
-  font-weight: 900;
+  display: none;
 }
 
 .product-card h3,
@@ -995,9 +1066,11 @@ h3 {
 }
 
 .product-card h3 {
-  max-width: 320px;
-  margin-top: auto;
-  font-size: clamp(19px, 1.7vw, 24px);
+  max-width: 250px;
+  margin-top: 0;
+  padding-right: 20px;
+  font-size: clamp(16px, 1.25vw, 19px);
+  line-height: 1.18;
   text-transform: uppercase;
 }
 
@@ -1006,6 +1079,22 @@ h3 {
 .company-panels p {
   margin-bottom: 0;
   color: rgb(255 255 255 / 74%);
+}
+
+.product-card p {
+  max-height: 0;
+  margin-top: 76px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: max-height 260ms ease, opacity 220ms ease, transform 220ms ease;
+}
+
+.product-card:hover p,
+.product-card:focus-within p {
+  max-height: 130px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .service-list p,
@@ -1873,6 +1962,11 @@ address a {
   .hero,
   .hero-inner {
     min-height: auto;
+  }
+
+  .hero-copy {
+    padding-top: 0;
+    padding-left: 0;
   }
 
   .hero-inner {
