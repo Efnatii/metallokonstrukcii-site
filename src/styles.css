@@ -31,6 +31,7 @@ html {
 }
 
 body {
+  position: relative;
   margin: 0;
   min-width: 320px;
   background:
@@ -38,13 +39,41 @@ body {
     var(--bg);
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: -120px;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 95px, rgb(255 196 0 / 9%) 96px, transparent 97px),
+    repeating-linear-gradient(0deg, transparent 0 95px, rgb(31 143 183 / 7%) 96px, transparent 97px);
+  opacity: .22;
+  transform: translate3d(0, 0, 0);
+  animation: blueprint-drift 34s linear infinite;
+}
+
 body.modal-open {
   overflow: hidden;
 }
 
 main {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+}
+
+.site-header,
+.site-footer,
+.floating-actions {
+  z-index: 2;
+}
+
+@keyframes blueprint-drift {
+  to {
+    transform: translate3d(-96px, -48px, 0);
+  }
 }
 
 img {
@@ -390,6 +419,20 @@ button {
   color: #fff;
 }
 
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0 48%, rgb(255 196 0 / 15%) 50%, transparent 52%),
+    repeating-linear-gradient(118deg, transparent 0 108px, rgb(255 255 255 / 7%) 109px 111px, transparent 112px 218px);
+  opacity: .42;
+  transform: translateX(-34%);
+  animation: industrial-sweep 11s cubic-bezier(.4, 0, .2, 1) infinite;
+}
+
 .hero-media,
 .hero-overlay {
   position: absolute;
@@ -410,6 +453,7 @@ button {
     linear-gradient(90deg, rgb(255 196 0 / 18%) 0 1px, transparent 1px 100%),
     repeating-linear-gradient(118deg, transparent 0 76px, rgb(255 255 255 / 5%) 77px 79px);
   background-size: auto, 96px 100%, auto;
+  animation: hero-grid-slide 28s linear infinite;
 }
 
 .hero::after {
@@ -446,6 +490,24 @@ button {
   76%,
   100% {
     transform: translateX(45%);
+  }
+}
+
+@keyframes industrial-sweep {
+  0%,
+  42% {
+    transform: translateX(-34%);
+  }
+
+  76%,
+  100% {
+    transform: translateX(34%);
+  }
+}
+
+@keyframes hero-grid-slide {
+  to {
+    background-position: 0 0, 96px 0, 160px 0;
   }
 }
 
@@ -822,14 +884,48 @@ h3 {
 }
 
 .section {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   padding: clamp(64px, 8vw, 110px) 0;
+}
+
+.section > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.section::after {
+  pointer-events: none;
 }
 
 .intro-band {
   order: 2;
-  padding: clamp(34px, 5vw, 54px) 0;
-  border-bottom: 1px solid var(--line);
-  background: var(--surface);
+  padding: clamp(44px, 5vw, 66px) 0;
+  border-top: 1px solid rgb(255 196 0 / 18%);
+  border-bottom: 1px solid rgb(255 196 0 / 20%);
+  background:
+    linear-gradient(135deg, rgb(12 17 19 / 98%), rgb(30 38 43 / 98%)),
+    url("./assets/metal-production-hero.png") center / cover fixed;
+  color: #fff;
+}
+
+.intro-band::before,
+#products::before,
+.calculator-section::before,
+.workshop-section::before,
+.clients::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 118px, rgb(255 196 0 / 10%) 119px, transparent 120px),
+    linear-gradient(120deg, transparent 0 42%, rgb(255 196 0 / 10%) 48%, transparent 55%);
+  opacity: .5;
+  transform: translate3d(-80px, 0, 0);
+  animation: section-lines 22s linear infinite;
 }
 
 .intro-grid {
@@ -847,18 +943,74 @@ h3 {
 
 .intro-grid p {
   margin-bottom: 0;
-  color: var(--muted);
+  padding-left: 26px;
+  border-left: 2px solid var(--accent);
+  color: rgb(255 255 255 / 72%);
   font-size: 18px;
 }
 
+.intro-grid .section-kicker {
+  color: var(--accent);
+}
+
 .section-head {
+  position: relative;
   max-width: 760px;
   margin-bottom: 34px;
+  padding-left: 28px;
+}
+
+.section-head::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 26px rgb(255 196 0 / 32%);
+}
+
+.section-head::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  width: 3px;
+  height: 34%;
+  border-radius: 999px;
+  background: #fff;
+  opacity: .72;
+  transform: translateY(-120%);
+  animation: rail-flow 4.8s ease-in-out infinite;
 }
 
 .section-head p {
   color: var(--muted);
   font-size: 18px;
+}
+
+.section-head h2 {
+  text-wrap: balance;
+}
+
+@keyframes section-lines {
+  to {
+    transform: translate3d(80px, 0, 0);
+  }
+}
+
+@keyframes rail-flow {
+  0%,
+  38% {
+    transform: translateY(-120%);
+  }
+
+  82%,
+  100% {
+    transform: translateY(260%);
+  }
 }
 
 .section-head.compact {
@@ -901,6 +1053,35 @@ h3 {
   color: #fff;
 }
 
+.process-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(115deg, transparent 0 92px, rgb(255 255 255 / 6%) 93px 95px, transparent 96px 184px),
+    linear-gradient(90deg, transparent 0 32%, rgb(255 196 0 / 11%) 50%, transparent 68%);
+  opacity: .65;
+  transform: translateX(-90px);
+  animation: conveyor-shift 18s linear infinite;
+}
+
+.process-section::after,
+.contacts-section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: .85;
+  transform: translateX(-100%);
+  animation: weld-scan 5.8s ease-in-out infinite;
+}
+
 .process-section .section-head p {
   color: rgb(255 255 255 / 68%);
 }
@@ -922,18 +1103,29 @@ h3 {
   border: 1px solid rgb(255 255 255 / 14%);
   border-radius: var(--radius);
   background:
-    linear-gradient(180deg, rgb(255 255 255 / 10%), rgb(255 255 255 / 4%));
+    linear-gradient(135deg, rgb(255 196 0 / 8%), transparent 44%),
+    linear-gradient(180deg, rgb(255 255 255 / 11%), rgb(255 255 255 / 4%));
   box-shadow: 0 24px 70px rgb(0 0 0 / 22%);
   backdrop-filter: blur(16px);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
-.process-card::after {
-  content: none;
+.process-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(112deg, transparent 0 38%, rgb(255 196 0 / 14%) 46%, transparent 55%);
+  opacity: 0;
+  transform: translateX(-35%);
+  transition: opacity 180ms ease;
+  animation: card-glint 9s ease-in-out infinite;
+  pointer-events: none;
 }
 
-.process-card:last-child::after {
-  content: none;
+.process-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .process-number {
@@ -957,6 +1149,10 @@ h3 {
   transform: translateY(-4px);
 }
 
+.process-card:hover::before {
+  opacity: 1;
+}
+
 .process-card h3 {
   margin-bottom: 0;
 }
@@ -964,6 +1160,46 @@ h3 {
 .process-card p {
   margin-bottom: 0;
   color: rgb(255 255 255 / 68%);
+}
+
+@keyframes conveyor-shift {
+  to {
+    transform: translateX(90px);
+  }
+}
+
+@keyframes weld-scan {
+  0%,
+  38% {
+    transform: translateX(-100%);
+  }
+
+  78%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes card-glint {
+  0%,
+  48% {
+    transform: translateX(-48%);
+  }
+
+  78%,
+  100% {
+    transform: translateX(48%);
+  }
+}
+
+@keyframes product-photo-breathe {
+  from {
+    filter: saturate(1) contrast(1);
+  }
+
+  to {
+    filter: saturate(1.08) contrast(1.06);
+  }
 }
 
 .product-grid {
@@ -977,7 +1213,83 @@ h3 {
   padding-top: clamp(24px, 2.6vw, 32px);
   padding-bottom: clamp(58px, 6vw, 86px);
   background:
-    linear-gradient(180deg, #fff, #f3f5f6);
+    linear-gradient(180deg, #fff 0%, #f8fafb 42%, #edf2f5 100%);
+}
+
+#products::before {
+  opacity: .34;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 115px, rgb(31 143 183 / 8%) 116px, transparent 117px),
+    repeating-linear-gradient(0deg, transparent 0 115px, rgb(16 20 23 / 5%) 116px, transparent 117px),
+    linear-gradient(115deg, transparent 0 35%, rgb(255 196 0 / 12%) 44%, transparent 54%);
+}
+
+#products::after,
+#services::after,
+#company::after,
+.calculator-section::after,
+.workshop-section::after,
+.clients::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  z-index: 0;
+  height: 92px;
+  background:
+    linear-gradient(90deg, transparent 0 9%, rgb(255 196 0 / 42%) 9.2% 9.5%, transparent 9.7% 100%),
+    repeating-linear-gradient(90deg, transparent 0 86px, rgb(16 20 23 / 7%) 87px, transparent 88px);
+  opacity: .48;
+  transform: translateX(-86px);
+  animation: blueprint-track 24s linear infinite;
+}
+
+#services::before,
+#company::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 126px, rgb(31 143 183 / 7%) 127px, transparent 128px),
+    repeating-linear-gradient(0deg, transparent 0 126px, rgb(16 20 23 / 4%) 127px, transparent 128px),
+    linear-gradient(112deg, transparent 0 36%, rgb(255 196 0 / 11%) 45%, transparent 54%);
+  opacity: .28;
+  transform: translate3d(-70px, 0, 0);
+  animation: section-lines 26s linear infinite;
+}
+
+#services::after,
+#company::after,
+.calculator-section::after,
+.workshop-section::after,
+.clients::after {
+  top: 0;
+  bottom: auto;
+  height: 120px;
+  opacity: .34;
+  background:
+    linear-gradient(105deg, transparent 0 42%, rgb(255 196 0 / 18%) 47%, transparent 54%),
+    repeating-linear-gradient(90deg, transparent 0 116px, rgb(31 143 183 / 7%) 117px, transparent 118px);
+  animation: scan-band 9s ease-in-out infinite;
+}
+
+@keyframes blueprint-track {
+  to {
+    transform: translateX(86px);
+  }
+}
+
+@keyframes scan-band {
+  0%,
+  35% {
+    transform: translateX(-46%);
+  }
+
+  78%,
+  100% {
+    transform: translateX(46%);
+  }
 }
 
 #products .section-head {
@@ -1051,7 +1363,22 @@ h3 {
     transform 180ms ease,
     box-shadow 180ms ease,
     border-color 180ms ease,
-    background 180ms ease;
+  background 180ms ease;
+  box-shadow: 0 18px 46px rgb(16 20 23 / 14%);
+}
+
+.product-card:nth-child(2n)::before {
+  background:
+    linear-gradient(180deg, rgb(7 10 12 / 24%), rgb(7 10 12 / 86%)),
+    linear-gradient(135deg, rgb(31 143 183 / 20%), transparent 44%),
+    var(--product-image, url("./assets/metal-production-hero.png")) center / cover no-repeat;
+}
+
+.product-card:nth-child(3n)::before {
+  background:
+    linear-gradient(180deg, rgb(7 10 12 / 20%), rgb(7 10 12 / 88%)),
+    linear-gradient(135deg, rgb(255 157 25 / 18%), transparent 40%),
+    var(--product-image, url("./assets/metal-production-hero.png")) center / cover no-repeat;
 }
 
 .product-card::before {
@@ -1066,6 +1393,10 @@ h3 {
     linear-gradient(135deg, rgb(255 196 0 / 18%), transparent 42%),
     var(--product-image, url("./assets/metal-production-hero.png")) center / cover no-repeat;
   transition: transform 420ms ease, filter 420ms ease;
+}
+
+.product-card-photo::before {
+  animation: product-photo-breathe 12s ease-in-out infinite alternate;
 }
 
 .product-card::after {
@@ -1083,6 +1414,16 @@ h3 {
     )
     center / contain no-repeat;
   transition: transform 180ms ease;
+}
+
+.product-card h3::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -18px;
+  width: 58px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
 }
 
 .product-card:hover {
@@ -1148,11 +1489,14 @@ h3 {
 }
 
 .section-muted {
-  background: var(--surface-2);
+  background:
+    linear-gradient(180deg, #eef3f5, #f7fafb);
 }
 
 #services {
   order: 4;
+  background:
+    linear-gradient(135deg, #eef4f7 0%, #fff 48%, #edf3f6 100%);
 }
 
 #calculator {
@@ -1161,6 +1505,8 @@ h3 {
 
 #company {
   order: 6;
+  background:
+    linear-gradient(180deg, #f9fbfc 0%, #eef3f5 100%);
 }
 
 #production {
@@ -1200,10 +1546,24 @@ h3 {
   filter: saturate(1.02) contrast(1.04);
 }
 
+.service-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(105deg, transparent 0 40%, rgb(255 196 0 / 24%) 48%, transparent 56%);
+  opacity: .54;
+  transform: translateX(-100%);
+  animation: weld-scan 7.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .service-visual::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: linear-gradient(180deg, transparent 38%, rgb(11 17 15 / 82%) 100%);
 }
 
@@ -1212,7 +1572,7 @@ h3 {
   left: 18px;
   right: 18px;
   bottom: 18px;
-  z-index: 1;
+  z-index: 3;
   display: grid;
   gap: 4px;
   color: #fff;
@@ -1231,8 +1591,21 @@ h3 {
 
 .service-list article {
   position: relative;
+  min-height: 154px;
   padding: 22px;
   overflow: hidden;
+  border-color: rgb(186 200 210 / 80%);
+  background:
+    linear-gradient(135deg, rgb(255 196 0 / 9%), transparent 46%),
+    linear-gradient(180deg, #fff, #f3f7f9);
+  box-shadow: 0 18px 48px rgb(16 20 23 / 9%);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.service-list article h3,
+.service-list article p {
+  position: relative;
+  z-index: 1;
 }
 
 .service-list article::before {
@@ -1261,18 +1634,52 @@ h3 {
       url("./assets/icons/service-arrow@3x.png") 3x
     )
     center / contain no-repeat;
+  z-index: 1;
+}
+
+.service-list article h3::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: -26px;
+  z-index: -1;
+  width: 96px;
+  height: 96px;
+  border: 1px solid rgb(16 20 23 / 8%);
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 13px, rgb(31 143 183 / 9%) 14px, transparent 15px);
+  opacity: .5;
+}
+
+.service-list article:nth-child(2n)::before {
+  background: linear-gradient(135deg, var(--accent-2), #4cc5e0);
+}
+
+.service-list article:nth-child(3n)::before {
+  background: linear-gradient(135deg, var(--accent), #ff8f1d);
 }
 
 .service-list article:first-child {
   grid-column: 1 / -1;
   background:
-    linear-gradient(135deg, rgb(15 106 95 / 10%), transparent 70%),
-    var(--surface);
+    linear-gradient(135deg, rgb(255 196 0 / 14%), transparent 55%),
+    linear-gradient(180deg, #fff, #f2f6f7);
+}
+
+.service-list article:hover {
+  border-color: rgb(255 196 0 / 42%);
+  box-shadow: 0 24px 58px rgb(16 20 23 / 14%);
+  transform: translateY(-3px);
 }
 
 .calculator-section {
   background:
-    linear-gradient(180deg, var(--bg), #fff 55%, var(--bg));
+    linear-gradient(180deg, #eef3f5, #fff 48%, #edf2f4);
+}
+
+.calculator-section::before {
+  opacity: .28;
 }
 
 .calculator-grid {
@@ -1287,8 +1694,12 @@ h3 {
   gap: 6px;
   max-width: 440px;
   padding: 18px;
-  background: var(--graphite);
+  border: 1px solid rgb(255 196 0 / 22%);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 54px, rgb(255 196 0 / 7%) 55px, transparent 56px),
+    linear-gradient(135deg, #101417, #20282e);
   color: #fff;
+  box-shadow: 0 20px 52px rgb(16 20 23 / 14%);
 }
 
 .formula-card span {
@@ -1299,7 +1710,12 @@ h3 {
   display: grid;
   gap: 16px;
   padding: clamp(22px, 4vw, 34px);
-  box-shadow: var(--shadow);
+  border-color: rgb(186 200 210 / 88%);
+  background:
+    linear-gradient(135deg, rgb(255 196 0 / 10%), transparent 44%),
+    repeating-linear-gradient(90deg, transparent 0 72px, rgb(31 143 183 / 4%) 73px, transparent 74px),
+    #fff;
+  box-shadow: 0 26px 72px rgb(16 20 23 / 15%);
 }
 
 .calculator label,
@@ -1378,20 +1794,30 @@ h3 {
   display: grid;
   gap: 4px;
   padding: 18px 14px;
-  border: 1px solid var(--line);
+  border: 1px solid rgb(255 196 0 / 18%);
   border-radius: var(--radius);
-  background: #fff;
-  box-shadow: 0 14px 36px rgb(24 33 31 / 7%);
+  background:
+    linear-gradient(135deg, rgb(255 196 0 / 12%), transparent 48%),
+    linear-gradient(180deg, #12191d, #263139);
+  color: #fff;
+  box-shadow: 0 18px 46px rgb(24 33 31 / 15%);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.company-metrics div:hover {
+  border-color: rgb(255 196 0 / 36%);
+  box-shadow: 0 22px 52px rgb(16 20 23 / 12%);
+  transform: translateY(-3px);
 }
 
 .company-metrics strong {
-  color: var(--accent-2);
+  color: var(--accent);
   font-size: clamp(28px, 3.8vw, 42px);
   line-height: 1;
 }
 
 .company-metrics span {
-  color: var(--muted);
+  color: rgb(255 255 255 / 68%);
   font-size: 13px;
   line-height: 1.2;
 }
@@ -1405,6 +1831,19 @@ h3 {
   position: relative;
   padding: 24px;
   overflow: hidden;
+  border-color: rgb(186 200 210 / 80%);
+  background:
+    linear-gradient(135deg, rgb(31 143 183 / 11%), transparent 54%),
+    repeating-linear-gradient(90deg, transparent 0 74px, rgb(16 20 23 / 4%) 75px, transparent 76px),
+    #fff;
+  box-shadow: 0 18px 48px rgb(16 20 23 / 10%);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.company-panels article:hover {
+  border-color: rgb(31 143 183 / 28%);
+  box-shadow: 0 24px 58px rgb(16 20 23 / 13%);
+  transform: translateX(4px);
 }
 
 .company-panels article::before {
@@ -1426,7 +1865,11 @@ h3 {
 
 .workshop-section {
   background:
-    linear-gradient(180deg, #fff 0%, var(--bg) 100%);
+    linear-gradient(135deg, #fff 0%, #f3f7f9 42%, #e7eef2 100%);
+}
+
+.workshop-section::before {
+  opacity: .24;
 }
 
 .workshop-grid {
@@ -1442,7 +1885,7 @@ h3 {
   overflow: hidden;
   border-radius: var(--radius);
   background: var(--graphite);
-  box-shadow: 0 20px 60px rgb(24 33 31 / 16%);
+  box-shadow: 0 24px 70px rgb(24 33 31 / 18%);
 }
 
 .workshop-card:first-child {
@@ -1458,10 +1901,25 @@ h3 {
   transition: transform 420ms ease, filter 420ms ease;
 }
 
+.workshop-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(105deg, transparent 0 37%, rgb(255 196 0 / 30%) 46%, transparent 55%),
+    repeating-linear-gradient(90deg, transparent 0 72px, rgb(255 255 255 / 6%) 73px, transparent 74px);
+  opacity: .42;
+  transform: translateX(-76%);
+  animation: workshop-scan 8.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .workshop-card::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: linear-gradient(180deg, transparent 45%, rgb(9 13 12 / 78%) 100%);
   pointer-events: none;
 }
@@ -1471,7 +1929,7 @@ h3 {
   left: 18px;
   right: 18px;
   bottom: 16px;
-  z-index: 1;
+  z-index: 3;
   color: #fff;
   font-weight: 800;
   line-height: 1.22;
@@ -1480,6 +1938,18 @@ h3 {
 .workshop-card:hover img {
   filter: saturate(1.04) contrast(1.03);
   transform: scale(1.035);
+}
+
+@keyframes workshop-scan {
+  0%,
+  42% {
+    transform: translateX(-76%);
+  }
+
+  78%,
+  100% {
+    transform: translateX(76%);
+  }
 }
 
 .service-visual,
@@ -1491,6 +1961,12 @@ h3 {
 .clients {
   padding-top: clamp(50px, 7vw, 84px);
   padding-bottom: clamp(50px, 7vw, 84px);
+  background:
+    linear-gradient(180deg, #e8eff3, #f8fafb);
+}
+
+.clients::before {
+  opacity: .18;
 }
 
 .clients-grid {
@@ -1500,23 +1976,53 @@ h3 {
 }
 
 .clients-grid article {
+  position: relative;
   display: grid;
   min-height: 154px;
   align-content: center;
   justify-items: center;
   gap: 14px;
   padding: 18px 14px;
+  overflow: hidden;
   text-align: center;
+  background:
+    linear-gradient(135deg, rgb(255 196 0 / 7%), transparent 52%),
+    repeating-linear-gradient(90deg, transparent 0 68px, rgb(31 143 183 / 4%) 69px, transparent 70px),
+    #fff;
+  box-shadow: 0 14px 34px rgb(16 20 23 / 7%);
   transition:
     transform 180ms ease,
     border-color 180ms ease,
     box-shadow 180ms ease;
 }
 
+.clients-grid article::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-top: 2px solid transparent;
+  background:
+    linear-gradient(90deg, var(--accent), var(--accent-2), transparent) top left / 45% 2px no-repeat;
+  opacity: .62;
+  transform: translateX(-28%);
+  transition: transform 180ms ease, opacity 180ms ease;
+  pointer-events: none;
+}
+
+.clients-grid article > * {
+  position: relative;
+  z-index: 1;
+}
+
 .clients-grid article:hover {
   border-color: rgb(15 106 95 / 34%);
   box-shadow: 0 16px 42px rgb(24 33 31 / 10%);
   transform: translateY(-3px);
+}
+
+.clients-grid article:hover::before {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .clients-grid img {
@@ -1543,8 +2049,23 @@ h3 {
 }
 
 .contacts-section {
-  background: var(--graphite);
+  background:
+    linear-gradient(135deg, rgb(11 16 18 / 98%), rgb(30 39 44 / 98%)),
+    url("./assets/metal-production-hero.png") center / cover fixed;
   color: #fff;
+}
+
+.contacts-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 118px, rgb(255 196 0 / 8%) 119px, transparent 120px),
+    linear-gradient(108deg, transparent 0 36%, rgb(31 143 183 / 11%) 45%, transparent 56%);
+  opacity: .56;
+  transform: translate3d(-70px, 0, 0);
+  animation: section-lines 24s linear infinite;
 }
 
 .contacts-grid {
@@ -1565,7 +2086,7 @@ h3 {
   overflow: hidden;
   border-radius: var(--radius);
   background: #dce2dc;
-  box-shadow: 0 24px 70px rgb(0 0 0 / 24%);
+  box-shadow: 0 26px 76px rgb(0 0 0 / 30%);
 }
 
 .leaflet-map {
@@ -1710,13 +2231,35 @@ h3 {
 }
 
 .contact-card {
+  position: relative;
   display: grid;
   align-content: center;
   gap: 22px;
   padding: clamp(24px, 4vw, 42px);
   border-color: rgb(255 255 255 / 12%);
-  background: rgb(255 255 255 / 8%);
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgb(255 196 0 / 10%), transparent 42%),
+    rgb(255 255 255 / 8%);
   color: #fff;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 20%);
+}
+
+.contact-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(105deg, transparent 0 42%, rgb(255 196 0 / 16%) 48%, transparent 56%);
+  opacity: .6;
+  transform: translateX(-80%);
+  animation: weld-scan 7.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.contact-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .contact-card .section-kicker {
@@ -2052,10 +2595,6 @@ address a {
 
   .process-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .process-card::after {
-    content: none;
   }
 
   .workshop-grid,
