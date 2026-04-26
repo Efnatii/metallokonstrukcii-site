@@ -100,11 +100,13 @@ button {
 }
 
 .brand-logo {
-  width: 190px;
+  width: 214px;
   height: auto;
-  min-width: 190px;
-  padding: 0;
-  filter: drop-shadow(0 12px 26px rgb(0 0 0 / 32%));
+  min-width: 214px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 6px;
+  background: #fff;
+  filter: drop-shadow(0 14px 28px rgb(0 0 0 / 34%));
 }
 
 .icon-img {
@@ -253,14 +255,20 @@ button {
 .max-link {
   display: inline-grid;
   place-items: center;
-  width: 38px;
-  height: 36px;
-  border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: var(--radius);
-  background: rgb(255 255 255 / 9%);
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(255 255 255 / 22%);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2bbcff, #087cf2);
   color: #fff;
-  font-size: 12px;
-  font-weight: 850;
+  box-shadow: 0 12px 28px rgb(8 124 242 / 24%);
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.max-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .header-actions .btn {
@@ -271,8 +279,9 @@ button {
 
 .max-link:hover,
 .max-link:focus-visible {
-  border-color: rgb(242 200 75 / 58%);
-  color: var(--accent);
+  border-color: rgb(255 255 255 / 58%);
+  box-shadow: 0 16px 34px rgb(8 124 242 / 36%);
+  transform: translateY(-1px);
   outline: none;
 }
 
@@ -1829,13 +1838,17 @@ address a {
 .max-float {
   display: inline-grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   border-radius: 999px;
-  background: var(--accent-2);
+  background: linear-gradient(135deg, #2bbcff, #087cf2);
   color: #fff;
-  box-shadow: 0 14px 34px rgb(0 0 0 / 20%);
-  font-size: 13px;
+  box-shadow: 0 14px 34px rgb(8 124 242 / 24%);
+}
+
+.max-float .max-icon {
+  width: 30px;
+  height: 30px;
 }
 
 .lead-modal {
@@ -2067,12 +2080,18 @@ address a {
   }
 
   .site-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
     padding: 10px 14px;
   }
 
+  .brand {
+    min-width: 0;
+  }
+
   .brand-logo {
-    width: 142px;
-    min-width: 142px;
+    width: 156px;
+    min-width: 0;
   }
 
   .brand-copy {

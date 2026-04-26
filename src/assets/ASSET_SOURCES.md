@@ -10,6 +10,10 @@
 
 `logo-b2e-ai-concept.png` - AI-концепт логотипа, сгенерированный для проекта через встроенный ImageGen/ChatGPT Image.
 
+`icons/generated-industrial-icons-source.png` - исходный лист промышленных пиктограмм, сгенерированный через встроенный ImageGen/ChatGPT Image; из него подготовлены адаптивные PNG-иконки 1x/2x/3x.
+
+`icons/max-logo.png`, `icons/max-logo@2x.png`, `icons/max-logo@3x.png` - официальный значок MAX из полного кода сайтов-примеров в `techtask/B2E STYLE EXAMPLE SITES/static.tildacdn.com/.../Max_logo-32x32.png`.
+
 ## Логотипы клиентов и партнеров
 
 Логотипы используются только для идентификации клиентов/партнеров из технического задания. Права на товарные знаки принадлежат их владельцам. Для сайта подготовлены PNG-версии 1x/2x/3x.
