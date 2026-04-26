@@ -47,8 +47,7 @@ main {
   flex-direction: column;
 }
 
-img,
-svg {
+img {
   display: block;
   max-width: 100%;
 }
@@ -108,6 +107,11 @@ button {
   filter: drop-shadow(0 12px 26px rgb(0 0 0 / 32%));
 }
 
+.icon-img {
+  display: block;
+  object-fit: contain;
+}
+
 .brand-copy {
   display: none;
 }
@@ -147,12 +151,17 @@ button {
 
 .nav-item .nav-link::after {
   content: "";
-  width: 6px;
-  height: 6px;
+  width: 12px;
+  height: 12px;
   margin-left: 8px;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
-  transform: translateY(-2px) rotate(45deg);
+  background:
+    image-set(
+      url("./assets/icons/chevron-down.png") 1x,
+      url("./assets/icons/chevron-down@2x.png") 2x,
+      url("./assets/icons/chevron-down@3x.png") 3x
+    )
+    center / contain no-repeat;
+  transform: translateY(1px);
 }
 
 .dropdown {
@@ -232,10 +241,9 @@ button {
   color: var(--accent);
 }
 
-.phone-badge svg {
+.phone-badge .icon-img {
   width: 18px;
   height: 18px;
-  fill: currentColor;
 }
 
 .email-link {
@@ -278,11 +286,22 @@ button {
 }
 
 .nav-toggle span {
+  display: none;
+}
+
+.nav-toggle::before {
+  content: "";
   display: block;
-  width: 20px;
-  height: 2px;
-  margin: 4px auto;
-  background: #fff;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto;
+  background:
+    image-set(
+      url("./assets/icons/hamburger.png") 1x,
+      url("./assets/icons/hamburger@2x.png") 2x,
+      url("./assets/icons/hamburger@3x.png") 3x
+    )
+    center / contain no-repeat;
 }
 
 .btn {
@@ -339,11 +358,16 @@ button {
 
 .btn-download::after {
   content: "";
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   margin-left: 10px;
-  background: currentColor;
-  clip-path: path("M7 1h2v8l3-3 1.4 1.4L8 12.8 2.6 7.4 4 6l3 3V1ZM2 14h12v2H2v-2Z");
+  background:
+    image-set(
+      url("./assets/icons/download.png") 1x,
+      url("./assets/icons/download@2x.png") 2x,
+      url("./assets/icons/download@3x.png") 3x
+    )
+    center / contain no-repeat;
   opacity: .82;
 }
 
@@ -555,15 +579,10 @@ h3 {
   color: var(--accent);
 }
 
-.fact-icon svg,
-.hero-capacity-list svg {
+.fact-icon .icon-img,
+.hero-capacity-list .icon-img {
   width: 100%;
   height: 100%;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: square;
-  stroke-linejoin: bevel;
-  stroke-width: 3;
 }
 
 @media (min-width: 901px) {
@@ -637,9 +656,9 @@ h3 {
   transform: translateX(4px);
 }
 
-.hero-capacity-list svg {
+.hero-capacity-list .icon-img {
   grid-row: span 2;
-  color: rgb(255 255 255 / 72%);
+  opacity: .86;
 }
 
 .hero-capacity-list span {
@@ -668,10 +687,16 @@ h3 {
 
 .panel-link::after,
 .workflow-cta::after {
-  content: "→";
-  color: var(--accent);
-  font-size: 28px;
-  line-height: 1;
+  content: "";
+  width: 34px;
+  height: 22px;
+  background:
+    image-set(
+      url("./assets/icons/arrow-right.png") 1x,
+      url("./assets/icons/arrow-right@2x.png") 2x,
+      url("./assets/icons/arrow-right@3x.png") 3x
+    )
+    center / contain no-repeat;
   transition: transform 180ms ease;
 }
 
@@ -906,18 +931,13 @@ h3 {
   font-weight: 900;
 }
 
-.process-card svg {
+.process-card .icon-img {
   width: 58px;
   height: 58px;
   padding: 10px;
   border-radius: var(--radius);
   background:
     linear-gradient(135deg, #111820, #26313a);
-  fill: none;
-  stroke: var(--accent);
-  stroke-linecap: square;
-  stroke-linejoin: bevel;
-  stroke-width: 3;
 }
 
 .process-card:hover {
@@ -981,10 +1001,18 @@ h3 {
 }
 
 #products .catalog-note::after {
-  content: "→";
+  content: "";
+  display: inline-block;
+  width: 34px;
+  height: 22px;
   margin-left: 0;
-  color: var(--graphite);
-  font-size: 34px;
+  background:
+    image-set(
+      url("./assets/icons/arrow-right.png") 1x,
+      url("./assets/icons/arrow-right@2x.png") 2x,
+      url("./assets/icons/arrow-right@3x.png") 3x
+    )
+    center / contain no-repeat;
   vertical-align: -4px;
 }
 
@@ -1030,13 +1058,19 @@ h3 {
 }
 
 .product-card::after {
-  content: "→";
+  content: "";
   position: absolute;
   left: 24px;
   top: 74px;
-  color: var(--accent);
-  font-size: 30px;
-  line-height: 1;
+  width: 34px;
+  height: 22px;
+  background:
+    image-set(
+      url("./assets/icons/arrow-right.png") 1x,
+      url("./assets/icons/arrow-right@2x.png") 2x,
+      url("./assets/icons/arrow-right@3x.png") 3x
+    )
+    center / contain no-repeat;
   transition: transform 180ms ease;
 }
 
@@ -1205,14 +1239,17 @@ h3 {
 .service-list article::after {
   content: "";
   position: absolute;
-  top: 30px;
-  left: 31px;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--graphite);
-  border-left: 0;
-  border-bottom: 0;
-  transform: rotate(45deg);
+  top: 28px;
+  left: 28px;
+  width: 22px;
+  height: 22px;
+  background:
+    image-set(
+      url("./assets/icons/service-arrow.png") 1x,
+      url("./assets/icons/service-arrow@2x.png") 2x,
+      url("./assets/icons/service-arrow@3x.png") 3x
+    )
+    center / contain no-repeat;
 }
 
 .service-list article:first-child {
@@ -1368,10 +1405,12 @@ h3 {
   height: 58px;
   opacity: 0.14;
   background:
-    linear-gradient(var(--accent-2), var(--accent-2)) 0 0 / 100% 8px no-repeat,
-    linear-gradient(var(--accent-2), var(--accent-2)) 0 25px / 100% 8px no-repeat,
-    linear-gradient(45deg, transparent 42%, var(--accent-2) 43% 50%, transparent 51%),
-    linear-gradient(135deg, transparent 42%, var(--accent-2) 43% 50%, transparent 51%);
+    image-set(
+      url("./assets/icons/company-truss-mark.png") 1x,
+      url("./assets/icons/company-truss-mark@2x.png") 2x,
+      url("./assets/icons/company-truss-mark@3x.png") 3x
+    )
+    center / contain no-repeat;
 }
 
 .workshop-section {
@@ -1563,30 +1602,16 @@ h3 {
 }
 
 .b2e-map-marker {
-  display: grid;
-  place-items: center;
   width: 30px !important;
-  height: 30px !important;
-  border: 3px solid #fff;
-  border-radius: 999px;
-  background: var(--accent-2);
-  box-shadow:
-    0 0 0 7px rgb(15 106 95 / 20%),
-    0 10px 24px rgb(24 33 31 / 22%);
+  height: 42px !important;
+  background: transparent;
+  border: 0;
 }
 
-.b2e-map-marker span {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #fff;
-}
-
-.b2e-map-marker.is-active {
-  background: var(--accent);
-  box-shadow:
-    0 0 0 8px rgb(242 200 75 / 24%),
-    0 14px 30px rgb(24 33 31 / 28%);
+.b2e-map-marker img {
+  width: 30px;
+  height: 42px;
+  filter: drop-shadow(0 10px 18px rgb(24 33 31 / 28%));
 }
 
 .map-status {
@@ -1771,11 +1796,10 @@ address a {
   box-shadow: 0 16px 40px rgb(0 0 0 / 22%);
 }
 
-.phone-float svg {
+.phone-float .icon-img {
   width: 23px;
   height: 23px;
   min-width: 23px;
-  fill: currentColor;
 }
 
 .phone-float span {
@@ -1872,16 +1896,9 @@ address a {
   text-align: center;
 }
 
-.success-icon {
-  display: grid;
-  place-items: center;
+.success-icon-img {
   width: 58px;
   height: 58px;
-  border-radius: 999px;
-  background: var(--accent-2);
-  color: #fff;
-  font-size: 34px;
-  font-weight: 850;
 }
 
 .success-state strong {

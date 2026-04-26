@@ -348,13 +348,19 @@
       wrap?.classList.remove('is-map-error');
     };
 
+    const iconAsset = (name) => new URL(`./assets/icons/${name}`, document.baseURI).href;
+    const createMarkerHtml = (active = false) => {
+      const name = active ? 'map-marker-active' : 'map-marker';
+      return `<img src="${iconAsset(`${name}.png`)}" srcset="${iconAsset(`${name}.png`)} 1x, ${iconAsset(`${name}@2x.png`)} 2x, ${iconAsset(`${name}@3x.png`)} 3x" width="30" height="42" alt="">`;
+    };
+
     const createIcon = (active = false) =>
       window.L.divIcon({
-        className: active ? 'b2e-map-marker is-active' : 'b2e-map-marker',
-        html: '<span></span>',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15],
-        popupAnchor: [0, -16]
+        className: 'b2e-map-marker',
+        html: createMarkerHtml(active),
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -38]
       });
 
     const locations = buttons
@@ -377,6 +383,7 @@
         scrollWheelZoom: false,
         zoomControl: true
       }).setView([start.lat, start.lng], start.zoom);
+      map.attributionControl.setPrefix(false);
 
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
