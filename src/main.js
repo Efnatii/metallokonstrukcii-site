@@ -250,10 +250,22 @@
   function setupFloatingActions() {
     const phone = $('.phone-float');
     const max = $('.max-float');
+    const revealAfter = () => window.scrollY > window.innerHeight * 0.9;
+    const syncVisibility = () => {
+      const isVisible = revealAfter();
+      phone?.classList.toggle('is-visible', isVisible);
+      max?.classList.toggle('is-visible', isVisible);
+      if (!isVisible) {
+        phone?.classList.remove('is-expanded');
+      }
+    };
 
-    setTimeout(() => phone?.classList.add('is-visible'), 5000);
-    setTimeout(() => max?.classList.add('is-visible'), 10000);
+    syncVisibility();
+    window.addEventListener('scroll', syncVisibility, { passive: true });
     setTimeout(() => {
+      if (!revealAfter()) {
+        return;
+      }
       phone?.classList.add('is-expanded');
       setTimeout(() => phone?.classList.remove('is-expanded'), 10000);
     }, 25000);
