@@ -82,7 +82,7 @@ button {
   display: grid;
   grid-template-columns: minmax(210px, 300px) minmax(460px, 1fr) minmax(390px, 460px);
   align-items: center;
-  min-height: 86px;
+  min-height: 94px;
   gap: 20px;
   padding: 12px clamp(26px, 3.4vw, 48px);
   border-bottom: 1px solid rgb(255 255 255 / 10%);
@@ -101,10 +101,10 @@ button {
 }
 
 .brand-logo {
-  width: 178px;
+  width: 190px;
   height: auto;
-  min-width: 178px;
-  padding: 3px 0;
+  min-width: 190px;
+  padding: 0;
   filter: drop-shadow(0 12px 26px rgb(0 0 0 / 32%));
 }
 
@@ -943,14 +943,14 @@ h3 {
 
 #products {
   order: 1;
-  padding-top: clamp(32px, 3.4vw, 42px);
+  padding-top: clamp(24px, 2.6vw, 32px);
   padding-bottom: clamp(58px, 6vw, 86px);
   background:
     linear-gradient(180deg, #fff, #f3f5f6);
 }
 
 #products .section-head {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 
 #products h2 {
@@ -2054,8 +2054,8 @@ address a {
   }
 
   .brand-logo {
-    width: 128px;
-    min-width: 128px;
+    width: 142px;
+    min-width: 142px;
   }
 
   .brand-copy {

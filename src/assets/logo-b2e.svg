@@ -1,22 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="154" height="56" viewBox="0 0 154 56" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="96" viewBox="0 0 220 96" role="img" aria-labelledby="title desc">
   <title id="title">B2E</title>
-  <desc id="desc">B2E industrial wordmark with a steel truss line.</desc>
+  <desc id="desc">B2E logo with an industrial steel truss and welding spark.</desc>
   <defs>
-    <linearGradient id="gold" x1="44" y1="8" x2="94" y2="52" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffe678"/>
+    <linearGradient id="gold" x1="116" y1="18" x2="188" y2="78" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffe981"/>
       <stop offset=".46" stop-color="#ffc400"/>
-      <stop offset="1" stop-color="#e5a700"/>
+      <stop offset="1" stop-color="#d89a00"/>
     </linearGradient>
-    <filter id="shadow" x="-8%" y="-30%" width="116%" height="160%">
-      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000000" flood-opacity=".38"/>
+    <linearGradient id="steel" x1="12" y1="10" x2="126" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".28" stop-color="#dfe5e4"/>
+      <stop offset=".72" stop-color="#838f92"/>
+      <stop offset="1" stop-color="#f5f7f4"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-18%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000000" flood-opacity=".42"/>
     </filter>
   </defs>
   <g filter="url(#shadow)">
-    <path d="M72 14h58l16 11" fill="none" stroke="#f7f8f4" stroke-width="2" stroke-linecap="square" opacity=".48"/>
-    <path d="M88 14 106 25m16-11 20 11m-44 0h48" fill="none" stroke="#f7f8f4" stroke-width="2" stroke-linecap="square" opacity=".42"/>
-    <path d="M46 44h43v7H46z" fill="url(#gold)"/>
-    <text x="0" y="48" fill="#f7f8f4" font-family="Arial Black, Inter, Arial, sans-serif" font-size="48" font-weight="900">B</text>
-    <text x="44" y="48" fill="url(#gold)" font-family="Arial Black, Inter, Arial, sans-serif" font-size="48" font-weight="900">2</text>
-    <text x="88" y="48" fill="#f7f8f4" font-family="Arial Black, Inter, Arial, sans-serif" font-size="48" font-weight="900">E</text>
+    <path d="M16 43h93l11-8h22l-11 8h72v6H16z" fill="url(#steel)"/>
+    <path d="M18 52h90v6H18zM128 52h75v6h-75z" fill="url(#steel)" opacity=".95"/>
+    <path d="M20 42 50 20h54l28 22" fill="none" stroke="#f7faf7" stroke-width="4" stroke-linecap="square" stroke-linejoin="bevel"/>
+    <path d="M34 41 56 24l24 17m-18-17-24 32m42-32-24 32m24-32 28 32" fill="none" stroke="#f7faf7" stroke-width="4" stroke-linecap="square" stroke-linejoin="bevel" opacity=".88"/>
+    <path d="M104 17h39l-14 11H91z" fill="#f7faf7"/>
+    <path d="M112 18v38" stroke="#f7faf7" stroke-width="4" stroke-linecap="square"/>
+    <path d="M132 43 166 26l37 17" fill="none" stroke="url(#gold)" stroke-width="6" stroke-linecap="square" stroke-linejoin="bevel"/>
+    <path d="M166 26v31m-26-13 26-18 27 18m-27 13 19-18" fill="none" stroke="url(#gold)" stroke-width="5" stroke-linecap="square" stroke-linejoin="bevel"/>
+    <path d="M150 57h51v6h-51z" fill="url(#gold)"/>
+    <path d="M178 59 164 73m14-14 4 18m-4-18 24 8m-24-8-24 5m24-5 16-13" stroke="url(#gold)" stroke-width="2.5" stroke-linecap="square"/>
+    <text x="4" y="91" fill="#f7faf7" font-family="Arial Black, Inter, Arial, sans-serif" font-size="52" font-weight="900">B</text>
+    <text x="62" y="91" fill="url(#gold)" font-family="Arial Black, Inter, Arial, sans-serif" font-size="52" font-weight="900">2</text>
+    <text x="116" y="91" fill="#f7faf7" font-family="Arial Black, Inter, Arial, sans-serif" font-size="52" font-weight="900">E</text>
   </g>
 </svg>
