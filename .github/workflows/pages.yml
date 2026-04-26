@@ -22,12 +22,13 @@ jobs:
       B2E_SITE_URL: ${{ vars.B2E_SITE_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
       B2E_CONTACT_PHONE: ${{ vars.B2E_CONTACT_PHONE || '+79650578270' }}
       B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 965 057 82 70' }}
+      B2E_WORK_HOURS: ${{ vars.B2E_WORK_HOURS || 'Пн-Пт 09:00 - 18:00' }}
       B2E_CONTACT_EMAIL: ${{ vars.B2E_CONTACT_EMAIL || 'zakaz@b2energy.ru' }}
       B2E_MAX_URL: ${{ vars.B2E_MAX_URL || 'https://max.ru/' }}
       B2E_ADDRESS: ${{ vars.B2E_ADDRESS || 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3' }}
       B2E_YANDEX_MAP_URL: ${{ vars.B2E_YANDEX_MAP_URL }}
       B2E_YANDEX_MAP_EMBED_URL: ${{ vars.B2E_YANDEX_MAP_EMBED_URL }}
-      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || secrets.B2E_LEAD_ENDPOINT }}
+      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

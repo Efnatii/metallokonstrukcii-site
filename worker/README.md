@@ -36,14 +36,19 @@ Workflow `.github/workflows/worker.yml`:
 | `WORKER_SITE_LABEL` | `SITE_LABEL` | Название сайта в webhook payload. |
 | `WORKER_LEAD_SUBJECT` | `LEAD_SUBJECT` | Тема заявки. |
 
+`CLOUDFLARE_ACCOUNT_ID` тоже хранится в GitHub Variables. Это не Worker binding для кода заявок, а публичный идентификатор аккаунта, который нужен GitHub Actions для деплоя.
+
 ## Приватные secrets
 
 | GitHub Secret | Cloudflare Worker Secret | Обязательно |
 | --- | --- | --- |
+| `CLOUDFLARE_API_TOKEN` | не загружается в Worker | Да, для автоматического деплоя Worker из GitHub Actions. |
 | `WORKER_LEAD_WEBHOOK_URL` | `LEAD_WEBHOOK_URL` | Нет, если настроен Telegram. |
 | `WORKER_TELEGRAM_BOT_TOKEN` | `TELEGRAM_BOT_TOKEN` | Нет, если настроен webhook. |
 | `WORKER_TELEGRAM_CHAT_ID` | `TELEGRAM_CHAT_ID` | Нет, если настроен webhook. |
 | `WORKER_TURNSTILE_SECRET_KEY` | `TURNSTILE_SECRET_KEY` | Нет, опциональная captcha. |
+
+`CLOUDFLARE_API_TOKEN` остается только в GitHub Secrets и используется GitHub Actions/Wrangler для публикации. Его нельзя загружать в `dist/config.js`, `wrangler.jsonc` или Worker vars.
 
 Для автоматической доставки заявок нужен хотя бы один канал:
 

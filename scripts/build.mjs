@@ -78,6 +78,7 @@ function makeConfig() {
     phone,
     phoneDisplay,
     phoneHref: `tel:${phone.replace(/[^\d+]/g, '')}`,
+    workHours: env('B2E_WORK_HOURS', 'Пн-Пт 09:00 - 18:00'),
     email,
     emailHref: `mailto:${email}`,
     maxUrl: env('B2E_MAX_URL', 'https://max.ru/'),
@@ -130,6 +131,7 @@ function makeStructuredData(config) {
     url: config.siteUrl,
     email: config.email,
     telephone: config.phone,
+    openingHours: config.workHours,
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Санкт-Петербург',
@@ -160,7 +162,7 @@ function makeStructuredDataScript(config) {
 }
 
 function makeIndexHtml(source, config) {
-  const imageUrl = new URL('./assets/metal-production-hero.png', config.siteUrl).href;
+  const imageUrl = new URL('./assets/generated/b2e-dashboard-hero.webp', config.siteUrl).href;
   let html = source
     .replace(
       /<link rel="canonical" href="[^"]+">/,

@@ -12,6 +12,7 @@ const envKeys = [
   'B2E_SITE_URL',
   'B2E_CONTACT_PHONE',
   'B2E_CONTACT_PHONE_DISPLAY',
+  'B2E_WORK_HOURS',
   'B2E_CONTACT_EMAIL',
   'B2E_MAX_URL',
   'B2E_ADDRESS',
@@ -33,6 +34,7 @@ test('build writes config, sitemap, robots and llms from environment', async () 
     B2E_SITE_URL: 'https://example.test/metallokonstrukcii-site',
     B2E_CONTACT_PHONE: '+79990000000',
     B2E_CONTACT_PHONE_DISPLAY: '+7 999 000 00 00',
+    B2E_WORK_HOURS: 'Пн-Пт 10:00 - 19:00',
     B2E_CONTACT_EMAIL: 'lead@example.test',
     B2E_MAX_URL: 'https://max.ru/example',
     B2E_ADDRESS: 'Saint Petersburg, Test 1',
@@ -55,11 +57,12 @@ test('build writes config, sitemap, robots and llms from environment', async () 
 
     assert.equal(config.siteUrl, 'https://example.test/metallokonstrukcii-site/');
     assert.equal(config.phoneHref, 'tel:+79990000000');
+    assert.equal(config.workHours, 'Пн-Пт 10:00 - 19:00');
     assert.equal(config.emailHref, 'mailto:lead@example.test');
     assert.equal(config.leadEndpoint, 'https://b2e-leads.example.workers.dev');
     assert.match(indexHtml, /<link rel="canonical" href="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
     assert.match(indexHtml, /<meta property="og:url" content="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
-    assert.match(indexHtml, /<meta property="og:image" content="https:\/\/example\.test\/metallokonstrukcii-site\/assets\/metal-production-hero\.png">/);
+    assert.match(indexHtml, /<meta property="og:image" content="https:\/\/example\.test\/metallokonstrukcii-site\/assets\/generated\/b2e-dashboard-hero\.webp">/);
     assert.match(indexHtml, /<link rel="alternate" type="text\/plain" href="\.\/llms\.txt" title="LLMs\.txt">/);
     assert.match(indexHtml, /<script type="application\/ld\+json">/);
     assert.match(sitemap, /https:\/\/example\.test\/metallokonstrukcii-site\//);

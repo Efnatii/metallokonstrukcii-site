@@ -15,9 +15,9 @@
       content="Металлоконструкции, монтаж, резка, гибка, металлообработка и порошковая окраска. Инженерный отдел, КМ/КМД, расчет тоннажа."
     >
     <meta property="og:type" content="website">
-    <meta property="og:image" content="./assets/metal-production-hero.png">
+    <meta property="og:image" content="./assets/generated/b2e-dashboard-hero.webp">
     <link rel="canonical" href="https://efnatii.github.io/metallokonstrukcii-site/">
-    <link rel="preload" href="./assets/metal-production-hero.png" as="image">
+    <link rel="preload" href="./assets/generated/b2e-dashboard-hero.webp" as="image">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="./styles.css">
     <script src="./config.js" defer></script>
@@ -75,7 +75,7 @@
         </span>
         <a class="header-contact" data-config-href="phoneHref" href="tel:+79650578270">
           <strong data-config-text="phoneDisplay">+7 965 057 82 70</strong>
-          <small>Пн-Пт 09:00 - 18:00</small>
+          <small data-config-text="workHours">Пн-Пт 09:00 - 18:00</small>
         </a>
         <a class="max-link" data-config-href="maxUrl" href="https://max.ru/" target="_blank" rel="noreferrer" aria-label="Написать в MAX">
           <img class="max-icon" src="./assets/icons/max-logo.png" srcset="./assets/icons/max-logo.png 1x, ./assets/icons/max-logo@2x.png 2x, ./assets/icons/max-logo@3x.png 3x" alt="" width="32" height="32" aria-hidden="true">
@@ -90,80 +90,60 @@
         <div class="hero-overlay" aria-hidden="true"></div>
         <div class="hero-inner">
           <div class="hero-copy reveal">
-            <p class="eyebrow">Производство металлоконструкций</p>
+            <p class="eyebrow">Надежность, точность, сроки</p>
             <h1 id="hero-title">
-              <span>Надежные</span>
-              <span>металлоконструкции</span>
-              <span>для сложных задач</span>
+              <span>Производство</span>
+              <span>металлоконструкций</span>
+              <span>СЗФО и ЦФО</span>
             </h1>
             <p class="hero-lead">
-              Проектируем, изготавливаем, обрабатываем и монтируем металлоконструкции: от закладных деталей до каркасов зданий, резервуаров и нестандартных решений.
+              Проектируем, изготавливаем, обрабатываем и монтируем металлоконструкции любой сложности: от закладных деталей до каркасов зданий, резервуаров и нестандартных узлов.
             </p>
+            <ul class="hero-checks" aria-label="Ключевые возможности">
+              <li>Собственное производство и инженерный отдел</li>
+              <li>Более 200 готовых решений КМ и КМД</li>
+              <li>Выезд на объект или производство по задаче</li>
+            </ul>
             <div class="hero-actions">
               <a class="btn btn-primary" href="#calculator">Рассчитать проект</a>
               <a class="btn btn-light btn-download" href="#products">Скачать каталог</a>
             </div>
-            <dl class="hero-facts" aria-label="Ключевые показатели">
-              <div>
-                <span class="fact-icon">
-                  <img class="icon-img" src="./assets/icons/capacity-cube.png" srcset="./assets/icons/capacity-cube.png 1x, ./assets/icons/capacity-cube@2x.png 2x, ./assets/icons/capacity-cube@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                </span>
-                <dt>15+</dt>
-                <dd>лет на рынке</dd>
-              </div>
-              <div>
-                <span class="fact-icon">
-                  <img class="icon-img" src="./assets/icons/document-kmd.png" srcset="./assets/icons/document-kmd.png 1x, ./assets/icons/document-kmd@2x.png 2x, ./assets/icons/document-kmd@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                </span>
-                <dt>500+</dt>
-                <dd>реализованных проектов</dd>
-              </div>
-              <div>
-                <span class="fact-icon">
-                  <img class="icon-img" src="./assets/icons/team.png" srcset="./assets/icons/team.png 1x, ./assets/icons/team@2x.png 2x, ./assets/icons/team@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                </span>
-                <dt>200+</dt>
-                <dd>довольных клиентов</dd>
-              </div>
-              <div>
-                <span class="fact-icon">
-                  <img class="icon-img" src="./assets/icons/quality-shield.png" srcset="./assets/icons/quality-shield.png 1x, ./assets/icons/quality-shield@2x.png 2x, ./assets/icons/quality-shield@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                </span>
-                <dt>100%</dt>
-                <dd>контроль качества на всех этапах</dd>
-              </div>
-            </dl>
           </div>
           <aside class="hero-panel reveal" aria-label="Производственные мощности B2E">
             <div class="hero-panel-head">
-              <span>Производственные мощности</span>
+              <span>Производство сегодня</span>
             </div>
-            <div class="hero-capacity-list">
-              <div>
-                <img class="icon-img" src="./assets/icons/factory.png" srcset="./assets/icons/factory.png 1x, ./assets/icons/factory@2x.png 2x, ./assets/icons/factory@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                <span>12 000 м²</span>
-                <small>производственная площадь</small>
-              </div>
-              <div>
-                <img class="icon-img" src="./assets/icons/truss.png" srcset="./assets/icons/truss.png 1x, ./assets/icons/truss@2x.png 2x, ./assets/icons/truss@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                <span>1500 т/мес</span>
-                <small>металлоконструкций</small>
-              </div>
-              <div>
-                <img class="icon-img" src="./assets/icons/request-doc.png" srcset="./assets/icons/request-doc.png 1x, ./assets/icons/request-doc@2x.png 2x, ./assets/icons/request-doc@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                <span>ISO 9001</span>
-                <small>сертифицированное производство</small>
-              </div>
-              <div>
-                <img class="icon-img" src="./assets/icons/calendar.png" srcset="./assets/icons/calendar.png 1x, ./assets/icons/calendar@2x.png 2x, ./assets/icons/calendar@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
-                <span>от 15 дней</span>
-                <small>срок изготовления</small>
-              </div>
+            <div class="production-status-grid">
+              <article>
+                <small>Загрузка производства</small>
+                <strong>78%</strong>
+                <span style="--status-width: 78%"></span>
+              </article>
+              <article>
+                <small>Отгрузка за месяц</small>
+                <strong>860 т</strong>
+                <span style="--status-width: 68%"></span>
+              </article>
+              <article>
+                <small>Проектов в работе</small>
+                <strong>38</strong>
+                <span style="--status-width: 52%"></span>
+              </article>
+              <article>
+                <small>Сроки соблюдаются</small>
+                <strong>100%</strong>
+                <span style="--status-width: 100%"></span>
+              </article>
+            </div>
+            <div class="hero-panel-media" aria-label="Производственные процессы">
+              <img src="./assets/generated/service-cutting.webp" srcset="./assets/generated/service-cutting.webp 1x, ./assets/generated/service-cutting@2x.webp 2x" alt="AI-визуализация резки металла" width="720" height="460">
+              <img src="./assets/generated/service-montage.webp" srcset="./assets/generated/service-montage.webp 1x, ./assets/generated/service-montage@2x.webp 2x" alt="AI-визуализация монтажа металлоконструкций" width="720" height="460">
+              <img src="./assets/generated/service-machining.webp" srcset="./assets/generated/service-machining.webp 1x, ./assets/generated/service-machining@2x.webp 2x" alt="AI-визуализация металлообработки" width="720" height="460">
             </div>
             <a class="panel-link" href="#production">Смотреть производство</a>
           </aside>
           <div class="hero-workflow reveal" aria-label="Как мы работаем">
-            <strong>Как мы работаем</strong>
+            <strong>Процесс работы</strong>
             <ol>
               <li><span>01</span>Заявка</li>
               <li><span>02</span>Расчет</li>
@@ -173,6 +153,36 @@
             </ol>
             <button class="workflow-cta callback-trigger" type="button">Стать партнером</button>
           </div>
+          <dl class="hero-facts" aria-label="Ключевые показатели">
+            <div>
+              <span class="fact-icon">
+                <img class="icon-img" src="./assets/icons/capacity-cube.png" srcset="./assets/icons/capacity-cube.png 1x, ./assets/icons/capacity-cube@2x.png 2x, ./assets/icons/capacity-cube@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
+              </span>
+              <dt>1000+</dt>
+              <dd>т/мес производственная мощность</dd>
+            </div>
+            <div>
+              <span class="fact-icon">
+                <img class="icon-img" src="./assets/icons/document-kmd.png" srcset="./assets/icons/document-kmd.png 1x, ./assets/icons/document-kmd@2x.png 2x, ./assets/icons/document-kmd@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
+              </span>
+              <dt>200+</dt>
+              <dd>готовых решений КМ/КМД</dd>
+            </div>
+            <div>
+              <span class="fact-icon">
+                <img class="icon-img" src="./assets/icons/team.png" srcset="./assets/icons/team.png 1x, ./assets/icons/team@2x.png 2x, ./assets/icons/team@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
+              </span>
+              <dt>Выезд</dt>
+              <dd>на СЗФО и ЦФО</dd>
+            </div>
+            <div>
+              <span class="fact-icon">
+                <img class="icon-img" src="./assets/icons/quality-shield.png" srcset="./assets/icons/quality-shield.png 1x, ./assets/icons/quality-shield@2x.png 2x, ./assets/icons/quality-shield@3x.png 3x" alt="" width="38" height="38" aria-hidden="true">
+              </span>
+              <dt>Инж.</dt>
+              <dd>собственный отдел</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
@@ -236,34 +246,44 @@
             </div>
           </div>
           <div class="product-grid">
-            <article class="product-card product-card-photo" style="--product-image: url('./assets/metal-production-hero.png')">
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-frame.webp')">
               <span>01</span>
-              <h3>Каркасы зданий и сооружений</h3>
+              <h3>Строительные металлоконструкции</h3>
               <p>Каркасы зданий, фермы, колонны, балки, связи и элементы несущих систем.</p>
             </article>
-            <article class="product-card product-card-photo" style="--product-image: url('./assets/workshop/cnc-plasma-cutting.jpg')">
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-embedded.webp')">
               <span>02</span>
-              <h3>Металлические балки</h3>
-              <p>Изделия по чертежам КЖ/КМ, анкеры, пластины, кронштейны и узлы крепления.</p>
+              <h3>Закладные детали</h3>
+              <p>Анкеры, пластины, кронштейны, узлы крепления и изделия по чертежам КЖ/КМ.</p>
             </article>
-            <article class="product-card product-card-photo" style="--product-image: url('./assets/workshop/welder-workshop.jpg')">
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-stairs.webp')">
               <span>03</span>
-              <h3>Опоры и мачты</h3>
+              <h3>Лестницы металлические</h3>
               <p>Маршевые, эвакуационные и технологические лестницы с ограждениями.</p>
             </article>
-            <article class="product-card product-card-photo" style="--product-image: url('./assets/workshop/plasma-table.jpg')">
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-canopy.webp')">
               <span>04</span>
-              <h3>Фермы и прогоны</h3>
-              <p>Металлические навесы, въездные группы, рамы ворот и сопутствующие элементы.</p>
+              <h3>Навесы</h3>
+              <p>Навесные и кровельные металлокаркасы для промышленных и коммерческих объектов.</p>
             </article>
-            <article class="product-card product-card-photo" style="--product-image: url('./assets/metal-production-hero.png')">
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-gates.webp')">
               <span>05</span>
+              <h3>Ворота</h3>
+              <p>Металлические рамы ворот, въездные группы и сопутствующие элементы.</p>
+            </article>
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-tank.webp')">
+              <span>06</span>
               <h3>Резервуары</h3>
               <p>Емкости и резервуарные конструкции под производственные и инженерные задачи.</p>
             </article>
-            <article class="product-card product-card-photo" style="--product-image: url('./assets/workshop/welder-workshop.jpg')">
-              <span>06</span>
-              <h3>Арочные и нестандартные конструкции</h3>
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-arch.webp')">
+              <span>07</span>
+              <h3>Арочные конструкции</h3>
+              <p>Арочные фермы, перекрытия, нестандартные пространственные металлокаркасы.</p>
+            </article>
+            <article class="product-card product-card-photo" style="--product-image: url('./assets/generated/product-custom.webp')">
+              <span>08</span>
+              <h3>Нестандартные конструкции</h3>
               <p>Индивидуальные изделия, сложные узлы, проектные решения и опытные партии.</p>
             </article>
           </div>
@@ -277,7 +297,7 @@
             <h2 id="services-title">Производство полного цикла</h2>
             <p>Закрываем ключевые этапы изготовления, обработки и подготовки металлоконструкций к монтажу.</p>
             <figure class="service-visual">
-              <img src="./assets/workshop/plasma-table.jpg" alt="Плазменная резка металлического листа на производственном столе" loading="lazy" width="800" height="599">
+              <img src="./assets/generated/service-cutting.webp" srcset="./assets/generated/service-cutting.webp 1x, ./assets/generated/service-cutting@2x.webp 2x" alt="AI-визуализация плазменной резки металла" loading="lazy" width="720" height="460">
               <figcaption>
                 <strong>Собираем маршрут производства под изделие</strong>
                 <span>Заготовка → обработка → сборка → покрытие</span>
@@ -286,22 +306,27 @@
           </div>
           <div class="service-list">
             <article>
+              <img src="./assets/generated/service-montage.webp" srcset="./assets/generated/service-montage.webp 1x, ./assets/generated/service-montage@2x.webp 2x" alt="" loading="lazy" width="720" height="460" aria-hidden="true">
               <h3>Монтаж металлоконструкций</h3>
               <p>Организация монтажных работ и координация с проектными решениями.</p>
             </article>
             <article>
+              <img src="./assets/generated/service-cutting.webp" srcset="./assets/generated/service-cutting.webp 1x, ./assets/generated/service-cutting@2x.webp 2x" alt="" loading="lazy" width="720" height="460" aria-hidden="true">
               <h3>Резка металла</h3>
               <p>Подготовка заготовок и деталей под дальнейшую сварку и сборку.</p>
             </article>
             <article>
+              <img src="./assets/generated/service-bending.webp" srcset="./assets/generated/service-bending.webp 1x, ./assets/generated/service-bending@2x.webp 2x" alt="" loading="lazy" width="720" height="460" aria-hidden="true">
               <h3>Гибка металла</h3>
               <p>Гибка листового и профильного металла под требуемую геометрию.</p>
             </article>
             <article>
+              <img src="./assets/generated/service-machining.webp" srcset="./assets/generated/service-machining.webp 1x, ./assets/generated/service-machining@2x.webp 2x" alt="" loading="lazy" width="720" height="460" aria-hidden="true">
               <h3>Металлообработка</h3>
               <p>Сверление, зачистка, подготовка к окраске и сборочные операции.</p>
             </article>
             <article>
+              <img src="./assets/generated/service-powder.webp" srcset="./assets/generated/service-powder.webp 1x, ./assets/generated/service-powder@2x.webp 2x" alt="" loading="lazy" width="720" height="460" aria-hidden="true">
               <h3>Порошковая окраска</h3>
               <p>Защитно-декоративное покрытие для повышения стойкости изделий.</p>
             </article>
@@ -398,20 +423,20 @@
             <span class="section-kicker">Производство</span>
             <h2 id="production-title">Цех, резка, сварка и сборка металлоконструкций</h2>
             <p>
-              Визуальный блок с реальными производственными фотографиями: показываем оборудование, сварочные работы и подготовку металла без декоративных заглушек.
+              Визуальный блок собран из AI-сгенерированных производственных сцен: показываем оборудование, сварочные работы и подготовку металла без декоративных заглушек.
             </p>
           </div>
-          <div class="workshop-grid" aria-label="Фотографии производственных процессов">
+          <div class="workshop-grid" aria-label="AI-визуализации производственных процессов">
             <figure class="workshop-card reveal">
-              <img src="./assets/workshop/cnc-plasma-cutting.jpg" alt="Плазменная резка листового металла на ЧПУ-станке" loading="lazy" width="1600" height="1200">
+              <img src="./assets/generated/service-cutting.webp" srcset="./assets/generated/service-cutting.webp 1x, ./assets/generated/service-cutting@2x.webp 2x" alt="AI-визуализация плазменной резки листового металла на ЧПУ-станке" loading="lazy" width="720" height="460">
               <figcaption>Резка металла на ЧПУ</figcaption>
             </figure>
             <figure class="workshop-card reveal">
-              <img src="./assets/workshop/plasma-table.jpg" alt="Стол плазменной резки для металлических листов" loading="lazy" width="800" height="599">
+              <img src="./assets/generated/service-bending.webp" srcset="./assets/generated/service-bending.webp 1x, ./assets/generated/service-bending@2x.webp 2x" alt="AI-визуализация гибки металлического профиля" loading="lazy" width="720" height="460">
               <figcaption>Подготовка заготовок</figcaption>
             </figure>
             <figure class="workshop-card reveal">
-              <img src="./assets/workshop/welder-workshop.jpg" alt="Сварочные работы в производственном помещении" loading="lazy" width="1600" height="1066">
+              <img src="./assets/generated/service-machining.webp" srcset="./assets/generated/service-machining.webp 1x, ./assets/generated/service-machining@2x.webp 2x" alt="AI-визуализация металлообработки в производственном помещении" loading="lazy" width="720" height="460">
               <figcaption>Сварка и сборка</figcaption>
             </figure>
           </div>
