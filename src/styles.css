@@ -631,8 +631,9 @@ h3 {
 .hero-workflow ol {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: 42px;
   align-items: stretch;
-  padding: 0;
+  padding: 0 28px;
   margin: 0;
   list-style: none;
 }
@@ -643,7 +644,7 @@ h3 {
   align-content: center;
   gap: 4px;
   min-height: 72px;
-  padding: 0 26px;
+  padding: 0;
   color: rgb(255 255 255 / 76%);
   font-size: 12px;
   font-weight: 760;
@@ -660,24 +661,25 @@ h3 {
   content: "";
   position: absolute;
   top: 50%;
-  right: -26px;
+  right: -34px;
   z-index: 2;
-  width: 52px;
+  width: 34px;
   height: 1px;
   background: rgb(255 255 255 / 42%);
+  transform: translateY(-50%);
 }
 
 .hero-workflow li:not(:last-child)::before {
   content: "";
   position: absolute;
-  top: calc(50% - 4px);
-  right: -27px;
+  top: 50%;
+  right: -34px;
   z-index: 3;
   width: 8px;
   height: 8px;
   border-top: 1px solid rgb(255 255 255 / 52%);
   border-right: 1px solid rgb(255 255 255 / 52%);
-  transform: rotate(45deg);
+  transform: translateY(-50%) rotate(45deg);
 }
 
 .workflow-cta {
