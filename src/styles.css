@@ -224,6 +224,7 @@ address {
   width: 24px;
   height: 24px;
   object-fit: contain;
+  transform: translate(1px, -1px);
 }
 
 .header-contact {
@@ -1308,10 +1309,12 @@ h3 {
 
 .phone-float {
   display: grid;
-  grid-template-columns: 52px minmax(0, 0);
+  grid-template-columns: 54px minmax(0, 0);
   align-items: center;
+  justify-items: center;
   width: 54px;
   min-height: 54px;
+  padding: 0;
   overflow: hidden;
   border-radius: 999px;
   background: var(--accent);
@@ -1322,7 +1325,10 @@ h3 {
 .phone-float img {
   width: 30px;
   height: 30px;
-  margin: 0 auto;
+  justify-self: center;
+  margin: 0;
+  object-fit: contain;
+  transform: translate(1px, -1px);
 }
 
 .phone-float span {
@@ -1338,7 +1344,7 @@ h3 {
 }
 
 .phone-float.is-expanded {
-  grid-template-columns: 52px 240px;
+  grid-template-columns: 54px 240px;
   width: 318px;
   padding-right: 18px;
 }
@@ -1815,7 +1821,7 @@ h3 {
   }
 
   .phone-float.is-expanded {
-    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-columns: 54px minmax(0, 1fr);
     width: min(318px, calc(100vw - 82px));
   }
 }
