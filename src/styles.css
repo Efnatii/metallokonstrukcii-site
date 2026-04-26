@@ -638,7 +638,7 @@ h3 {
 .hero-workflow ol {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  column-gap: 42px;
+  column-gap: 54px;
   align-items: stretch;
   padding: 0 28px;
   margin: 0;
@@ -668,9 +668,9 @@ h3 {
   content: "";
   position: absolute;
   top: 50%;
-  right: -34px;
+  right: -39px;
   z-index: 2;
-  width: 34px;
+  width: 28px;
   height: 1px;
   background: rgb(255 255 255 / 42%);
   transform: translateY(-50%);
@@ -680,7 +680,7 @@ h3 {
   content: "";
   position: absolute;
   top: 50%;
-  right: -34px;
+  right: -39px;
   z-index: 3;
   width: 8px;
   height: 8px;
@@ -1534,6 +1534,19 @@ h3 {
   h1 {
     max-width: 760px;
     font-size: clamp(44px, 3.9vw, 54px);
+  }
+
+  .hero-workflow ol {
+    column-gap: 44px;
+  }
+
+  .hero-workflow li:not(:last-child)::after {
+    right: -32px;
+    width: 22px;
+  }
+
+  .hero-workflow li:not(:last-child)::before {
+    right: -32px;
   }
 
   .service-grid {
