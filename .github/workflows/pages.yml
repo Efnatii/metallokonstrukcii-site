@@ -21,7 +21,7 @@ jobs:
     env:
       B2E_SITE_URL: ${{ vars.B2E_SITE_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
       B2E_CONTACT_PHONE: ${{ vars.B2E_CONTACT_PHONE || '+79650578270' }}
-      B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 965 057 82 70' }}
+      B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 (965) 057-82-70' }}
       B2E_WORK_HOURS: ${{ vars.B2E_WORK_HOURS || 'Пн-Пт 09:00 - 18:00' }}
       B2E_CONTACT_EMAIL: ${{ vars.B2E_CONTACT_EMAIL || 'zakaz@b2energy.ru' }}
       B2E_MAX_URL: ${{ vars.B2E_MAX_URL || 'https://max.ru/' }}

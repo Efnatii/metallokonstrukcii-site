@@ -62,11 +62,26 @@ function escapeXml(value) {
     .replaceAll("'", '&apos;');
 }
 
+function formatPhoneDisplay(value) {
+  const digits = String(value).replace(/\D/g, '');
+  const normalized = digits.length === 11 && digits.startsWith('8') ? `7${digits.slice(1)}` : digits;
+
+  if (normalized.length === 11 && normalized.startsWith('7')) {
+    return `+7 (${normalized.slice(1, 4)}) ${normalized.slice(4, 7)}-${normalized.slice(7, 9)}-${normalized.slice(9, 11)}`;
+  }
+
+  if (normalized.length === 10) {
+    return `+7 (${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6, 8)}-${normalized.slice(8, 10)}`;
+  }
+
+  return String(value);
+}
+
 function makeConfig() {
   const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
   const defaultMapPoint = encodeURIComponent('30.425277,59.879804');
   const phone = env('B2E_CONTACT_PHONE', '+79650578270');
-  const phoneDisplay = env('B2E_CONTACT_PHONE_DISPLAY', '+7 965 057 82 70');
+  const phoneDisplay = formatPhoneDisplay(env('B2E_CONTACT_PHONE_DISPLAY', '+7 (965) 057-82-70'));
   const email = env('B2E_CONTACT_EMAIL', 'zakaz@b2energy.ru');
   const siteUrl = withTrailingSlash(
     env('B2E_SITE_URL', 'https://efnatii.github.io/metallokonstrukcii-site/')

@@ -57,6 +57,7 @@ test('build writes config, sitemap, robots and llms from environment', async () 
 
     assert.equal(config.siteUrl, 'https://example.test/metallokonstrukcii-site/');
     assert.equal(config.phoneHref, 'tel:+79990000000');
+    assert.equal(config.phoneDisplay, '+7 (999) 000-00-00');
     assert.equal(config.workHours, 'Пн-Пт 10:00 - 19:00');
     assert.equal(config.emailHref, 'mailto:lead@example.test');
     assert.equal(config.leadEndpoint, 'https://b2e-leads.example.workers.dev');
@@ -68,6 +69,7 @@ test('build writes config, sitemap, robots and llms from environment', async () 
     assert.match(sitemap, /https:\/\/example\.test\/metallokonstrukcii-site\//);
     assert.match(robots, /Sitemap: https:\/\/example\.test\/metallokonstrukcii-site\/sitemap\.xml/);
     assert.match(llms, /lead@example\.test/);
+    assert.match(llms, /\+7 \(999\) 000-00-00/);
   } finally {
     for (const [key, value] of Object.entries(previousEnv)) {
       if (value === undefined) {

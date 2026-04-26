@@ -6,7 +6,7 @@
     siteName: 'ООО B2E - производство металлоконструкций',
     siteUrl: 'https://efnatii.github.io/metallokonstrukcii-site/',
     phone: '+79650578270',
-    phoneDisplay: '+7 965 057 82 70',
+    phoneDisplay: '+7 (965) 057-82-70',
     phoneHref: 'tel:+79650578270',
     workHours: 'Пн-Пт 09:00 - 18:00',
     email: 'zakaz@b2energy.ru',
@@ -21,6 +21,23 @@
   const config = { ...defaults, ...(window.B2E_CONFIG || {}) };
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  function formatPhoneDisplay(value) {
+    const digits = String(value).replace(/\D/g, '');
+    const normalized = digits.length === 11 && digits.startsWith('8') ? `7${digits.slice(1)}` : digits;
+
+    if (normalized.length === 11 && normalized.startsWith('7')) {
+      return `+7 (${normalized.slice(1, 4)}) ${normalized.slice(4, 7)}-${normalized.slice(7, 9)}-${normalized.slice(9, 11)}`;
+    }
+
+    if (normalized.length === 10) {
+      return `+7 (${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6, 8)}-${normalized.slice(8, 10)}`;
+    }
+
+    return String(value);
+  }
+
+  config.phoneDisplay = formatPhoneDisplay(config.phoneDisplay || config.phone);
 
   function applyConfig() {
     $$('[data-config-text]').forEach((node) => {
