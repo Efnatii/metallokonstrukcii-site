@@ -1751,7 +1751,7 @@ address a {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .hero,
   .hero-inner {
     min-height: auto;
@@ -1759,11 +1759,11 @@ address a {
 
   .hero-inner {
     grid-template-columns: 1fr;
-    padding-top: 82px;
+    padding-top: 70px;
   }
 
   .hero-panel {
-    max-width: 560px;
+    max-width: 620px;
   }
 
   .hero-workflow {
@@ -1788,7 +1788,9 @@ address a {
   .hero-workflow li::after {
     content: none;
   }
+}
 
+@media (max-width: 900px) {
   .hero-facts,
   .intro-grid,
   .services-layout,
