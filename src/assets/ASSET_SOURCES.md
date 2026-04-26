@@ -6,11 +6,13 @@
 
 `logo/logo-b2e.png`, `logo/logo-b2e@2x.png`, `logo/logo-b2e@3x.png` - PNG-набор логотипа B2E для шапки сайта.
 
+`logo/logo-b2e-generated-source.png` - исходный AI-логотип B2E на chroma key green, сгенерированный через встроенный ImageGen/ChatGPT Image и очищенный до прозрачного PNG-набора.
+
 `icons/*.png`, `icons/*@2x.png`, `icons/*@3x.png` - PNG-наборы интерфейсных иконок: телефон, производственные показатели, этапы процесса, стрелки, скачивание, меню, успешная отправка формы и маркеры карты.
 
 `logo-b2e-ai-concept.png` - AI-концепт логотипа, сгенерированный для проекта через встроенный ImageGen/ChatGPT Image.
 
-`icons/generated-industrial-icons-source.png` - исходный лист промышленных пиктограмм, сгенерированный через встроенный ImageGen/ChatGPT Image; из него подготовлены адаптивные PNG-иконки 1x/2x/3x.
+`icons/generated-industrial-icons-source.png` - исходный лист плоских промышленных пиктограмм, сгенерированный через встроенный ImageGen/ChatGPT Image; из него подготовлены адаптивные PNG-иконки 1x/2x/3x.
 
 `icons/max-logo.png`, `icons/max-logo@2x.png`, `icons/max-logo@3x.png` - официальный значок MAX из полного кода сайтов-примеров в `techtask/B2E STYLE EXAMPLE SITES/static.tildacdn.com/.../Max_logo-32x32.png`.
 
