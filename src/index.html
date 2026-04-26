@@ -18,8 +18,10 @@
     <meta property="og:image" content="./assets/metal-production-hero.png">
     <link rel="canonical" href="https://efnatii.github.io/metallokonstrukcii-site/">
     <link rel="preload" href="./assets/metal-production-hero.png" as="image">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="./styles.css">
     <script src="./config.js" defer></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
     <script src="./main.js" defer></script>
   </head>
   <body>
@@ -430,42 +432,10 @@
         <div class="container contacts-grid">
           <div class="map-column">
             <div class="map-wrap" data-map-wrap>
-              <div class="map-schematic" data-map-schematic aria-hidden="true">
-                <span class="map-route route-petrozavodsk"></span>
-                <span class="map-route route-nikolskoe"></span>
-                <span class="map-route route-rybatskoe"></span>
-                <span class="map-pin pin-office is-active" data-preview-pin="office">
-                  <span></span>
-                  <strong>Седова 57</strong>
-                  <small>главный офис</small>
-                </span>
-                <span class="map-pin pin-petrozavodsk" data-preview-pin="petrozavodsk">
-                  <span></span>
-                  <strong>Петрозаводск</strong>
-                  <small>площадка</small>
-                </span>
-                <span class="map-pin pin-nikolskoe" data-preview-pin="nikolskoe">
-                  <span></span>
-                  <strong>Никольское</strong>
-                  <small>площадка</small>
-                </span>
-                <span class="map-pin pin-rybatskoe" data-preview-pin="rybatskoe">
-                  <span></span>
-                  <strong>Рыбацкое</strong>
-                  <small>площадка</small>
-                </span>
-              </div>
-              <iframe
-                title="Карта: офис B2E на улице Седова 57, лит. В"
-                loading="eager"
-                referrerpolicy="no-referrer-when-downgrade"
-                src="https://yandex.ru/map-widget/v1/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16"
-                data-config-src="yandexMapEmbedUrl"
-                data-map-lazy="true"
-              ></iframe>
-              <div class="map-fallback" data-map-fallback>
-                <strong>Карта площадок B2E</strong>
-                <span>Точки можно открыть в Яндекс Картах по точным координатам.</span>
+              <div class="leaflet-map" id="locationsMap" data-locations-map aria-label="Интерактивная карта площадок B2E"></div>
+              <div class="map-status" data-map-status hidden>
+                <strong>Карта временно недоступна</strong>
+                <span>Откройте выбранную точку во внешних Яндекс Картах.</span>
                 <a data-map-fallback-link href="https://yandex.ru/maps/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16" target="_blank" rel="noreferrer">Открыть карту</a>
               </div>
             </div>
@@ -474,6 +444,11 @@
                 <button
                   type="button"
                   data-map-key="office"
+                  data-map-lat="59.8864045"
+                  data-map-lng="30.4230533"
+                  data-map-zoom="15"
+                  data-map-name="Седова 57"
+                  data-map-kind="Главный офис"
                   data-map-src="https://yandex.ru/map-widget/v1/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16"
                   data-map-url="https://yandex.ru/maps/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16"
                   data-map-title="Карта: офис B2E на улице Седова 57, лит. В"
@@ -486,6 +461,11 @@
                 <button
                   type="button"
                   data-map-key="petrozavodsk"
+                  data-map-lat="61.7892210"
+                  data-map-lng="34.3688041"
+                  data-map-zoom="11"
+                  data-map-name="Петрозаводск"
+                  data-map-kind="Площадка"
                   data-map-src="https://yandex.ru/map-widget/v1/?ll=34.3688041%2C61.7892210&mode=whatshere&whatshere%5Bpoint%5D=34.3688041%2C61.7892210&whatshere%5Bzoom%5D=11&z=11"
                   data-map-url="https://yandex.ru/maps/?ll=34.3688041%2C61.7892210&mode=whatshere&whatshere%5Bpoint%5D=34.3688041%2C61.7892210&whatshere%5Bzoom%5D=11&z=11"
                   data-map-title="Карта: производственная площадка, Петрозаводск"
@@ -498,6 +478,11 @@
                 <button
                   type="button"
                   data-map-key="nikolskoe"
+                  data-map-lat="59.7034799"
+                  data-map-lng="30.7861084"
+                  data-map-zoom="12"
+                  data-map-name="Никольское"
+                  data-map-kind="Площадка"
                   data-map-src="https://yandex.ru/map-widget/v1/?ll=30.7861084%2C59.7034799&mode=whatshere&whatshere%5Bpoint%5D=30.7861084%2C59.7034799&whatshere%5Bzoom%5D=12&z=12"
                   data-map-url="https://yandex.ru/maps/?ll=30.7861084%2C59.7034799&mode=whatshere&whatshere%5Bpoint%5D=30.7861084%2C59.7034799&whatshere%5Bzoom%5D=12&z=12"
                   data-map-title="Карта: производственная площадка, Никольское"
@@ -510,6 +495,11 @@
                 <button
                   type="button"
                   data-map-key="rybatskoe"
+                  data-map-lat="59.8308399"
+                  data-map-lng="30.5002908"
+                  data-map-zoom="13"
+                  data-map-name="Рыбацкое"
+                  data-map-kind="Площадка"
                   data-map-src="https://yandex.ru/map-widget/v1/?ll=30.5002908%2C59.8308399&mode=whatshere&whatshere%5Bpoint%5D=30.5002908%2C59.8308399&whatshere%5Bzoom%5D=13&z=13"
                   data-map-url="https://yandex.ru/maps/?ll=30.5002908%2C59.8308399&mode=whatshere&whatshere%5Bpoint%5D=30.5002908%2C59.8308399&whatshere%5Bzoom%5D=13&z=13"
                   data-map-title="Карта: производственная площадка, Рыбацкое"

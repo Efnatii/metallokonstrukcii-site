@@ -282,149 +282,162 @@
     items.forEach((item) => observer.observe(item));
   }
 
-  function isIframeBlank(iframe) {
-    try {
-      const href = iframe.contentWindow?.location.href;
-      return !href || href === 'about:blank';
-    } catch {
-      return false;
-    }
-  }
+  function setupLocationMap() {
+    const mapNode = $('[data-locations-map]');
+    const externalLink = $('[data-location-map-link]');
+    const fallbackLink = $('[data-map-fallback-link]');
+    const status = $('[data-map-status]');
+    const wrap = mapNode?.closest('.map-wrap');
+    const cards = $$('.location-card');
+    const buttons = $$('.location-card button[data-map-lat][data-map-lng]');
 
-  function markMapLoaded(iframe, wrap) {
-    if (!iframe || !wrap) {
+    if (!mapNode || !buttons.length) {
       return;
     }
 
-    if (isIframeBlank(iframe)) {
-      wrap.classList.remove('is-loaded');
-      wrap.classList.add('is-unavailable');
-      return;
-    }
+    const escapeHtml = (value) =>
+      String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
 
-    iframe.dataset.loadedSrc = iframe.getAttribute('src') || '';
-    wrap.classList.remove('is-unavailable');
-    wrap.classList.add('is-loaded');
-  }
+    const readLocation = (button) => {
+      const lat = Number(button.dataset.mapLat);
+      const lng = Number(button.dataset.mapLng);
 
-  function setupLazyMap() {
-    const iframe = $('[data-map-lazy="true"]');
-    const wrap = iframe?.closest('.map-wrap');
-
-    if (!iframe) {
-      return;
-    }
-
-    let loaded = false;
-
-    iframe.addEventListener('load', () => {
-      loaded = true;
-      setTimeout(() => markMapLoaded(iframe, wrap), 500);
-    });
-
-    setTimeout(() => {
-      if (isIframeBlank(iframe)) {
-        wrap?.classList.add('is-unavailable');
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        return null;
       }
-    }, 2500);
 
-    setTimeout(() => {
-      if (!loaded || isIframeBlank(iframe)) {
-        wrap?.classList.add('is-unavailable');
+      return {
+        key: button.dataset.mapKey || button.dataset.mapName || `${lat},${lng}`,
+        lat,
+        lng,
+        zoom: Number(button.dataset.mapZoom) || 13,
+        name: button.dataset.mapName || button.textContent.trim(),
+        kind: button.dataset.mapKind || 'Площадка',
+        url: button.dataset.mapUrl || config.yandexMapUrl
+      };
+    };
+
+    const setLinks = (location) => {
+      if (externalLink && location.url) {
+        externalLink.setAttribute('href', location.url);
       }
-    }, 9000);
 
-    const loadMap = () => {
-      const src = iframe.dataset.resolvedSrc || config[iframe.dataset.configSrc];
-      if (src && !iframe.getAttribute('src')) {
-        iframe.setAttribute('src', src);
+      if (fallbackLink && location.url) {
+        fallbackLink.setAttribute('href', location.url);
       }
     };
 
-    if (!('IntersectionObserver' in window)) {
-      loadMap();
+    const showMapStatus = () => {
+      if (status) {
+        status.hidden = false;
+      }
+
+      wrap?.classList.add('is-map-error');
+    };
+
+    const hideMapStatus = () => {
+      if (status) {
+        status.hidden = true;
+      }
+
+      wrap?.classList.remove('is-map-error');
+    };
+
+    const createIcon = (active = false) =>
+      window.L.divIcon({
+        className: active ? 'b2e-map-marker is-active' : 'b2e-map-marker',
+        html: '<span></span>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -16]
+      });
+
+    const locations = buttons
+      .map((button) => ({ button, location: readLocation(button) }))
+      .filter((item) => item.location);
+    const activeItem =
+      locations.find((item) => item.button.closest('.location-card')?.classList.contains('is-active')) ||
+      locations[0];
+
+    if (!activeItem) {
       return;
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          loadMap();
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '600px 0px' }
-    );
+    let map = null;
+    const markers = new Map();
 
-    observer.observe(iframe);
-  }
+    if (window.L) {
+      const start = activeItem.location;
+      map = window.L.map(mapNode, {
+        scrollWheelZoom: false,
+        zoomControl: true
+      }).setView([start.lat, start.lng], start.zoom);
 
-  function setupLocationMap() {
-    const iframe = $('[data-map-lazy="true"]');
-    const externalLink = $('[data-location-map-link]');
-    const fallbackLink = $('[data-map-fallback-link]');
-    const wrap = iframe?.closest('.map-wrap');
-    const cards = $$('.location-card');
-    const buttons = $$('.location-card button[data-map-src]');
-    const previewPins = $$('.map-pin[data-preview-pin]');
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
 
-    if (!iframe || !buttons.length) {
-      return;
+      locations.forEach(({ button, location }) => {
+        const marker = window.L.marker([location.lat, location.lng], {
+          icon: createIcon(location.key === start.key),
+          title: `${location.kind}: ${location.name}`
+        })
+          .addTo(map)
+          .bindPopup(
+            `<strong>${escapeHtml(location.name)}</strong><span>${escapeHtml(location.kind)}</span>`
+          );
+
+        marker.on('click', () => activate(button, { move: false }));
+        markers.set(location.key, marker);
+      });
+
+      hideMapStatus();
+      setTimeout(() => map.invalidateSize(), 100);
+    } else {
+      showMapStatus();
     }
 
     const activate = (button, options = {}) => {
-      const { load = false } = options;
+      const { move = true, openPopup = true } = options;
+      const location = readLocation(button);
       const card = button.closest('.location-card');
+
+      if (!location) {
+        return;
+      }
 
       cards.forEach((item) => item.classList.remove('is-active'));
       buttons.forEach((item) => item.setAttribute('aria-pressed', 'false'));
       card?.classList.add('is-active');
       button.setAttribute('aria-pressed', 'true');
+      setLinks(location);
 
-      if (button.dataset.mapKey) {
-        previewPins.forEach((pin) => pin.classList.toggle('is-active', pin.dataset.previewPin === button.dataset.mapKey));
-      }
-
-      if (button.dataset.mapTitle) {
-        iframe.setAttribute('title', button.dataset.mapTitle);
-      }
-
-      if (button.dataset.mapSrc) {
-        iframe.dataset.resolvedSrc = button.dataset.mapSrc;
-
-        if (load) {
-          wrap?.classList.remove('is-loaded');
-          wrap?.classList.add('is-unavailable');
-          iframe.setAttribute('src', button.dataset.mapSrc);
-          setTimeout(() => {
-            if (
-              iframe.getAttribute('src') === button.dataset.mapSrc &&
-              iframe.dataset.loadedSrc !== button.dataset.mapSrc
-            ) {
-              wrap?.classList.add('is-unavailable');
-            }
-          }, 9000);
+      if (map) {
+        if (move) {
+          map.setView([location.lat, location.lng], location.zoom, { animate: true });
         }
-      }
 
-      if (externalLink && button.dataset.mapUrl) {
-        externalLink.setAttribute('href', button.dataset.mapUrl);
-      }
+        markers.forEach((marker, key) => marker.setIcon(createIcon(key === location.key)));
+        const marker = markers.get(location.key);
 
-      if (fallbackLink && button.dataset.mapUrl) {
-        fallbackLink.setAttribute('href', button.dataset.mapUrl);
+        if (marker && openPopup) {
+          marker.openPopup();
+        }
       }
     };
 
     buttons.forEach((button) => {
       button.setAttribute('aria-pressed', 'false');
-      button.addEventListener('click', () => activate(button, { load: true }));
+      button.addEventListener('click', () => activate(button));
     });
 
-    const activeButton = $('.location-card.is-active button[data-map-src]');
-    if (activeButton) {
-      activate(activeButton);
-    }
+    activate(activeItem.button, { move: false });
   }
 
   applyConfig();
@@ -434,5 +447,4 @@
   setupFloatingActions();
   setupReveal();
   setupLocationMap();
-  setupLazyMap();
 })();
