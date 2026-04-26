@@ -9,8 +9,8 @@ window.B2E_CONFIG = window.B2E_CONFIG || {
   maxUrl: 'https://max.ru/',
   address: 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3',
   yandexMapUrl:
-    'https://yandex.ru/maps/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16',
+    'https://yandex.ru/maps/?ll=30.425277%2C59.879804&mode=whatshere&whatshere%5Bpoint%5D=30.425277%2C59.879804&whatshere%5Bzoom%5D=17&z=17',
   yandexMapEmbedUrl:
-    'https://yandex.ru/map-widget/v1/?ll=30.4230533%2C59.8864045&mode=whatshere&whatshere%5Bpoint%5D=30.4230533%2C59.8864045&whatshere%5Bzoom%5D=16&z=16',
+    'https://yandex.ru/map-widget/v1/?ll=30.425277%2C59.879804&mode=whatshere&whatshere%5Bpoint%5D=30.425277%2C59.879804&whatshere%5Bzoom%5D=17&z=17',
   leadEndpoint: ''
 };
