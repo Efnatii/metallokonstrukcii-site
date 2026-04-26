@@ -10,6 +10,8 @@
 
 `icons/concept-c-industrial-icons-source.png` - новый исходный лист пиктограмм для реализации концепта C. Лист сгенерирован через встроенный ImageGen/ChatGPT Image в едином black/yellow industrial 3D стиле, затем разрезан на адаптивные PNG-иконки 1x/2x/3x.
 
+`icons/arrow-download-simple-source.png` - отдельный ImageGen/ChatGPT Image исходник для упрощенных CTA-иконок `arrow-right` и `download`. После генерации фон был очищен, а цвета сведены к плоскому black/yellow стилю без 3D-пластики.
+
 `icons/phone-gold.png`, `icons/arrow-right.png`, `icons/download.png`, `icons/chevron-down.png`, `icons/hamburger.png`, `icons/factory.png`, `icons/truss.png`, `icons/capacity-cube.png`, `icons/document-kmd.png`, `icons/team.png`, `icons/quality-shield.png`, `icons/request-doc.png`, `icons/calc-truss.png`, `icons/cutting.png`, `icons/delivery.png`, `icons/success-check.png` и их `@2x`/`@3x` версии - UI icon pack концепта C.
 
 `icons/max-logo.png`, `icons/max-logo@2x.png`, `icons/max-logo@3x.png` - официальный значок MAX из полного кода сайтов-примеров в `techtask/B2E STYLE EXAMPLE SITES/static.tildacdn.com/.../Max_logo-32x32.png`.
