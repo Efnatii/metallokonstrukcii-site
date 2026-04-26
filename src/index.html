@@ -41,7 +41,7 @@
 
       <nav class="site-nav" aria-label="Основная навигация">
         <div class="nav-item">
-          <button type="button" class="nav-link">Металлоконструкции</button>
+          <button type="button" class="nav-link">Продукция</button>
           <div class="dropdown" aria-label="Виды металлоконструкций">
             <a href="#products">Строительные металлоконструкции</a>
             <a href="#products">Закладные детали</a>
@@ -63,25 +63,23 @@
             <a href="#services">Порошковая окраска</a>
           </div>
         </div>
+        <a class="nav-link" href="#production">Производство</a>
+        <a class="nav-link" href="#calculator">Проекты</a>
         <a class="nav-link" href="#company">О компании</a>
-        <a class="nav-link" href="#calculator">Калькулятор</a>
         <a class="nav-link" href="#contacts">Контакты</a>
       </nav>
 
       <div class="header-actions">
-        <a class="header-contact" data-config-href="phoneHref" href="tel:+79650578270">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
+        <span class="phone-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
             <path d="M6.6 10.8c1.5 3 3.6 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.3 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.8 21 3 13.2 3 3.8c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.3 1.1l-2.2 2.2Z"></path>
           </svg>
-          <span data-config-text="phoneDisplay">+7 965 057 82 70</span>
+        </span>
+        <a class="header-contact" data-config-href="phoneHref" href="tel:+79650578270">
+          <strong data-config-text="phoneDisplay">+7 965 057 82 70</strong>
+          <small>ПН-ПТ 09:00 - 18:00</small>
         </a>
-        <a class="header-contact email-link" data-config-href="emailHref" href="mailto:zakaz@b2energy.ru">
-          <span data-config-text="email">zakaz@b2energy.ru</span>
-        </a>
-        <a class="max-link" data-config-href="maxUrl" href="https://max.ru/" target="_blank" rel="noreferrer" aria-label="MAX">
-          MAX
-        </a>
-        <button class="btn btn-outline callback-trigger" type="button">Обратный звонок</button>
+        <button class="btn btn-primary callback-trigger" type="button">Заказать звонок</button>
       </div>
     </header>
 
@@ -92,12 +90,7 @@
         <div class="hero-inner">
           <div class="hero-copy reveal">
             <p class="eyebrow">Производство металлоконструкций</p>
-            <h1 id="hero-title">
-              <span>Надежные</span>
-              <span>металлоконструкции</span>
-              <span>для объектов</span>
-              <span>СЗФО и ЦФО</span>
-            </h1>
+            <h1 id="hero-title">Надежные металлоконструкции для сложных задач</h1>
             <p class="hero-lead">
               Проектируем, изготавливаем, обрабатываем и монтируем металлоконструкции: от закладных деталей до каркасов зданий, резервуаров и нестандартных решений.
             </p>
@@ -107,16 +100,32 @@
             </div>
             <dl class="hero-facts" aria-label="Ключевые показатели">
               <div>
-                <dt>1000+ т/мес</dt>
-                <dd>мощности группы компаний</dd>
+                <span class="fact-icon">
+                  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6 54 18v28L32 58 10 46V18zM32 6v24m22-12L32 30 10 18m0 28 22-16 22 16"></path></svg>
+                </span>
+                <dt>1000+</dt>
+                <dd>тонн в месяц</dd>
               </div>
               <div>
+                <span class="fact-icon">
+                  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 12h28v38H14zM22 20h12M22 30h14M22 40h10M44 34l10 10m0-10L44 44"></path></svg>
+                </span>
                 <dt>200+</dt>
-                <dd>готовых решений КМ и КМД</dd>
+                <dd>решений КМ/КМД</dd>
               </div>
               <div>
+                <span class="fact-icon">
+                  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 46c0-8 6-13 14-13s14 5 14 13M24 20a8 8 0 1 0 16 0 8 8 0 0 0-16 0M8 48h48"></path></svg>
+                </span>
                 <dt>3</dt>
-                <dd>производственные площадки</dd>
+                <dd>площадки</dd>
+              </div>
+              <div>
+                <span class="fact-icon">
+                  <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M30 8 50 16v14c0 13-8 21-20 26C18 51 10 43 10 30V16zM20 31l7 7 17-18"></path></svg>
+                </span>
+                <dt>100%</dt>
+                <dd>контроль этапов</dd>
               </div>
             </dl>
           </div>
@@ -127,18 +136,22 @@
             </div>
             <div class="hero-capacity-list">
               <div>
+                <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M14 52V24l18-12 18 12v28M22 52V32h20v20M26 22h12M24 40h16"></path></svg>
                 <span>1000+ т/мес</span>
                 <small>производственная мощность</small>
               </div>
               <div>
+                <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M12 44h40M18 22h28v22H18zM24 22v22M40 22v22M18 22l28 22M46 22 18 44"></path></svg>
                 <span>200+ КМ/КМД</span>
                 <small>готовых проектных решений</small>
               </div>
               <div>
+                <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 12h28v40H18zM24 20h16M24 30h16M24 40h10M12 52h40"></path></svg>
                 <span>3 площадки</span>
                 <small>Петрозаводск, Никольское, Рыбацкое</small>
               </div>
               <div>
+                <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 14h28v36H18zM24 22h16M24 32h16M24 42h8M46 22l8-8M50 14h4v4"></path></svg>
                 <span>Выезд</span>
                 <small>на производство или объект</small>
               </div>
@@ -223,8 +236,7 @@
         <div class="container">
           <div class="section-head section-head-split">
             <div>
-              <span class="section-kicker">Каталог</span>
-              <h2 id="products-title">Металлоконструкции</h2>
+              <h2 id="products-title">Каталог продукции</h2>
             </div>
             <div class="catalog-note">
               <strong>От узла до каркаса</strong>
