@@ -1,17 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="184" height="54" viewBox="0 0 184 54" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="210" height="62" viewBox="0 0 210 62" role="img" aria-labelledby="title desc">
   <title id="title">B2E</title>
-  <desc id="desc">Логотип B2E со знаком металлической фермы</desc>
+  <desc id="desc">Логотип B2E: монограмма и знак металлической фермы</desc>
   <defs>
-    <linearGradient id="mark" x1="8" y1="8" x2="49" y2="48" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#374642"/>
-      <stop offset="1" stop-color="#17211e"/>
+    <linearGradient id="yellow" x1="65" y1="8" x2="132" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE26B"/>
+      <stop offset="1" stop-color="#F2B705"/>
     </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000" flood-opacity=".28"/>
+    </filter>
   </defs>
-  <path fill="url(#mark)" d="M8 8h42l10 10v28H18L8 36V8Z"/>
-  <path fill="#F2C84B" d="M15 15h36v7H15zM15 33h36v7H15z"/>
-  <path fill="none" stroke="#F8FAF6" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="4" d="M18 40 31 22l12 18"/>
-  <path fill="#F8FAF6" d="M56 18h8v28h-8z"/>
-  <path fill="#F8FAF6" d="M80 11h25.5c9 0 14.4 4.6 14.4 11.7 0 4.4-2.1 7.8-6.3 9.5 5.1 1.5 7.8 5 7.8 10 0 7.5-5.8 12.8-15.2 12.8H80V11Zm24 17.3c4 0 6.2-1.9 6.2-5.1 0-3.2-2.2-5.1-6.2-5.1H89.8v10.2H104Zm1.3 19.6c4.1 0 6.4-2.2 6.4-5.7s-2.3-5.6-6.4-5.6H89.8v11.3h15.5Z"/>
-  <path fill="#F2C84B" d="M127.4 55v-7.2l17.2-15.6c3.6-3.2 5.3-5.7 5.3-8.6 0-3.6-2.7-5.8-6.5-5.8-4.4 0-7.5 2.9-7.8 7.7h-9.2c.4-9.2 7.3-15.2 17.3-15.2 9.5 0 15.9 5.2 15.9 13 0 5.2-2.5 9.2-8.4 14.3l-10.9 9.6h20V55h-32.9Z"/>
-  <path fill="#F8FAF6" d="M164.7 11H184v7.6h-9.5v10.3h8.5v7.4h-8.5v11.1h9.5V55h-19.3V11Z"/>
+  <g filter="url(#shadow)">
+    <path fill="#F8FAF6" d="M12 44h55v7H12z"/>
+    <path fill="url(#yellow)" d="M20 36h40v6H20z"/>
+    <path fill="none" stroke="#F8FAF6" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="4" d="M16 42 38 19l25 23"/>
+    <path fill="none" stroke="url(#yellow)" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="4" d="M25 39 38 19l13 20"/>
+    <path fill="#F8FAF6" d="M36 12h31v7H36z"/>
+    <path fill="#151A18" stroke="#F8FAF6" stroke-width="3" d="M67 14h16v40H67z"/>
+    <text x="92" y="48" fill="#F8FAF6" font-family="Arial Black, Inter, Arial, sans-serif" font-size="45" font-weight="900">B</text>
+    <text x="125" y="48" fill="url(#yellow)" font-family="Arial Black, Inter, Arial, sans-serif" font-size="45" font-weight="900">2</text>
+    <text x="160" y="48" fill="#F8FAF6" font-family="Arial Black, Inter, Arial, sans-serif" font-size="45" font-weight="900">E</text>
+  </g>
 </svg>
