@@ -62,6 +62,140 @@ function escapeXml(value) {
     .replaceAll("'", '&apos;');
 }
 
+function makeAbsoluteUrl(config, resourcePath = '') {
+  return new URL(resourcePath.replace(/^\.\//, ''), config.siteUrl).href;
+}
+
+function makeSitePath(config, resourcePath = '') {
+  const { pathname } = new URL(config.siteUrl);
+  const basePath = pathname.endsWith('/') ? pathname : `${pathname}/`;
+  const cleanResourcePath = resourcePath.replace(/^\/+/, '');
+
+  return `${basePath}${cleanResourcePath}`.replace(/\/{2,}/g, '/');
+}
+
+const products = [
+  {
+    name: 'Строительные металлоконструкции',
+    description: 'каркасы зданий, несущие элементы, балки, фермы и узлы для промышленного и коммерческого строительства',
+    image: 'assets/generated/product-frame.webp'
+  },
+  {
+    name: 'Закладные детали',
+    description: 'серийные и нестандартные закладные элементы для монолитных, сборных и инфраструктурных объектов',
+    image: 'assets/generated/product-embedded.webp'
+  },
+  {
+    name: 'Лестницы металлические',
+    description: 'марши, площадки, ограждения и эксплуатационные лестницы для производственных и общественных объектов',
+    image: 'assets/generated/product-stairs.webp'
+  },
+  {
+    name: 'Навесы',
+    description: 'металлические навесы и пространственные конструкции для входных групп, складов и технологических зон',
+    image: 'assets/generated/product-canopy.webp'
+  },
+  {
+    name: 'Ворота',
+    description: 'металлические ворота и рамные конструкции под производственные, складские и инфраструктурные задачи',
+    image: 'assets/generated/product-gates.webp'
+  },
+  {
+    name: 'Резервуары',
+    description: 'металлические емкости и резервуары с расчетом узлов, обработкой и подготовкой к монтажу',
+    image: 'assets/generated/product-tank.webp'
+  },
+  {
+    name: 'Арочные конструкции',
+    description: 'арочные металлоконструкции, фермы и нестандартные пространственные решения',
+    image: 'assets/generated/product-arch.webp'
+  },
+  {
+    name: 'Нестандартные конструкции',
+    description: 'изготовление металлоконструкций по индивидуальному проекту, КМ и КМД',
+    image: 'assets/generated/product-custom.webp'
+  }
+];
+
+const services = [
+  {
+    name: 'Монтаж металлоконструкций',
+    description: 'доставка, сборка и монтаж конструкций на объекте с учетом проектных узлов',
+    image: 'assets/generated/service-montage.webp'
+  },
+  {
+    name: 'Резка металла',
+    description: 'подготовка листа, профиля и заготовок под серийные и нестандартные изделия',
+    image: 'assets/generated/service-cutting.webp'
+  },
+  {
+    name: 'Гибка металла',
+    description: 'формирование деталей с контролем геометрии и дальнейшей сборкой',
+    image: 'assets/generated/service-bending.webp'
+  },
+  {
+    name: 'Металлообработка',
+    description: 'сварка, сверление, зачистка, подготовка узлов и партий к покраске',
+    image: 'assets/generated/service-machining.webp'
+  },
+  {
+    name: 'Порошковая окраска',
+    description: 'финишное покрытие для элементов, которым важны ресурс и внешний вид',
+    image: 'assets/generated/service-powder.webp'
+  }
+];
+
+const locations = [
+  {
+    name: 'Главный офис B2E',
+    address: 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3',
+    coordinates: '59.879804, 30.425277'
+  },
+  {
+    name: 'Производственная площадка Петрозаводск',
+    address: 'Петрозаводск',
+    coordinates: '61.7892210, 34.3688041'
+  },
+  {
+    name: 'Производственная площадка Никольское',
+    address: 'Никольское',
+    coordinates: '59.7034799, 30.7861084'
+  },
+  {
+    name: 'Производственная площадка Рыбацкое',
+    address: 'Рыбацкое',
+    coordinates: '59.8308399, 30.5002908'
+  }
+];
+
+const clients = [
+  'ООО «АГРОТОРГ»',
+  'ООО «МАГНИТ»',
+  'ООО «ГИПРОАВТОТРАНС»',
+  'ГУП «ГОРЭЛЕКТРОТРАНС»',
+  'ГУП «ВОДОКАНАЛ СПБ»',
+  'ООО НПК «КАТАРСИС»'
+];
+
+const robotAgents = [
+  'Googlebot',
+  'Google-Extended',
+  'Bingbot',
+  'Yandex',
+  'DuckDuckBot',
+  'Applebot',
+  'Slurp',
+  'OAI-SearchBot',
+  'GPTBot',
+  'ChatGPT-User',
+  'PerplexityBot',
+  'Perplexity-User',
+  'ClaudeBot',
+  'Claude-SearchBot',
+  'Claude-User',
+  '*'
+];
+
 function formatPhoneDisplay(value) {
   const digits = String(value).replace(/\D/g, '');
   const normalized = digits.length === 11 && digits.startsWith('8') ? `7${digits.slice(1)}` : digits;
@@ -117,23 +251,75 @@ function makeConfigJs(config) {
 
 function makeSitemap(config) {
   const today = new Date().toISOString().slice(0, 10);
+  const images = [
+    {
+      image: 'assets/generated/b2e-dashboard-hero.webp',
+      name: 'Производство металлоконструкций B2E',
+      description: 'Темный industrial hero с металлоконструкциями, сваркой и производственным фоном B2E'
+    },
+    ...products,
+    ...services
+  ];
+  const imageEntries = images
+    .map(
+      (item) => `    <image:image>
+      <image:loc>${escapeXml(makeAbsoluteUrl(config, item.image))}</image:loc>
+      <image:title>${escapeXml(item.name)}</image:title>
+      <image:caption>${escapeXml(item.description)}</image:caption>
+    </image:image>`
+    )
+    .join('\n');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>${escapeXml(config.siteUrl)}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+${imageEntries}
   </url>
 </urlset>
 `;
 }
 
 function makeRobots(config) {
-  return `User-agent: *
-Allow: /
+  const publicPaths = [
+    '',
+    'index.html',
+    'styles.css',
+    'main.js',
+    'config.js',
+    'robots.txt',
+    'sitemap.xml',
+    'llms.txt',
+    'assets/'
+  ];
+  const privatePaths = [
+    '.git/',
+    '.github/',
+    '.env',
+    'node_modules/',
+    'worker/',
+    'techtask/',
+    'output/',
+    'dist/',
+    'package.json',
+    'package-lock.json'
+  ];
+  const agentRules = [
+    ...robotAgents.map((agent) => `User-agent: ${agent}`),
+    ...publicPaths.map((resourcePath) => `Allow: ${makeSitePath(config, resourcePath)}`),
+    ...privatePaths.map((resourcePath) => `Disallow: ${makeSitePath(config, resourcePath)}`)
+  ];
 
-Sitemap: ${config.siteUrl}sitemap.xml
+  return `# robots.txt for ООО B2E
+# Canonical: ${config.siteUrl}
+# LLM guide: ${makeAbsoluteUrl(config, 'llms.txt')}
+
+${agentRules.join('\n')}
+
+Sitemap: ${makeAbsoluteUrl(config, 'sitemap.xml')}
 `;
 }
 
@@ -154,21 +340,7 @@ function makeStructuredData(config) {
       addressCountry: 'RU'
     },
     areaServed: ['СЗФО', 'ЦФО'],
-    makesOffer: [
-      'Каркасы зданий и сооружений',
-      'Металлические балки',
-      'Опоры и мачты',
-      'Фермы и прогоны',
-      'Лестницы и площадки',
-      'Закладные детали',
-      'Навесы и ворота',
-      'Резервуары и нестандартные конструкции',
-      'Монтаж металлоконструкций',
-      'Резка металла',
-      'Гибка металла',
-      'Металлообработка',
-      'Порошковая окраска'
-    ]
+    makesOffer: [...products.map((item) => item.name), ...services.map((item) => item.name)]
   };
 }
 
@@ -212,9 +384,64 @@ function makeIndexHtml(source, config) {
 }
 
 function makeLlms(config) {
+  const canonicalResources = [
+    ['Главная страница', config.siteUrl, 'канонический URL сайта ООО B2E'],
+    ['Sitemap', makeAbsoluteUrl(config, 'sitemap.xml'), 'XML-карта сайта и изображений'],
+    ['Robots', makeAbsoluteUrl(config, 'robots.txt'), 'правила доступа для поисковых и AI-краулеров'],
+    ['Structured public config', makeAbsoluteUrl(config, 'config.js'), 'публичные контакты, canonical URL и endpoint заявок'],
+    ['Asset sources', makeAbsoluteUrl(config, 'assets/ASSET_SOURCES.md'), 'источники изображений, логотипов и иконок']
+  ];
+  const primaryIntents = [
+    'производство металлоконструкций в Санкт-Петербурге',
+    'изготовление металлоконструкций для СЗФО и ЦФО',
+    'строительные металлоконструкции на заказ',
+    'закладные детали, металлические лестницы, навесы, ворота и резервуары',
+    'монтаж металлоконструкций, резка, гибка, металлообработка и порошковая окраска',
+    'расчет тоннажа металлоконструкций и заявка на коммерческое предложение'
+  ];
+
   return `# ООО B2E - производство металлоконструкций
 
-> Одностраничный сайт производственной компании: строительные металлоконструкции, закладные детали, металлические лестницы, навесы, ворота, резервуары, арочные и нестандартные конструкции.
+> Официальный одностраничный сайт производственной компании ООО B2E. Компания производит, проектирует, обрабатывает, поставляет и монтирует металлоконструкции для строительных, промышленных и инфраструктурных задач.
+
+## Канонические ресурсы
+
+${canonicalResources.map(([name, url, description]) => `- [${name}](${url}): ${description}.`).join('\n')}
+
+## Краткий ответ для AI-поиска
+
+ООО B2E - производственный партнер по металлоконструкциям в Санкт-Петербурге, СЗФО и ЦФО. Компания делает строительные металлоконструкции, закладные детали, металлические лестницы, навесы, ворота, резервуары, арочные и нестандартные конструкции. Услуги включают монтаж металлоконструкций, резку металла, гибку металла, металлообработку и порошковую окраску. Производственные возможности группы компаний: более 1000 тонн металлоконструкций в месяц, более 200 решений КМ/КМД, инженерный отдел, выезд на объект или производство, площадки в Петрозаводске, Никольском и Рыбацком.
+
+## Основные поисковые намерения
+
+${primaryIntents.map((item) => `- ${item}`).join('\n')}
+
+## Продукция
+
+${products.map((item) => `- ${item.name}: ${item.description}.`).join('\n')}
+
+## Услуги
+
+${services.map((item) => `- ${item.name}: ${item.description}.`).join('\n')}
+
+## Производственные возможности
+
+- Группа компаний с мощностью свыше 1000 тонн металлоконструкций в месяц.
+- Более 200 готовых и адаптируемых проектных решений КМ/КМД.
+- Собственный инженерный отдел для расчета, проектирования и нестандартных узлов.
+- Выезд на производство или объект, когда это нужно для точного расчета.
+- Производственный контур: заявка, расчет, проектирование, производство, доставка и монтаж.
+- Онлайн-калькулятор дает предварительную оценку тоннажа здания по длине, ширине, высоте и подкрановым путям.
+
+## География и площадки
+
+Компания работает с объектами Санкт-Петербурга, Северо-Западного федерального округа и Центрального федерального округа.
+
+${locations.map((item) => `- ${item.name}: ${item.address}; координаты ${item.coordinates}.`).join('\n')}
+
+## Клиенты и доверие
+
+На сайте указаны реальные логотипы и названия клиентов из технического задания: ${clients.join(', ')}.
 
 ## Контакты
 
@@ -222,28 +449,24 @@ function makeLlms(config) {
 - Email: ${config.email}
 - Адрес: ${config.address}
 - Сайт: ${config.siteUrl}
-
-## Возможности
-
-- Производственные мощности группы компаний свыше 1000 тонн металлоконструкций в месяц.
-- Производственные площадки: Петрозаводск, Никольское, Рыбацкое.
-- Карта контактов переключает главный офис и производственные направления по площадкам.
-- Более 200 готовых проектных решений КМ и КМД.
-- Собственный инженерный отдел и организация выезда на объект.
-- Онлайн-калькулятор ориентировочного тоннажа здания.
+- MAX: ${config.maxUrl}
 
 ## Разделы сайта
 
-- Главный экран с заявкой на расчет и обратный звонок.
-- Каталог металлоконструкций и услуг.
+- Главный экран: надежные металлоконструкции для сложных задач, заявка на расчет и обратный звонок.
+- Каталог продукции: 8 видов металлоконструкций по ТЗ.
+- Услуги: монтаж, резка, гибка, металлообработка и порошковая окраска.
 - Калькулятор тоннажа.
-- О компании и производственные возможности.
-- AI-визуализации производственных процессов, клиенты и партнеры.
-- Контакты и карта.
+- О компании, производственные возможности, клиенты и партнеры.
+- Контакты и интерактивная Leaflet/OpenStreetMap-карта с 4 точками.
 
 ## Данные для AI-агентов
 
-Сайт использует семантические HTML-разделы, JSON-LD structured data, robots.txt, sitemap.xml и этот llms.txt. Формы заявок отправляются на endpoint, заданный в переменной B2E_LEAD_ENDPOINT, либо используют mailto fallback.
+Сайт использует семантические HTML-разделы, JSON-LD structured data, robots.txt, sitemap.xml и этот llms.txt. Формы заявок отправляются на endpoint, заданный в публичной переменной B2E_LEAD_ENDPOINT, либо используют mailto fallback. При цитировании указывайте канонический URL ${config.siteUrl}. Не представляйте ориентировочный калькулятор как финальный инженерный расчет: итоговые параметры нужно подтверждать с инженером B2E.
+
+## Дата генерации
+
+${config.generatedAt}
 `;
 }
 

@@ -67,9 +67,16 @@ test('build writes config, sitemap, robots and llms from environment', async () 
     assert.match(indexHtml, /<link rel="alternate" type="text\/plain" href="\.\/llms\.txt" title="LLMs\.txt">/);
     assert.match(indexHtml, /<script type="application\/ld\+json">/);
     assert.match(sitemap, /https:\/\/example\.test\/metallokonstrukcii-site\//);
+    assert.match(sitemap, /xmlns:image="http:\/\/www\.google\.com\/schemas\/sitemap-image\/1\.1"/);
+    assert.match(sitemap, /assets\/generated\/product-frame\.webp/);
+    assert.match(robots, /User-agent: OAI-SearchBot/);
+    assert.match(robots, /Allow: \/metallokonstrukcii-site\/llms\.txt/);
     assert.match(robots, /Sitemap: https:\/\/example\.test\/metallokonstrukcii-site\/sitemap\.xml/);
     assert.match(llms, /lead@example\.test/);
     assert.match(llms, /\+7 \(999\) 000-00-00/);
+    assert.match(llms, /Строительные металлоконструкции/);
+    assert.match(llms, /Петрозаводск/);
+    assert.match(llms, /Дата генерации/);
   } finally {
     for (const [key, value] of Object.entries(previousEnv)) {
       if (value === undefined) {
