@@ -657,15 +657,20 @@ h3 {
 
 .hero-workflow ol {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  column-gap: 54px;
+  grid-template-columns:
+    max-content minmax(58px, 1fr)
+    max-content minmax(58px, 1fr)
+    max-content minmax(58px, 1fr)
+    max-content minmax(58px, 1fr)
+    max-content;
+  column-gap: 0;
   align-items: stretch;
-  padding: 0 28px;
+  padding: 0 30px;
   margin: 0;
   list-style: none;
 }
 
-.hero-workflow li {
+.hero-workflow li:not(.workflow-arrow) {
   position: relative;
   display: grid;
   align-content: center;
@@ -678,35 +683,36 @@ h3 {
   text-transform: uppercase;
 }
 
-.hero-workflow li span {
+.hero-workflow li:not(.workflow-arrow) span {
   color: #fff;
   font-size: 13px;
   font-weight: 900;
 }
 
-.hero-workflow li:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: -39px;
-  z-index: 2;
-  width: 28px;
-  height: 1px;
-  background: rgb(255 255 255 / 42%);
-  transform: translateY(-50%);
+.workflow-arrow {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 72px;
 }
 
-.hero-workflow li:not(:last-child)::before {
+.workflow-arrow::before {
+  content: "";
+  width: min(44px, 62%);
+  height: 1px;
+  background: rgb(255 255 255 / 42%);
+}
+
+.workflow-arrow::after {
   content: "";
   position: absolute;
   top: 50%;
-  right: -39px;
-  z-index: 3;
+  left: 50%;
   width: 8px;
   height: 8px;
   border-top: 1px solid rgb(255 255 255 / 52%);
   border-right: 1px solid rgb(255 255 255 / 52%);
-  transform: translateY(-50%) rotate(45deg);
+  transform: translate(14px, -50%) rotate(45deg);
 }
 
 .workflow-cta {
@@ -1713,16 +1719,21 @@ h3 {
   }
 
   .hero-workflow ol {
-    column-gap: 44px;
+    grid-template-columns:
+      max-content minmax(42px, 1fr)
+      max-content minmax(42px, 1fr)
+      max-content minmax(42px, 1fr)
+      max-content minmax(42px, 1fr)
+      max-content;
+    padding: 0 24px;
   }
 
-  .hero-workflow li:not(:last-child)::after {
-    right: -32px;
-    width: 22px;
+  .workflow-arrow::before {
+    width: min(34px, 58%);
   }
 
-  .hero-workflow li:not(:last-child)::before {
-    right: -32px;
+  .workflow-arrow::after {
+    transform: translate(9px, -50%) rotate(45deg);
   }
 
   .service-grid {
@@ -1968,6 +1979,10 @@ h3 {
   .hero-workflow li {
     min-height: 58px;
     border-top: 1px solid rgb(255 255 255 / 10%);
+  }
+
+  .workflow-arrow {
+    display: none;
   }
 
   .hero-workflow li::before,
