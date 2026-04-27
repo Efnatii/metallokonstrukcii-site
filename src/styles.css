@@ -12,6 +12,7 @@
   --light-2: #e9eef2;
   --accent: #ffc400;
   --accent-2: #ff9d19;
+  --accent-ink: #26382c;
   --shadow: 0 28px 80px rgb(0 0 0 / 34%);
   --radius: 4px;
   color-scheme: light;
@@ -316,14 +317,14 @@ address {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ffe36c, var(--accent));
-  color: #101417;
+  background: linear-gradient(135deg, #ffdc61, #f7be00);
+  color: var(--accent-ink);
   box-shadow: 0 16px 36px rgb(255 196 0 / 22%);
 }
 
 .btn-primary:hover,
 .btn-primary:focus-visible {
-  background: linear-gradient(135deg, #fff0a0, #ffca1c);
+  background: linear-gradient(135deg, #ffe78a, #ffc51d);
   box-shadow: 0 18px 40px rgb(255 196 0 / 34%);
 }
 
@@ -1317,8 +1318,8 @@ h3 {
   padding: 0;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--accent);
-  color: #101417;
+  background: linear-gradient(135deg, #ffdc61, #f7be00);
+  color: var(--accent-ink);
   box-shadow: 0 18px 46px rgb(0 0 0 / 30%);
 }
 
