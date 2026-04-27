@@ -266,11 +266,16 @@
   }
 
   function setupFloatingActions() {
+    const actions = $('.floating-actions');
     const phone = $('.phone-float');
     const max = $('.max-float');
 
+    actions?.classList.add('is-max-pending');
     setTimeout(() => phone?.classList.add('is-visible'), 5000);
-    setTimeout(() => max?.classList.add('is-visible'), 10000);
+    setTimeout(() => {
+      actions?.classList.remove('is-max-pending');
+      max?.classList.add('is-visible');
+    }, 10000);
     setTimeout(() => {
       phone?.classList.add('is-expanded');
       setTimeout(() => phone?.classList.remove('is-expanded'), 10000);
