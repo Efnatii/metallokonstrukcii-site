@@ -28,7 +28,7 @@
     <header class="site-header" id="top">
       <a class="brand" href="#top" aria-label="B2E - производство металлоконструкций">
         <img class="brand-logo" src="./assets/logo/logo-b2e.png" srcset="./assets/logo/logo-b2e.png 1x, ./assets/logo/logo-b2e@2x.png 2x, ./assets/logo/logo-b2e@3x.png 3x" alt="" width="360" height="108" aria-hidden="true">
-        <span>Производство металлоконструкций СЗФО, ЦФО</span>
+        <span aria-label="Производство Металлоконструкций СЗФО, ЦФО">Производство<br>Металло-<br>конструкций<br>СЗФО, ЦФО</span>
       </a>
 
       <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false">
@@ -38,17 +38,17 @@
       <nav class="site-nav" aria-label="Основная навигация">
         <div class="nav-item">
           <button type="button" class="nav-link">
-            Продукция
+            Металлоконструкции
             <img src="./assets/icons/chevron-down.png" srcset="./assets/icons/chevron-down.png 1x, ./assets/icons/chevron-down@2x.png 2x, ./assets/icons/chevron-down@3x.png 3x" alt="" width="14" height="14" aria-hidden="true">
           </button>
           <div class="dropdown" aria-label="Виды металлоконструкций">
-            <a href="#products">Каркасы зданий</a>
-            <a href="#products">Металлические балки</a>
-            <a href="#products">Опоры и мачты</a>
-            <a href="#products">Фермы и прогоны</a>
-            <a href="#products">Лестницы и площадки</a>
+            <a href="#products">Строительные металлоконструкции</a>
             <a href="#products">Закладные детали</a>
-            <a href="#products">Навесы и ворота</a>
+            <a href="#products">Лестницы металлические</a>
+            <a href="#products">Навесы</a>
+            <a href="#products">Ворота</a>
+            <a href="#products">Резервуары</a>
+            <a href="#products">Арочные конструкции</a>
             <a href="#products">Нестандартные конструкции</a>
           </div>
         </div>
@@ -75,10 +75,12 @@
         <span class="phone-badge" aria-hidden="true">
           <img src="./assets/icons/phone-gold.png" srcset="./assets/icons/phone-gold.png 1x, ./assets/icons/phone-gold@2x.png 2x, ./assets/icons/phone-gold@3x.png 3x" alt="" width="24" height="24" aria-hidden="true">
         </span>
-        <a class="header-contact" data-config-href="phoneHref" href="tel:+79650578270">
-          <strong data-config-text="phoneDisplay">+7 (965) 057-82-70</strong>
-          <small data-config-text="workHours">Пн-Пт 09:00 - 18:00</small>
-        </a>
+        <div class="header-contact">
+          <a data-config-href="phoneHref" href="tel:+79650578270">
+            <strong data-config-text="phoneDisplay">+7 (965) 057-82-70</strong>
+          </a>
+          <a class="header-email" data-config-href="emailHref" href="mailto:zakaz@b2energy.ru" data-config-text="email">zakaz@b2energy.ru</a>
+        </div>
         <a class="max-link" data-config-href="maxUrl" href="https://max.ru/" target="_blank" rel="noreferrer" aria-label="Написать в MAX">
           <img class="max-icon" src="./assets/icons/max-logo.png" srcset="./assets/icons/max-logo.png 1x, ./assets/icons/max-logo@2x.png 2x, ./assets/icons/max-logo@3x.png 3x" alt="" width="32" height="32" aria-hidden="true">
         </a>
@@ -205,28 +207,8 @@
           </div>
           <div class="product-grid">
             <article class="product-card reveal">
-              <img src="./assets/generated/product-frame.webp" srcset="./assets/generated/product-frame.webp 1x, ./assets/generated/product-frame@2x.webp 2x" alt="Визуализация каркасов зданий и сооружений" width="720" height="460">
-              <h3>Каркасы зданий и сооружений</h3>
-              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
-            </article>
-            <article class="product-card reveal">
-              <img src="./assets/generated/product-custom.webp" srcset="./assets/generated/product-custom.webp 1x, ./assets/generated/product-custom@2x.webp 2x" alt="Визуализация металлических балок" width="720" height="460">
-              <h3>Металлические балки</h3>
-              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
-            </article>
-            <article class="product-card reveal">
-              <img src="./assets/generated/product-arch.webp" srcset="./assets/generated/product-arch.webp 1x, ./assets/generated/product-arch@2x.webp 2x" alt="Визуализация опор и мачт" width="720" height="460">
-              <h3>Опоры и мачты</h3>
-              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
-            </article>
-            <article class="product-card reveal">
-              <img src="./assets/generated/product-canopy.webp" srcset="./assets/generated/product-canopy.webp 1x, ./assets/generated/product-canopy@2x.webp 2x" alt="Визуализация ферм и прогонов" width="720" height="460">
-              <h3>Фермы и прогоны</h3>
-              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
-            </article>
-            <article class="product-card reveal">
-              <img src="./assets/generated/product-stairs.webp" srcset="./assets/generated/product-stairs.webp 1x, ./assets/generated/product-stairs@2x.webp 2x" alt="Визуализация металлических лестниц и площадок" width="720" height="460">
-              <h3>Лестницы и площадки</h3>
+              <img src="./assets/generated/product-frame.webp" srcset="./assets/generated/product-frame.webp 1x, ./assets/generated/product-frame@2x.webp 2x" alt="Визуализация строительных металлоконструкций" width="720" height="460">
+              <h3>Строительные металлоконструкции</h3>
               <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
             </article>
             <article class="product-card reveal">
@@ -235,13 +217,33 @@
               <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
             </article>
             <article class="product-card reveal">
-              <img src="./assets/generated/product-gates.webp" srcset="./assets/generated/product-gates.webp 1x, ./assets/generated/product-gates@2x.webp 2x" alt="Визуализация навесов и ворот" width="720" height="460">
-              <h3>Навесы и ворота</h3>
+              <img src="./assets/generated/product-stairs.webp" srcset="./assets/generated/product-stairs.webp 1x, ./assets/generated/product-stairs@2x.webp 2x" alt="Визуализация металлических лестниц и площадок" width="720" height="460">
+              <h3>Лестницы металлические</h3>
               <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
             </article>
             <article class="product-card reveal">
-              <img src="./assets/generated/product-tank.webp" srcset="./assets/generated/product-tank.webp 1x, ./assets/generated/product-tank@2x.webp 2x" alt="Визуализация резервуаров и нестандартных металлоконструкций" width="720" height="460">
-              <h3>Резервуары и нестандартные конструкции</h3>
+              <img src="./assets/generated/product-canopy.webp" srcset="./assets/generated/product-canopy.webp 1x, ./assets/generated/product-canopy@2x.webp 2x" alt="Визуализация навесов" width="720" height="460">
+              <h3>Навесы</h3>
+              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+            </article>
+            <article class="product-card reveal">
+              <img src="./assets/generated/product-gates.webp" srcset="./assets/generated/product-gates.webp 1x, ./assets/generated/product-gates@2x.webp 2x" alt="Визуализация ворот" width="720" height="460">
+              <h3>Ворота</h3>
+              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+            </article>
+            <article class="product-card reveal">
+              <img src="./assets/generated/product-tank.webp" srcset="./assets/generated/product-tank.webp 1x, ./assets/generated/product-tank@2x.webp 2x" alt="Визуализация резервуаров" width="720" height="460">
+              <h3>Резервуары</h3>
+              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+            </article>
+            <article class="product-card reveal">
+              <img src="./assets/generated/product-arch.webp" srcset="./assets/generated/product-arch.webp 1x, ./assets/generated/product-arch@2x.webp 2x" alt="Визуализация арочных конструкций" width="720" height="460">
+              <h3>Арочные конструкции</h3>
+              <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+            </article>
+            <article class="product-card reveal">
+              <img src="./assets/generated/product-custom.webp" srcset="./assets/generated/product-custom.webp 1x, ./assets/generated/product-custom@2x.webp 2x" alt="Визуализация нестандартных металлоконструкций" width="720" height="460">
+              <h3>Нестандартные конструкции</h3>
               <span><img src="./assets/icons/arrow-right.png" srcset="./assets/icons/arrow-right.png 1x, ./assets/icons/arrow-right@2x.png 2x, ./assets/icons/arrow-right@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
             </article>
           </div>
@@ -555,12 +557,14 @@
         <label>
           <span>Тип объекта</span>
           <select name="objectType">
-            <option>Каркасы зданий и сооружений</option>
-            <option>Металлические балки</option>
-            <option>Опоры, мачты, фермы</option>
-            <option>Лестницы, площадки, закладные детали</option>
-            <option>Резервуар</option>
-            <option>Нестандартная конструкция</option>
+            <option>Строительные металлоконструкции</option>
+            <option>Закладные детали</option>
+            <option>Лестницы металлические</option>
+            <option>Навесы</option>
+            <option>Ворота</option>
+            <option>Резервуары</option>
+            <option>Арочные конструкции</option>
+            <option>Нестандартные конструкции</option>
             <option>Расчет тоннажа</option>
           </select>
         </label>

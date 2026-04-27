@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node --check scripts/build.mjs && node --check scripts/smoke.mjs && node --check src/main.js && npm test && npm run build && npm --prefix worker run check",
+    "check": "node --check scripts/build.mjs && node --check scripts/smoke.mjs && node --check scripts/tz-audit.mjs && node --check src/main.js && npm test && npm run build && npm run audit:tz && npm --prefix worker run check",
+    "audit:tz": "node scripts/tz-audit.mjs",
     "smoke": "node scripts/smoke.mjs",
     "start": "node scripts/serve.mjs",
     "serve": "node scripts/serve.mjs",

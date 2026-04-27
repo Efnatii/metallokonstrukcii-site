@@ -88,11 +88,11 @@ address {
   top: 0;
   z-index: 50;
   display: grid;
-  grid-template-columns: minmax(230px, 330px) minmax(450px, 1fr) minmax(390px, 520px);
+  grid-template-columns: minmax(430px, 460px) minmax(430px, 1fr) minmax(450px, 500px);
   align-items: center;
-  gap: clamp(16px, 2vw, 30px);
+  gap: clamp(12px, 1.5vw, 24px);
   min-height: 84px;
-  padding: 10px clamp(26px, 3.2vw, 48px);
+  padding: 10px clamp(22px, 2.7vw, 42px);
   border-bottom: 1px solid rgb(255 255 255 / 12%);
   background: linear-gradient(180deg, rgb(5 7 9 / 98%), rgb(9 12 14 / 94%));
   box-shadow: 0 18px 64px rgb(0 0 0 / 34%);
@@ -101,32 +101,36 @@ address {
 
 .brand {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: clamp(142px, 10vw, 170px) minmax(0, 128px);
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   min-width: 0;
 }
 
 .brand-logo {
-  width: clamp(156px, 12vw, 214px);
+  width: 100%;
   height: auto;
   filter: drop-shadow(0 12px 24px rgb(0 0 0 / 44%));
 }
 
 .brand span {
-  max-width: 150px;
+  width: 128px;
+  min-width: 0;
+  max-width: 128px;
   color: rgb(255 255 255 / 68%);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   line-height: 1.18;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .site-nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(14px, 1.85vw, 32px);
+  gap: clamp(10px, 1.35vw, 22px);
 }
 
 .nav-item {
@@ -142,7 +146,7 @@ address {
   border: 0;
   background: transparent;
   color: rgb(255 255 255 / 86%);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 760;
   white-space: nowrap;
 }
@@ -200,7 +204,7 @@ address {
 
 .header-actions {
   display: grid;
-  grid-template-columns: 46px minmax(150px, auto) 42px auto;
+  grid-template-columns: 46px minmax(180px, auto) 42px auto;
   align-items: center;
   justify-content: end;
   gap: 12px;
@@ -236,6 +240,10 @@ address {
   white-space: nowrap;
 }
 
+.header-contact a {
+  width: fit-content;
+}
+
 .header-contact strong {
   color: #fff;
   font-size: 16px;
@@ -243,10 +251,16 @@ address {
   line-height: 1.05;
 }
 
-.header-contact small {
+.header-email {
   color: rgb(255 255 255 / 58%);
   font-size: 11px;
-  font-weight: 650;
+  font-weight: 760;
+}
+
+.header-email:hover,
+.header-email:focus-visible {
+  color: var(--accent);
+  outline: none;
 }
 
 .max-link {
@@ -1643,22 +1657,34 @@ h3 {
   }
 }
 
-@media (max-width: 1320px) {
+@media (max-width: 1600px) {
   .site-header {
-    grid-template-columns: minmax(200px, 280px) minmax(360px, 1fr) minmax(350px, 470px);
-    gap: 16px;
+    grid-template-columns: minmax(170px, 220px) minmax(560px, 1fr) minmax(420px, 470px);
+    gap: 12px;
   }
 
   .brand span {
     display: none;
   }
 
+  .brand {
+    grid-template-columns: minmax(142px, 170px);
+  }
+
   .site-nav {
-    gap: 16px;
+    gap: 10px;
   }
 
   .nav-link {
-    font-size: 14px;
+    font-size: 13.5px;
+  }
+
+  .header-actions {
+    grid-template-columns: 46px minmax(156px, auto) 42px auto;
+  }
+
+  .header-actions .btn {
+    padding: 0 22px;
   }
 
   .hero-grid {
