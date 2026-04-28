@@ -12,9 +12,11 @@
 
 `icons/arrow-download-simple-source.png` - отдельный ImageGen/ChatGPT Image исходник для упрощенных CTA-иконок `arrow-right` и `download`. После генерации фон был очищен, а цвета сведены к плоскому black/yellow стилю без 3D-пластики.
 
+`icons/arrow-download-contrast-source.png` - новый ChatGPT Image/ImageGen исходник для контрастных CTA-иконок в двух цветовых вариантах: темный знак для желтого фона и желтый знак для темного фона. Из него нарезаны `arrow-right-on-yellow`, `arrow-right-on-dark`, `download-on-yellow`, `download-on-dark` и их `@2x`/`@3x` PNG-версии.
+
 `icons/hamburger-simple-source.png` - отдельный ImageGen/ChatGPT Image исходник для упрощенной кнопки мобильного меню. Финальные PNG сведены к плоскому набору из трех полос без рамки, внутренней кнопки, теней и 3D-эффектов.
 
-`icons/phone-gold.png`, `icons/arrow-right.png`, `icons/download.png`, `icons/chevron-down.png`, `icons/hamburger.png`, `icons/factory.png`, `icons/truss.png`, `icons/capacity-cube.png`, `icons/document-kmd.png`, `icons/team.png`, `icons/quality-shield.png`, `icons/request-doc.png`, `icons/calc-truss.png`, `icons/cutting.png`, `icons/delivery.png`, `icons/success-check.png` и их `@2x`/`@3x` версии - UI icon pack концепта C.
+`icons/phone-gold.png`, `icons/arrow-right.png`, `icons/download.png`, `icons/arrow-right-on-yellow.png`, `icons/arrow-right-on-dark.png`, `icons/download-on-yellow.png`, `icons/download-on-dark.png`, `icons/chevron-down.png`, `icons/hamburger.png`, `icons/factory.png`, `icons/truss.png`, `icons/capacity-cube.png`, `icons/document-kmd.png`, `icons/team.png`, `icons/quality-shield.png`, `icons/request-doc.png`, `icons/calc-truss.png`, `icons/cutting.png`, `icons/delivery.png`, `icons/success-check.png` и их `@2x`/`@3x` версии - UI icon pack концепта C.
 
 `icons/max-logo.png`, `icons/max-logo@2x.png`, `icons/max-logo@3x.png` - официальный значок MAX из полного кода сайтов-примеров в `techtask/B2E STYLE EXAMPLE SITES/static.tildacdn.com/.../Max_logo-32x32.png`.
 
