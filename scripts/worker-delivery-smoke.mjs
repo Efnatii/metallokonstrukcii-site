@@ -36,7 +36,6 @@ async function main() {
       name: 'Worker Delivery Smoke',
       phone: '+79650578270',
       objectType: 'SMTP/no-reply smoke',
-      source: 'worker-delivery-smoke',
       page: siteUrl,
       createdAt: new Date().toISOString()
     })

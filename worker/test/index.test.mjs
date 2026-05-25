@@ -30,7 +30,6 @@ function validLead(overrides = {}) {
     name: 'Test User',
     phone: '+79650578270',
     objectType: 'Metal frame',
-    source: 'test',
     page: 'https://efnatii.github.io/metallokonstrukcii-site/',
     createdAt: '2026-04-25T09:00:00.000Z',
     ...overrides
@@ -192,7 +191,7 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   });
   const payload = await response.json();
   const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
-  const expectedSubject = Buffer.from('Новая заявка на металлоконструкции: Metal frame').toString('base64');
+  const expectedSubject = Buffer.from('Новая заявка на металлоконструкции').toString('base64');
 
   assert.equal(response.status, 200);
   assert.equal(payload.ok, true);
@@ -203,8 +202,12 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Sender: <smtp-login@b2energy\.ru>/m);
   assert.match(dataCommand, /^Content-Type: text\/plain; charset=UTF-8$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
-  assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
+  assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции<\/h1>/);
   assert.match(dataCommand, /<img src="https:\/\/efnatii\.github\.io\/metallokonstrukcii-site\/assets\/logo\/logo-b2e\.png"/);
+  assert.match(dataCommand, /Тип обращения: Заявка/);
+  assert.match(dataCommand, />Тип обращения<\/td>/);
+  assert.match(dataCommand, />Заявка<\/td>/);
+  assert.match(dataCommand, />Объект или услуга<\/td>/);
   assert.match(dataCommand, /Сайт: B2E Металлоконструкции/);
   assert.match(dataCommand, /Когда отправлено: 25 апреля 2026 года, 12:00 по московскому времени/);
   assert.match(dataCommand, /Реквизиты B2E/);
@@ -214,6 +217,55 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.doesNotMatch(dataCommand, /Открыть страницу заявки/);
   assert.doesNotMatch(dataCommand, /Новая входящая заявка/);
   assert.doesNotMatch(dataCommand, /Cloudflare Worker/);
+  assert.doesNotMatch(dataCommand, />Источник<\/td>/);
+});
+
+test('SMTP labels free-form callback as message and includes client comment', async () => {
+  const commands = [];
+  const responses = [
+    '220 smtp.test ESMTP\r\n',
+    '250-smtp.test\r\n250 AUTH LOGIN\r\n',
+    '334 VXNlcm5hbWU6\r\n',
+    '334 UGFzc3dvcmQ6\r\n',
+    '235 2.7.0 Authentication successful\r\n',
+    '250 2.1.0 Sender OK\r\n',
+    '250 2.1.5 Recipient OK\r\n',
+    '354 End data with <CR><LF>.<CR><LF>\r\n',
+    '250 2.0.0 Queued\r\n',
+    '221 2.0.0 Bye\r\n'
+  ];
+
+  const response = await worker.fetch(
+    makeRequest({
+      body: validLead({
+        objectType: 'Общая заявка',
+        message: 'Нужно изготовить лестницу и ограждения для склада.'
+      })
+    }),
+    {
+      ...baseEnv,
+      SMTP_HOST: 'smtp.test',
+      SMTP_PORT: '465',
+      SMTP_USERNAME: 'smtp-login@b2energy.ru',
+      SMTP_PASSWORD: 'app-password',
+      SMTP_FROM: 'B2E <no-reply@b2energy.ru>',
+      SMTP_FROM_NAME: 'B2E',
+      SMTP_TO: 'zakaz@example.test',
+      SMTP_CONNECT: makeSmtpConnect(responses, commands)
+    }
+  );
+  const payload = await response.json();
+  const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
+  const expectedSubject = Buffer.from('Новое сообщение на металлоконструкции').toString('base64');
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.ok, true);
+  assert.ok(dataCommand);
+  assert.match(dataCommand, new RegExp(`^Subject: =\\?UTF-8\\?B\\?${escapeRegExp(expectedSubject)}\\?=$`, 'm'));
+  assert.match(dataCommand, /Тип обращения: Сообщение/);
+  assert.match(dataCommand, />Сообщение<\/td>/);
+  assert.match(dataCommand, /Комментарий клиента/);
+  assert.match(dataCommand, /Нужно изготовить лестницу и ограждения для склада\./);
 });
 
 test('Turnstile secret requires a token before delivery', async () => {

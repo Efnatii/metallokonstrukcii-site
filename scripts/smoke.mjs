@@ -52,7 +52,6 @@ async function main() {
         name: 'Smoke Test',
         phone: '+79650578270',
         objectType: 'Smoke',
-        source: 'smoke',
         page: normalizedSiteUrl,
         createdAt: new Date().toISOString()
       })

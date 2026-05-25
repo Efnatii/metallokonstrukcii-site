@@ -117,15 +117,11 @@
       }
     };
 
-    const openModal = (objectType, source) => {
+    const openModal = (objectType) => {
       restoreForm();
 
       if (objectType) {
         form.elements.objectType.value = objectType;
-      }
-
-      if (source) {
-        form.elements.source.value = source;
       }
 
       if (typeof modal.showModal === 'function') {
@@ -147,7 +143,7 @@
     $$('.callback-trigger').forEach((button) => {
       button.addEventListener('click', () => {
         const typeFromButton = button.dataset.objectType;
-        openModal(typeFromButton, '');
+        openModal(typeFromButton);
       });
     });
 
@@ -172,15 +168,16 @@
         phone: String(formData.get('phone') || '').trim(),
         objectType: String(formData.get('objectType') || '').trim(),
         message: String(formData.get('message') || '').trim(),
-        source: String(formData.get('source') || 'callback').trim(),
         page: window.location.href,
         createdAt: new Date().toISOString()
       };
 
       const openMailFallback = () => {
-        const subject = encodeURIComponent(`Заявка с сайта B2E: ${payload.objectType || 'общая заявка'}`);
+        const requestType =
+          payload.message && (!payload.objectType || payload.objectType === 'Общая заявка') ? 'Сообщение' : 'Заявка';
+        const subject = encodeURIComponent(`${requestType} с сайта B2E`);
         const body = encodeURIComponent(
-          `Имя: ${payload.name}\nКонтакт: ${payload.phone}\nТип заявки: ${payload.objectType}\nЗадача: ${payload.message || 'не указана'}\nИсточник: ${payload.source}\nСтраница: ${payload.page}`
+          `Тип обращения: ${requestType}\nИмя: ${payload.name}\nКонтакт: ${payload.phone}\nОбъект или услуга: ${payload.objectType || 'не указано'}\nКомментарий клиента: ${payload.message || 'не указан'}\nСтраница: ${payload.page}`
         );
         window.location.href = `${config.emailHref}?subject=${subject}&body=${body}`;
       };

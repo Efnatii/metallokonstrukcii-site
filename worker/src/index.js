@@ -3,6 +3,7 @@ const JSON_HEADERS = {
   'Cache-Control': 'no-store'
 };
 const DEFAULT_LEAD_SUBJECT = 'Новая заявка на металлоконструкции';
+const DEFAULT_MESSAGE_SUBJECT = 'Новое сообщение на металлоконструкции';
 const EMAIL_BOUNDARY = 'b2e-lead-message-boundary';
 const MOSCOW_TIME_ZONE = 'Europe/Moscow';
 const DEFAULT_SITE_PROFILE = {
@@ -64,7 +65,7 @@ function normalizeLead(input) {
     name: cleanText(input.name, 120),
     phone: cleanText(input.phone, 80),
     objectType: cleanText(input.objectType, 180),
-    source: cleanText(input.source, 500),
+    message: cleanText(input.message, 1000),
     page: cleanText(input.page, 500),
     createdAt: cleanText(input.createdAt, 80) || new Date().toISOString()
   };
@@ -162,28 +163,38 @@ function formatHumanDate(value) {
   }
 }
 
+function isMessageLead(lead) {
+  return Boolean(lead.message) && (!lead.objectType || /^общая заявка$/i.test(lead.objectType));
+}
+
+function formatLeadKind(lead) {
+  return isMessageLead(lead) ? 'Сообщение' : 'Заявка';
+}
+
 function formatLeadSubject(lead, env) {
   const configuredSubject = cleanText(env.LEAD_SUBJECT, 140);
-  const baseSubject = /металлоконструкц/i.test(configuredSubject)
+  const fallbackSubject = isMessageLead(lead) ? DEFAULT_MESSAGE_SUBJECT : DEFAULT_LEAD_SUBJECT;
+  const subject = /металлоконструкц/i.test(configuredSubject)
     ? configuredSubject
-    : DEFAULT_LEAD_SUBJECT;
-  const objectType = cleanText(lead.objectType, 80);
+    : fallbackSubject;
 
-  return objectType ? `${baseSubject}: ${objectType}` : baseSubject;
+  return isMessageLead(lead) ? subject.replace(/^Новая заявка/i, 'Новое сообщение') : subject;
 }
 
 function formatLeadText(lead, env) {
   const profile = getSiteProfile(lead, env);
   const humanDate = formatHumanDate(lead.createdAt);
+  const messageLines = lead.message ? ['', 'Комментарий клиента', lead.message] : [];
 
   return [
     formatLeadSubject(lead, env),
     '',
     'Карточка обращения',
+    `Тип обращения: ${formatLeadKind(lead)}`,
     `Имя: ${lead.name}`,
     `Контакт: ${lead.phone}`,
-    `Тип объекта: ${lead.objectType || '-'}`,
-    `Источник формы: ${lead.source || '-'}`,
+    `Объект или услуга: ${lead.objectType || '-'}`,
+    ...messageLines,
     `Сайт: ${profile.siteName}`,
     `Направление сайта: ${profile.siteType}`,
     `Страница отправки: ${lead.page || '-'}`,
@@ -242,11 +253,18 @@ function formatEmailHtml(lead, env) {
   const logoUrl = escapeHtml(profile.logoUrl, 500);
   const name = escapeHtml(lead.name, 120);
   const phone = escapeHtml(lead.phone, 80);
+  const leadKind = escapeHtml(formatLeadKind(lead), 40);
   const objectType = escapeHtml(lead.objectType || 'Не указан', 180);
-  const source = escapeHtml(lead.source || 'Сайт', 500);
+  const message = escapeHtml(lead.message, 1000);
   const page = safeHttpUrl(lead.page);
   const pageText = escapeHtml(page || 'Не указана', 500);
   const createdAt = escapeHtml(formatHumanDate(lead.createdAt), 120);
+  const messageRow = message
+    ? `<tr>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Комментарий клиента</td>
+                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${message}</td>
+                  </tr>`
+    : '';
 
   return `<!doctype html>
 <html lang="ru">
@@ -291,17 +309,18 @@ function formatEmailHtml(lead, env) {
                 </table>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-top:1px solid #e3e7ec;border-bottom:1px solid #e3e7ec;">
                   <tr>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Тип обращения</td>
+                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${leadKind}</td>
+                  </tr>
+                  <tr>
                     <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Сайт</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${siteName}</td>
                   </tr>
                   <tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Тип объекта</td>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Объект или услуга</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${objectType}</td>
                   </tr>
-                  <tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Источник</td>
-                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${source}</td>
-                  </tr>
+                  ${messageRow}
                   <tr>
                     <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Страница отправки</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${pageText}</td>
