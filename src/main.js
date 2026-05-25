@@ -177,7 +177,7 @@
           payload.message && (!payload.objectType || payload.objectType === 'Общая заявка') ? 'Сообщение' : 'Заявка';
         const subject = encodeURIComponent(`${requestType} с сайта B2E`);
         const body = encodeURIComponent(
-          `Тип обращения: ${requestType}\nИмя: ${payload.name}\nКонтакт: ${payload.phone}\nОбъект или услуга: ${payload.objectType || 'не указано'}\nКомментарий клиента: ${payload.message || 'не указан'}\nСтраница: ${payload.page}`
+          `Имя: ${payload.name}\nКонтакт: ${payload.phone}\nТекст заявки: ${payload.message || payload.objectType || 'не указан'}\nСтраница: ${payload.page}`
         );
         window.location.href = `${config.emailHref}?subject=${subject}&body=${body}`;
       };

@@ -171,6 +171,10 @@ function formatLeadKind(lead) {
   return isMessageLead(lead) ? 'Сообщение' : 'Заявка';
 }
 
+function formatLeadRequestText(lead) {
+  return cleanText(lead.message || lead.objectType, 1000) || 'Не указан';
+}
+
 function formatLeadSubject(lead, env) {
   const configuredSubject = cleanText(env.LEAD_SUBJECT, 140);
   const fallbackSubject = isMessageLead(lead) ? DEFAULT_MESSAGE_SUBJECT : DEFAULT_LEAD_SUBJECT;
@@ -184,17 +188,14 @@ function formatLeadSubject(lead, env) {
 function formatLeadText(lead, env) {
   const profile = getSiteProfile(lead, env);
   const humanDate = formatHumanDate(lead.createdAt);
-  const messageLines = lead.message ? ['', 'Комментарий клиента', lead.message] : [];
 
   return [
     formatLeadSubject(lead, env),
     '',
     'Карточка обращения',
-    `Тип обращения: ${formatLeadKind(lead)}`,
     `Имя: ${lead.name}`,
     `Контакт: ${lead.phone}`,
-    `Объект или услуга: ${lead.objectType || '-'}`,
-    ...messageLines,
+    `Текст заявки: ${formatLeadRequestText(lead)}`,
     `Сайт: ${profile.siteName}`,
     `Направление сайта: ${profile.siteType}`,
     `Страница отправки: ${lead.page || '-'}`,
@@ -253,18 +254,10 @@ function formatEmailHtml(lead, env) {
   const logoUrl = escapeHtml(profile.logoUrl, 500);
   const name = escapeHtml(lead.name, 120);
   const phone = escapeHtml(lead.phone, 80);
-  const leadKind = escapeHtml(formatLeadKind(lead), 40);
-  const objectType = escapeHtml(lead.objectType || 'Не указан', 180);
-  const message = escapeHtml(lead.message, 1000);
+  const requestText = escapeHtml(formatLeadRequestText(lead), 1000);
   const page = safeHttpUrl(lead.page);
   const pageText = escapeHtml(page || 'Не указана', 500);
   const createdAt = escapeHtml(formatHumanDate(lead.createdAt), 120);
-  const messageRow = message
-    ? `<tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Комментарий клиента</td>
-                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${message}</td>
-                  </tr>`
-    : '';
 
   return `<!doctype html>
 <html lang="ru">
@@ -309,18 +302,13 @@ function formatEmailHtml(lead, env) {
                 </table>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-top:1px solid #e3e7ec;border-bottom:1px solid #e3e7ec;">
                   <tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Тип обращения</td>
-                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${leadKind}</td>
-                  </tr>
-                  <tr>
                     <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Сайт</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${siteName}</td>
                   </tr>
                   <tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Объект или услуга</td>
-                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${objectType}</td>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Текст заявки</td>
+                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${requestText}</td>
                   </tr>
-                  ${messageRow}
                   <tr>
                     <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Страница отправки</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${pageText}</td>

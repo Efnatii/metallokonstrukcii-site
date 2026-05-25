@@ -204,10 +204,8 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
   assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции<\/h1>/);
   assert.match(dataCommand, /<img src="https:\/\/efnatii\.github\.io\/metallokonstrukcii-site\/assets\/logo\/logo-b2e\.png"/);
-  assert.match(dataCommand, /Тип обращения: Заявка/);
-  assert.match(dataCommand, />Тип обращения<\/td>/);
-  assert.match(dataCommand, />Заявка<\/td>/);
-  assert.match(dataCommand, />Объект или услуга<\/td>/);
+  assert.match(dataCommand, /Текст заявки: Metal frame/);
+  assert.match(dataCommand, />Текст заявки<\/td>/);
   assert.match(dataCommand, /Сайт: B2E Металлоконструкции/);
   assert.match(dataCommand, /Когда отправлено: 25 апреля 2026 года, 12:00 по московскому времени/);
   assert.match(dataCommand, /Реквизиты B2E/);
@@ -218,6 +216,9 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.doesNotMatch(dataCommand, /Новая входящая заявка/);
   assert.doesNotMatch(dataCommand, /Cloudflare Worker/);
   assert.doesNotMatch(dataCommand, />Источник<\/td>/);
+  assert.doesNotMatch(dataCommand, />Объект или услуга<\/td>/);
+  assert.doesNotMatch(dataCommand, />Тип объекта<\/td>/);
+  assert.doesNotMatch(dataCommand, /Тип обращения/);
 });
 
 test('SMTP labels free-form callback as message and includes client comment', async () => {
@@ -262,10 +263,10 @@ test('SMTP labels free-form callback as message and includes client comment', as
   assert.equal(payload.ok, true);
   assert.ok(dataCommand);
   assert.match(dataCommand, new RegExp(`^Subject: =\\?UTF-8\\?B\\?${escapeRegExp(expectedSubject)}\\?=$`, 'm'));
-  assert.match(dataCommand, /Тип обращения: Сообщение/);
-  assert.match(dataCommand, />Сообщение<\/td>/);
-  assert.match(dataCommand, /Комментарий клиента/);
+  assert.match(dataCommand, /Текст заявки/);
   assert.match(dataCommand, /Нужно изготовить лестницу и ограждения для склада\./);
+  assert.doesNotMatch(dataCommand, /Комментарий клиента/);
+  assert.doesNotMatch(dataCommand, /Тип обращения/);
 });
 
 test('Turnstile secret requires a token before delivery', async () => {
