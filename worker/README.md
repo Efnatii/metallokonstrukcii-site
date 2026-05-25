@@ -59,6 +59,8 @@ Workflow `.github/workflows/worker.yml`:
 
 `CLOUDFLARE_API_TOKEN` остается только в GitHub Secrets и используется GitHub Actions/Wrangler для публикации. Его нельзя загружать в `dist/config.js`, `wrangler.jsonc` или Worker vars.
 
+Если используется прямой Cloudflare Workers Builds / git-deploy из репозитория, задавайте секреты в Cloudflare Worker Settings с runtime-именами без префикса `WORKER_`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`, `SMTP_ENVELOPE_FROM`, `SMTP_TO`. Префикс `WORKER_` нужен только для GitHub Actions, где workflow переименовывает secrets перед `wrangler secret bulk`.
+
 Для автоматической доставки заявок нужен хотя бы один канал:
 
 - `WORKER_LEAD_WEBHOOK_URL`

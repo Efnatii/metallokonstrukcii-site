@@ -107,6 +107,8 @@ SMTP/IMAP-логины, пароли приложений и почтовые п
 
 Для Cloudflare Workers Builds / git-deploy в корне репозитория есть `wrangler.jsonc`. Он указывает на `worker/src/index.js`, поэтому в Cloudflare можно оставить root directory корнем репозитория и deploy command по умолчанию `npx wrangler deploy`.
 
+Если Worker подключен к репозиторию напрямую через Cloudflare Workers Builds, SMTP нужно задавать в Cloudflare как Worker Secrets с runtime-именами без префикса `WORKER_`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`, `SMTP_ENVELOPE_FROM`, `SMTP_TO`. GitHub Secrets вида `WORKER_SMTP_*` используются только workflow `.github/workflows/worker.yml`, который синхронизирует их через `wrangler secret bulk`.
+
 Локально:
 
 ```powershell
