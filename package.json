@@ -13,9 +13,14 @@
     "serve": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs && npm --prefix worker test",
     "worker:dev": "npm --prefix worker run dev",
-    "worker:deploy": "npm --prefix worker run deploy"
+    "worker:deploy": "npm --prefix worker run deploy",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "wrangler": "^4.94.0"
   }
 }
