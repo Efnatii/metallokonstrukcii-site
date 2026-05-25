@@ -105,6 +105,8 @@ SMTP/IMAP-логины, пароли приложений и почтовые п
 
 Код Worker лежит в `worker/`. Он принимает POST-заявки только с `WORKER_ALLOWED_ORIGIN`, валидирует имя/телефон, опционально проверяет Turnstile и отправляет заявку в Telegram, webhook или SMTP.
 
+Для Cloudflare Workers Builds / git-deploy в корне репозитория есть `wrangler.jsonc`. Он указывает на `worker/src/index.js`, поэтому в Cloudflare можно оставить root directory корнем репозитория и deploy command по умолчанию `npx wrangler deploy`.
+
 Локально:
 
 ```powershell

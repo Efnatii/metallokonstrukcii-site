@@ -10,6 +10,7 @@ const configJs = read('src/config.js');
 const envExample = read('.env.example');
 const pagesWorkflow = read('.github/workflows/pages.yml');
 const workerWorkflow = read('.github/workflows/worker.yml');
+const rootWrangler = read('wrangler.jsonc');
 const distHtml = read('dist/index.html');
 
 const products = [
@@ -249,6 +250,13 @@ const checks = [
       workerWorkflow.includes('wrangler secret bulk') &&
       read('worker/src/index.js').includes('sendSmtp'),
     'GitHub Secrets -> Worker secrets + SMTP'
+  ),
+  check(
+    'Cloudflare git-deploy из корня публикует Worker',
+    rootWrangler.includes('"name": "b2e-leads"') &&
+      rootWrangler.includes('"main": "worker/src/index.js"') &&
+      rootWrangler.includes('"ALLOWED_ORIGIN": "https://efnatii.github.io"'),
+    'root wrangler.jsonc -> worker/src/index.js'
   ),
   check('Все локальные asset refs существуют', missingRefs.length === 0, missingRefs.join(', ') || 'all local refs exist'),
   check('Нет SVG UI-иконок в HTML', !/\.svg(?:"|\s)/.test(html), 'PNG/WebP/JPG references only'),
