@@ -105,6 +105,9 @@
     }
 
     const originalFormHtml = form.innerHTML;
+    const syncModalLock = () => {
+      document.body.classList.toggle('modal-open', Boolean(modal.open));
+    };
 
     const restoreForm = () => {
       if (!form.elements.namedItem('name')) {
@@ -130,14 +133,14 @@
         modal.setAttribute('open', '');
       }
 
-      document.body.classList.add('modal-open');
+      syncModalLock();
       setTimeout(() => form.elements.name.focus(), 80);
     };
 
     const closeModal = () => {
       modal.close?.();
       modal.removeAttribute('open');
-      document.body.classList.remove('modal-open');
+      syncModalLock();
     };
 
     $$('.callback-trigger').forEach((button) => {
@@ -153,7 +156,10 @@
         closeModal();
       }
     });
-    modal.addEventListener('close', () => document.body.classList.remove('modal-open'));
+    modal.addEventListener('close', syncModalLock);
+    modal.addEventListener('cancel', syncModalLock);
+    window.addEventListener('pageshow', syncModalLock);
+    syncModalLock();
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
