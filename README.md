@@ -24,11 +24,13 @@ npm.cmd start
 npm test
 npm run check
 npm run smoke
+npm run smoke:worker-delivery
 ```
 
 - `npm test` проверяет сборочный конфиг сайта и логику Worker.
 - `npm run check` дополнительно проверяет синтаксис, сборку и `wrangler deploy --dry-run`.
 - `npm run smoke` проверяет опубликованный GitHub Pages сайт, `config.js`, `sitemap.xml` и CORS Cloudflare Worker.
+- `npm run smoke:worker-delivery` отправляет тестовую заявку в опубликованный Worker и должен вернуть `200`; `503` означает, что в Cloudflare Worker не заданы runtime secrets доставки.
 
 ## Контент и карты
 

@@ -9,6 +9,7 @@
     "check": "node --check scripts/build.mjs && node --check scripts/smoke.mjs && node --check scripts/tz-audit.mjs && node --check src/main.js && npm test && npm run build && npm run audit:tz && npm --prefix worker run check",
     "audit:tz": "node scripts/tz-audit.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "smoke:worker-delivery": "node scripts/worker-delivery-smoke.mjs",
     "start": "node scripts/serve.mjs",
     "serve": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs && npm --prefix worker test",
