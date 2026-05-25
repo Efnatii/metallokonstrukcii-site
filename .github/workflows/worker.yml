@@ -76,6 +76,7 @@ jobs:
           WORKER_SMTP_PASSWORD: ${{ secrets.WORKER_SMTP_PASSWORD }}
           WORKER_SMTP_FROM: ${{ secrets.WORKER_SMTP_FROM }}
           WORKER_SMTP_FROM_NAME: ${{ secrets.WORKER_SMTP_FROM_NAME }}
+          WORKER_SMTP_ENVELOPE_FROM: ${{ secrets.WORKER_SMTP_ENVELOPE_FROM }}
           WORKER_SMTP_TO: ${{ secrets.WORKER_SMTP_TO }}
           WORKER_TURNSTILE_SECRET_KEY: ${{ secrets.WORKER_TURNSTILE_SECRET_KEY }}
         run: |
@@ -92,6 +93,7 @@ jobs:
             SMTP_PASSWORD: process.env.WORKER_SMTP_PASSWORD,
             SMTP_FROM: process.env.WORKER_SMTP_FROM,
             SMTP_FROM_NAME: process.env.WORKER_SMTP_FROM_NAME,
+            SMTP_ENVELOPE_FROM: process.env.WORKER_SMTP_ENVELOPE_FROM,
             SMTP_TO: process.env.WORKER_SMTP_TO,
             TURNSTILE_SECRET_KEY: process.env.WORKER_TURNSTILE_SECRET_KEY
           };

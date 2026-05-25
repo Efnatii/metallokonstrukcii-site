@@ -98,7 +98,9 @@ function encodeHeader(value) {
 }
 
 function smtpAddress(value) {
-  return cleanText(value, 180).replace(/[<>]/g, '');
+  const text = cleanText(value, 180);
+  const mailbox = text.match(/<([^<>]+)>/)?.[1] || text;
+  return mailbox.replace(/[<>]/g, '').trim();
 }
 
 function smtpRecipients(value) {
@@ -110,18 +112,26 @@ function smtpRecipients(value) {
 
 function formatEmailMessage(lead, env) {
   const from = smtpAddress(env.SMTP_FROM || env.SMTP_USERNAME);
+  const envelopeFrom = smtpAddress(env.SMTP_ENVELOPE_FROM || env.SMTP_USERNAME);
   const fromName = cleanText(env.SMTP_FROM_NAME || env.SITE_LABEL || 'ООО B2E', 80);
   const to = smtpRecipients(env.SMTP_TO);
   const subject = env.LEAD_SUBJECT || 'Новая заявка с сайта B2E';
   const text = formatLeadText(lead, env);
-
-  return [
+  const headers = [
     `From: ${encodeHeader(fromName)} <${from}>`,
     `To: ${to.join(', ')}`,
     `Subject: ${encodeHeader(subject)}`,
     'MIME-Version: 1.0',
     'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
+    'Content-Transfer-Encoding: 8bit'
+  ];
+
+  if (envelopeFrom && envelopeFrom.toLowerCase() !== from.toLowerCase()) {
+    headers.splice(1, 0, `Sender: <${envelopeFrom}>`);
+  }
+
+  return [
+    ...headers,
     '',
     text
   ].join('\r\n');
@@ -196,7 +206,7 @@ async function sendSmtp(lead, env) {
   const port = Number(env.SMTP_PORT || 465);
   const secureTransport = env.SMTP_SECURE === 'starttls' ? 'starttls' : 'on';
   const recipients = smtpRecipients(env.SMTP_TO);
-  const from = smtpAddress(env.SMTP_FROM || env.SMTP_USERNAME);
+  const from = smtpAddress(env.SMTP_ENVELOPE_FROM || env.SMTP_USERNAME);
   const message = formatEmailMessage(lead, env).replace(/^\./gm, '..');
 
   let socket = connect({ hostname: host, port }, { secureTransport });

@@ -93,6 +93,7 @@ npm run smoke
 | `WORKER_SMTP_PASSWORD` | Пароль приложения SMTP. |
 | `WORKER_SMTP_FROM` | Адрес отправителя. |
 | `WORKER_SMTP_FROM_NAME` | Отображаемое имя отправителя. |
+| `WORKER_SMTP_ENVELOPE_FROM` | Опциональный SMTP envelope sender для `MAIL FROM`; по умолчанию используется `WORKER_SMTP_USERNAME`. |
 | `WORKER_SMTP_TO` | Адрес получателя заявок. |
 | `WORKER_TURNSTILE_SECRET_KEY` | Опциональный секрет Cloudflare Turnstile. |
 

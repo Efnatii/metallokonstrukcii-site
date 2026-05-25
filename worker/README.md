@@ -53,6 +53,7 @@ Workflow `.github/workflows/worker.yml`:
 | `WORKER_SMTP_PASSWORD` | `SMTP_PASSWORD` | Да, если используется SMTP. |
 | `WORKER_SMTP_FROM` | `SMTP_FROM` | Нет, если совпадает с `SMTP_USERNAME`. |
 | `WORKER_SMTP_FROM_NAME` | `SMTP_FROM_NAME` | Нет. |
+| `WORKER_SMTP_ENVELOPE_FROM` | `SMTP_ENVELOPE_FROM` | Нет, по умолчанию `SMTP_USERNAME` для `MAIL FROM`. |
 | `WORKER_SMTP_TO` | `SMTP_TO` | Да, если используется SMTP. |
 | `WORKER_TURNSTILE_SECRET_KEY` | `TURNSTILE_SECRET_KEY` | Нет, опциональная captcha. |
 

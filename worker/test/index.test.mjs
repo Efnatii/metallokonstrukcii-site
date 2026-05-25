@@ -37,6 +37,32 @@ function validLead(overrides = {}) {
   };
 }
 
+function makeSmtpConnect(responses, commands) {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  return () => ({
+    opened: Promise.resolve(),
+    readable: new ReadableStream({
+      pull(controller) {
+        const response = responses.shift();
+        if (response === undefined) {
+          controller.close();
+          return;
+        }
+
+        controller.enqueue(encoder.encode(response));
+      }
+    }),
+    writable: new WritableStream({
+      write(chunk) {
+        commands.push(decoder.decode(chunk));
+      }
+    }),
+    close: async () => {}
+  });
+}
+
 test('OPTIONS request returns CORS preflight headers', async () => {
   const response = await worker.fetch(makeRequest({ method: 'OPTIONS' }), baseEnv);
 
@@ -132,6 +158,43 @@ test('SMTP delivery can be configured through Worker secrets', async () => {
   assert.equal(smtpCalls.length, 1);
   assert.equal(smtpCalls[0].lead.objectType, 'Строительные металлоконструкции');
   assert.equal(smtpCalls[0].to, 'zakaz@example.test');
+});
+
+test('SMTP keeps no-reply From while using authenticated envelope sender', async () => {
+  const commands = [];
+  const responses = [
+    '220 smtp.test ESMTP\r\n',
+    '250-smtp.test\r\n250 AUTH LOGIN\r\n',
+    '334 VXNlcm5hbWU6\r\n',
+    '334 UGFzc3dvcmQ6\r\n',
+    '235 2.7.0 Authentication successful\r\n',
+    '250 2.1.0 Sender OK\r\n',
+    '250 2.1.5 Recipient OK\r\n',
+    '354 End data with <CR><LF>.<CR><LF>\r\n',
+    '250 2.0.0 Queued\r\n',
+    '221 2.0.0 Bye\r\n'
+  ];
+
+  const response = await worker.fetch(makeRequest({ body: validLead() }), {
+    ...baseEnv,
+    SMTP_HOST: 'smtp.test',
+    SMTP_PORT: '465',
+    SMTP_USERNAME: 'smtp-login@b2energy.ru',
+    SMTP_PASSWORD: 'app-password',
+    SMTP_FROM: 'B2E <no-reply@b2energy.ru>',
+    SMTP_FROM_NAME: 'B2E',
+    SMTP_TO: 'zakaz@example.test',
+    SMTP_CONNECT: makeSmtpConnect(responses, commands)
+  });
+  const payload = await response.json();
+  const dataCommand = commands.find((command) => command.includes('Content-Type: text/plain'));
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.ok, true);
+  assert.ok(dataCommand);
+  assert.equal(commands.find((command) => command.startsWith('MAIL FROM:')), 'MAIL FROM:<smtp-login@b2energy.ru>\r\n');
+  assert.match(dataCommand, /^From: B2E <no-reply@b2energy\.ru>/m);
+  assert.match(dataCommand, /^Sender: <smtp-login@b2energy\.ru>/m);
 });
 
 test('Turnstile secret requires a token before delivery', async () => {

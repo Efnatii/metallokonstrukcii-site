@@ -14,6 +14,7 @@
     "secret:smtp-host": "wrangler secret put SMTP_HOST",
     "secret:smtp-username": "wrangler secret put SMTP_USERNAME",
     "secret:smtp-password": "wrangler secret put SMTP_PASSWORD",
+    "secret:smtp-envelope-from": "wrangler secret put SMTP_ENVELOPE_FROM",
     "secret:smtp-to": "wrangler secret put SMTP_TO",
     "secret:turnstile": "wrangler secret put TURNSTILE_SECRET_KEY"
   },
