@@ -203,7 +203,6 @@ CSS-токены, которые проверяет аудит:
 
 - подстановка `window.B2E_CONFIG`;
 - навигация;
-- калькулятор;
 - callback modal;
 - отправка заявки;
 - floating actions;
@@ -233,7 +232,11 @@ CSS-токены, которые проверяет аудит:
 
 `src/assets/generated/`
 
-- AI-сгенерированные product/service/hero визуализации.
+- рабочие product/service/hero изображения. После обновления 2026-05-24 основные публичные изображения заменены на реальные фото, существующие фото проекта и пользовательские примеры КМ/КМД; старые AI-листы оставлены только как неиспользуемые исходники.
+
+`src/assets/documents/letters/`
+
+- PDF и WebP-превью благодарственных писем, добавленных из `update/Благодарственные письма`.
 
 `src/assets/clients/`
 
@@ -277,8 +280,8 @@ CSS-токены, которые проверяет аудит:
 3. `section.catalog#products`
 4. `section.services#services`
 5. `section.company#company`
-6. `section.calculator-section#calculator`
-7. `section.production#production`
+6. `section.production#production`
+7. `section.proof#proof`
 8. `section.clients`
 9. `section.contacts-section#contacts`
 10. `footer.site-footer`
@@ -301,7 +304,6 @@ CSS-токены, которые проверяет аудит:
 - overlay gradients;
 - large headline;
 - `.capacity-panel`;
-- `.hero-facts`;
 - `.hero-workflow`.
 
 `hero-workflow`
@@ -328,17 +330,6 @@ CSS-токены, которые проверяет аудит:
 `setupNavigation()`
 
 - mobile menu and nav behavior.
-
-`calculateTonnage()`
-
-- calculator formula;
-- do not change coefficients unless ТЗ changes.
-
-`setupCalculator()`
-
-- reads form fields;
-- outputs tonnage and coefficient;
-- can feed calculated source into lead form.
 
 `setupModal()`
 
@@ -375,9 +366,8 @@ CSS-токены, которые проверяет аудит:
 7. Арочные конструкции
 8. Нестандартные конструкции
 
-В callback select дополнительно есть:
+В форме заявки используется универсальное поле задачи; `objectType` остается скрытым служебным полем для совместимости отправки.
 
-- Расчет тоннажа
 
 ### Услуги
 
@@ -409,22 +399,6 @@ CSS-токены, которые проверяет аудит:
 - выезд на производство или объект;
 - площадки Петрозаводск, Никольское, Рыбацкое.
 
-### Калькулятор тоннажа
-
-Формула:
-
-```js
-const coefficient = height >= 10 ? (crane ? 0.09 : 0.08) : crane ? 0.065 : 0.05;
-const tonnage = length * width * height * coefficient;
-```
-
-Контрольные примеры из ТЗ:
-
-- `10 * 4 * 5 * 0.05 = 10 т`;
-- `10 * 4 * 5 * 0.065 = 13 т`;
-- `10 * 4 * 10 * 0.08 = 32 т`;
-- `10 * 4 * 10 * 0.09 = 36 т`.
-
 ## 8. Карта и контакты
 
 Карта должна быть реальной интерактивной картой, не iframe-заглушкой.
@@ -434,9 +408,10 @@ const tonnage = length * width * height * coefficient;
 - Leaflet;
 - OpenStreetMap tiles;
 - кастомные PNG markers;
-- 4 точки;
+- 4 точки и отдельный режим зоны покрытия;
 - переключение карточек адресов;
 - кнопка `Открыть в Яндекс Картах` ведет на выбранную точку.
+- кнопка `Зона покрытия` находится рядом с адресами, включает `fitBounds` и показывает охват Санкт-Петербург, Ленинградскую область, СЗФО и ЦФО.
 
 Точки:
 
@@ -444,7 +419,8 @@ const tonnage = length * width * height * coefficient;
 | --- | --- | --- | --- | --- |
 | `office` | Седова 57 лит В | `59.879804` | `30.425277` | Главный офис |
 | `petrozavodsk` | Петрозаводск | `61.7892210` | `34.3688041` | Площадка |
-| `nikolskoe` | Никольское | `59.7034799` | `30.7861084` | Площадка |
+| `nikolskoe` | Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6 | `59.7034799` | `30.7861084` | Площадка |
+| `coverage` | Санкт-Петербург, Ленинградская область, СЗФО и ЦФО | `59.200000` | `37.200000` | Зона покрытия |
 | `rybatskoe` | Рыбацкое | `59.8308399` | `30.5002908` | Площадка |
 
 Контакты:
@@ -474,7 +450,8 @@ Frontend payload:
 {
   "name": "Имя пользователя",
   "phone": "+7...",
-  "objectType": "Тип объекта",
+  "objectType": "Общая заявка",
+  "message": "Короткое описание задачи",
   "source": "source string",
   "page": "current page URL",
   "createdAt": "ISO date"

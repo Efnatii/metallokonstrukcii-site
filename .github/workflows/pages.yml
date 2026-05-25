@@ -24,11 +24,14 @@ jobs:
       B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 (965) 057-82-70' }}
       B2E_WORK_HOURS: ${{ vars.B2E_WORK_HOURS || 'Пн-Пт 09:00 - 18:00' }}
       B2E_CONTACT_EMAIL: ${{ vars.B2E_CONTACT_EMAIL || 'zakaz@b2energy.ru' }}
-      B2E_MAX_URL: ${{ vars.B2E_MAX_URL || 'https://max.ru/' }}
+      B2E_MAX_URL: ${{ vars.B2E_MAX_URL || 'https://max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM' }}
       B2E_ADDRESS: ${{ vars.B2E_ADDRESS || 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3' }}
-      B2E_YANDEX_MAP_URL: ${{ vars.B2E_YANDEX_MAP_URL }}
+      B2E_YANDEX_MAP_URL: ${{ vars.B2E_YANDEX_MAP_URL || 'https://yandex.ru/maps/-/CPSAzCMe' }}
       B2E_YANDEX_MAP_EMBED_URL: ${{ vars.B2E_YANDEX_MAP_EMBED_URL }}
-      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || '' }}
+      B2E_RBC_PROFILE_URL: ${{ vars.B2E_RBC_PROFILE_URL || 'https://companies.rbc.ru/amp/ogrn/1247800091098/' }}
+      B2E_RUSPROFILE_URL: ${{ vars.B2E_RUSPROFILE_URL || 'https://www.rusprofile.ru/id/1247800091098' }}
+      B2E_CATALOG_URL: ${{ vars.B2E_CATALOG_URL || './assets/documents/b2e-metallokonstrukcii-catalog.pdf' }}
+      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || 'https://b2e-leads.egory780.workers.dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

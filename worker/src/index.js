@@ -78,6 +78,173 @@ function formatLeadText(lead, env) {
   ].join('\n');
 }
 
+function base64Utf8(value) {
+  const bytes = new TextEncoder().encode(String(value));
+  let binary = '';
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+
+  if (typeof btoa === 'function') {
+    return btoa(binary);
+  }
+
+  return Buffer.from(bytes).toString('base64');
+}
+
+function encodeHeader(value) {
+  const text = cleanText(value, 180);
+  return /^[\x20-\x7e]*$/.test(text) ? text : `=?UTF-8?B?${base64Utf8(text)}?=`;
+}
+
+function smtpAddress(value) {
+  return cleanText(value, 180).replace(/[<>]/g, '');
+}
+
+function smtpRecipients(value) {
+  return String(value || '')
+    .split(',')
+    .map((item) => smtpAddress(item))
+    .filter(Boolean);
+}
+
+function formatEmailMessage(lead, env) {
+  const from = smtpAddress(env.SMTP_FROM || env.SMTP_USERNAME);
+  const fromName = cleanText(env.SMTP_FROM_NAME || env.SITE_LABEL || 'ООО B2E', 80);
+  const to = smtpRecipients(env.SMTP_TO);
+  const subject = env.LEAD_SUBJECT || 'Новая заявка с сайта B2E';
+  const text = formatLeadText(lead, env);
+
+  return [
+    `From: ${encodeHeader(fromName)} <${from}>`,
+    `To: ${to.join(', ')}`,
+    `Subject: ${encodeHeader(subject)}`,
+    'MIME-Version: 1.0',
+    'Content-Type: text/plain; charset=UTF-8',
+    'Content-Transfer-Encoding: 8bit',
+    '',
+    text
+  ].join('\r\n');
+}
+
+function isSmtpConfigured(env) {
+  return Boolean(env.SMTP_HOST && env.SMTP_USERNAME && env.SMTP_PASSWORD && env.SMTP_TO);
+}
+
+function smtpCode(response) {
+  return Number(String(response).match(/^(\d{3})/m)?.[1] || 0);
+}
+
+async function readSmtpResponse(reader) {
+  const decoder = new TextDecoder();
+  let response = '';
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    response += decoder.decode(value, { stream: true });
+
+    if (/(^|\r?\n)\d{3} [^\r\n]*(\r?\n)?$/.test(response)) {
+      break;
+    }
+  }
+
+  return response;
+}
+
+async function writeSmtp(writer, value) {
+  await writer.write(new TextEncoder().encode(value));
+}
+
+async function smtpCommand(reader, writer, command, expectedCodes) {
+  if (command) {
+    await writeSmtp(writer, `${command}\r\n`);
+  }
+
+  const response = await readSmtpResponse(reader);
+  const code = smtpCode(response);
+  if (!expectedCodes.includes(code)) {
+    throw new Error(`SMTP command failed with ${code}`);
+  }
+
+  return response;
+}
+
+async function getSocketConnect(env) {
+  if (typeof env.SMTP_CONNECT === 'function') {
+    return env.SMTP_CONNECT;
+  }
+
+  const sockets = await import('cloudflare:sockets');
+  return sockets.connect;
+}
+
+async function sendSmtp(lead, env) {
+  if (!isSmtpConfigured(env)) {
+    return null;
+  }
+
+  if (typeof env.SMTP_SEND === 'function') {
+    return env.SMTP_SEND(lead, env);
+  }
+
+  const connect = await getSocketConnect(env);
+  const host = cleanText(env.SMTP_HOST, 160);
+  const port = Number(env.SMTP_PORT || 465);
+  const secureTransport = env.SMTP_SECURE === 'starttls' ? 'starttls' : 'on';
+  const recipients = smtpRecipients(env.SMTP_TO);
+  const from = smtpAddress(env.SMTP_FROM || env.SMTP_USERNAME);
+  const message = formatEmailMessage(lead, env).replace(/^\./gm, '..');
+
+  let socket = connect({ hostname: host, port }, { secureTransport });
+  await socket.opened;
+
+  let reader = socket.readable.getReader();
+  let writer = socket.writable.getWriter();
+
+  try {
+    await smtpCommand(reader, writer, '', [220]);
+    await smtpCommand(reader, writer, `EHLO ${cleanText(env.SMTP_EHLO_DOMAIN || 'b2energy.ru', 120)}`, [250]);
+
+    if (secureTransport === 'starttls') {
+      await smtpCommand(reader, writer, 'STARTTLS', [220]);
+      writer.releaseLock();
+      reader.releaseLock();
+      socket = socket.startTls();
+      await socket.opened;
+      reader = socket.readable.getReader();
+      writer = socket.writable.getWriter();
+      await smtpCommand(reader, writer, `EHLO ${cleanText(env.SMTP_EHLO_DOMAIN || 'b2energy.ru', 120)}`, [250]);
+    }
+
+    await smtpCommand(reader, writer, 'AUTH LOGIN', [334]);
+    await smtpCommand(reader, writer, base64Utf8(env.SMTP_USERNAME), [334]);
+    await smtpCommand(reader, writer, base64Utf8(env.SMTP_PASSWORD), [235]);
+    await smtpCommand(reader, writer, `MAIL FROM:<${from}>`, [250]);
+
+    for (const recipient of recipients) {
+      await smtpCommand(reader, writer, `RCPT TO:<${recipient}>`, [250, 251]);
+    }
+
+    await smtpCommand(reader, writer, 'DATA', [354]);
+    await smtpCommand(reader, writer, `${message}\r\n.`, [250]);
+    await smtpCommand(reader, writer, 'QUIT', [221]);
+  } finally {
+    writer.releaseLock?.();
+    reader.releaseLock?.();
+    await socket.close?.();
+  }
+
+  return {
+    target: 'smtp',
+    ok: true,
+    status: 250
+  };
+}
+
 async function verifyTurnstile(token, request, env) {
   if (!env.TURNSTILE_SECRET_KEY) {
     return true;
@@ -190,7 +357,11 @@ export default {
       return jsonResponse(request, env, { error: validationError }, { status: 400 });
     }
 
-    const results = [await sendTelegram(lead, env), await sendWebhook(lead, env)].filter(Boolean);
+    const results = [
+      await sendTelegram(lead, env),
+      await sendWebhook(lead, env),
+      await sendSmtp(lead, env)
+    ].filter(Boolean);
     if (results.length === 0) {
       return jsonResponse(
         request,

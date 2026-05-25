@@ -11,11 +11,14 @@
     workHours: 'Пн-Пт 09:00 - 18:00',
     email: 'zakaz@b2energy.ru',
     emailHref: 'mailto:zakaz@b2energy.ru',
-    maxUrl: 'https://max.ru/',
+    maxUrl: 'https://max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM',
     address: defaultAddress,
-    yandexMapUrl: `https://yandex.ru/maps/?ll=${officePoint}&mode=whatshere&whatshere%5Bpoint%5D=${officePoint}&whatshere%5Bzoom%5D=17&z=17`,
+    yandexMapUrl: 'https://yandex.ru/maps/-/CPSAzCMe',
     yandexMapEmbedUrl: `https://yandex.ru/map-widget/v1/?ll=${officePoint}&mode=whatshere&whatshere%5Bpoint%5D=${officePoint}&whatshere%5Bzoom%5D=17&z=17`,
-    leadEndpoint: ''
+    rbcProfileUrl: 'https://companies.rbc.ru/amp/ogrn/1247800091098/',
+    rusprofileUrl: 'https://www.rusprofile.ru/id/1247800091098',
+    catalogUrl: './assets/documents/b2e-metallokonstrukcii-catalog.pdf',
+    leadEndpoint: 'https://b2e-leads.egory780.workers.dev'
   };
 
   const config = { ...defaults, ...(window.B2E_CONFIG || {}) };
@@ -91,44 +94,6 @@
     });
   }
 
-  function getCalculatorValues(form) {
-    const field = (name) => form.elements.namedItem(name);
-    const length = Number(field('length')?.value) || 0;
-    const width = Number(field('width')?.value) || 0;
-    const height = Number(field('height')?.value) || 0;
-    const crane = Boolean(field('crane')?.checked);
-    const coefficient = height >= 10 ? (crane ? 0.09 : 0.08) : crane ? 0.065 : 0.05;
-    const tonnage = length * width * height * coefficient;
-
-    return { length, width, height, crane, coefficient, tonnage };
-  }
-
-  function formatTonnage(value) {
-    const rounded = Math.round(value * 10) / 10;
-    return Number.isInteger(rounded) ? `${rounded} т` : `${rounded.toFixed(1)} т`;
-  }
-
-  function setupCalculator() {
-    const form = $('#tonnageCalculator');
-    const result = $('#calcResult');
-
-    if (!form || !result) {
-      return;
-    }
-
-    const update = () => {
-      const values = getCalculatorValues(form);
-      result.innerHTML = `
-        <span>Ориентировочный тоннаж</span>
-        <strong>${formatTonnage(values.tonnage)}</strong>
-        <small>Коэффициент ${String(values.coefficient).replace('.', ',')}</small>
-      `;
-    };
-
-    form.addEventListener('input', update);
-    update();
-  }
-
   function setupModal() {
     const modal = $('#leadModal');
     const form = $('#leadForm');
@@ -182,15 +147,7 @@
     $$('.callback-trigger').forEach((button) => {
       button.addEventListener('click', () => {
         const typeFromButton = button.dataset.objectType;
-        const calcForm = $('#tonnageCalculator');
-        let source = '';
-
-        if (typeFromButton === 'Расчет тоннажа' && calcForm) {
-          const values = getCalculatorValues(calcForm);
-          source = `calculator: ${values.length}x${values.width}x${values.height}, crane=${values.crane}, coefficient=${values.coefficient}, result=${formatTonnage(values.tonnage)}`;
-        }
-
-        openModal(typeFromButton, source);
+        openModal(typeFromButton, '');
       });
     });
 
@@ -214,15 +171,16 @@
         name: String(formData.get('name') || '').trim(),
         phone: String(formData.get('phone') || '').trim(),
         objectType: String(formData.get('objectType') || '').trim(),
+        message: String(formData.get('message') || '').trim(),
         source: String(formData.get('source') || 'callback').trim(),
         page: window.location.href,
         createdAt: new Date().toISOString()
       };
 
       const openMailFallback = () => {
-        const subject = encodeURIComponent(`Заявка с сайта B2E: ${payload.objectType}`);
+        const subject = encodeURIComponent(`Заявка с сайта B2E: ${payload.objectType || 'общая заявка'}`);
         const body = encodeURIComponent(
-          `Имя: ${payload.name}\nТелефон: ${payload.phone}\nТип объекта: ${payload.objectType}\nИсточник: ${payload.source}\nСтраница: ${payload.page}`
+          `Имя: ${payload.name}\nКонтакт: ${payload.phone}\nТип заявки: ${payload.objectType}\nЗадача: ${payload.message || 'не указана'}\nИсточник: ${payload.source}\nСтраница: ${payload.page}`
         );
         window.location.href = `${config.emailHref}?subject=${subject}&body=${body}`;
       };
@@ -269,16 +227,22 @@
     const actions = $('.floating-actions');
     const phone = $('.phone-float');
     const max = $('.max-float');
+    const expandPhone = () => phone?.classList.add('is-expanded');
+    const collapsePhone = () => phone?.classList.remove('is-expanded');
 
     actions?.classList.add('is-max-pending');
+    phone?.addEventListener('mouseenter', expandPhone);
+    phone?.addEventListener('mouseleave', collapsePhone);
+    phone?.addEventListener('focus', expandPhone);
+    phone?.addEventListener('blur', collapsePhone);
     setTimeout(() => phone?.classList.add('is-visible'), 5000);
     setTimeout(() => {
       actions?.classList.remove('is-max-pending');
       max?.classList.add('is-visible');
     }, 10000);
     setTimeout(() => {
-      phone?.classList.add('is-expanded');
-      setTimeout(() => phone?.classList.remove('is-expanded'), 10000);
+      expandPhone();
+      setTimeout(collapsePhone, 10000);
     }, 25000);
   }
 
@@ -326,6 +290,55 @@
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
 
+    const isMapPoint = ([lat, lng]) =>
+      Number.isFinite(lat) &&
+      Number.isFinite(lng) &&
+      Math.abs(lat) <= 90 &&
+      Math.abs(lng) <= 180;
+
+    const readBounds = (value) => {
+      if (!value) {
+        return null;
+      }
+
+      const points = value.split(';').map((point) => point.split(',').map(Number));
+      const isValid = points.length === 2 && points.every(isMapPoint);
+
+      return isValid ? points : null;
+    };
+
+    const readPolygons = (value) => {
+      if (!value) {
+        return [];
+      }
+
+      return value
+        .split('|')
+        .map((polygon) =>
+          polygon
+            .split(';')
+            .map((point) => point.split(',').map(Number))
+            .filter(isMapPoint)
+        )
+        .filter((polygon) => polygon.length >= 3);
+    };
+
+    const boundsFromPolygons = (polygons) => {
+      const points = polygons.flat();
+
+      if (!points.length) {
+        return null;
+      }
+
+      const lats = points.map(([lat]) => lat);
+      const lngs = points.map(([, lng]) => lng);
+
+      return [
+        [Math.min(...lats), Math.min(...lngs)],
+        [Math.max(...lats), Math.max(...lngs)]
+      ];
+    };
+
     const readLocation = (button) => {
       const lat = Number(button.dataset.mapLat);
       const lng = Number(button.dataset.mapLng);
@@ -334,6 +347,8 @@
         return null;
       }
 
+      const polygons = readPolygons(button.dataset.mapPolygons);
+
       return {
         key: button.dataset.mapKey || button.dataset.mapName || `${lat},${lng}`,
         lat,
@@ -341,7 +356,10 @@
         zoom: Number(button.dataset.mapZoom) || 13,
         name: button.dataset.mapName || button.textContent.trim(),
         kind: button.dataset.mapKind || 'Площадка',
-        url: button.dataset.mapUrl || config.yandexMapUrl
+        url: button.dataset.mapUrl || config.yandexMapUrl,
+        coverage: button.dataset.mapCoverage === 'true',
+        polygons,
+        bounds: readBounds(button.dataset.mapBounds) || boundsFromPolygons(polygons)
       };
     };
 
@@ -399,6 +417,7 @@
 
     let map = null;
     const markers = new Map();
+    let coverageLayer = null;
 
     if (window.L) {
       const start = activeItem.location;
@@ -414,6 +433,10 @@
       }).addTo(map);
 
       locations.forEach(({ button, location }) => {
+        if (location.coverage) {
+          return;
+        }
+
         const marker = window.L.marker([location.lat, location.lng], {
           icon: createIcon(location.key === start.key),
           title: `${location.kind}: ${location.name}`
@@ -426,6 +449,24 @@
         marker.on('click', () => activate(button, { move: false }));
         markers.set(location.key, marker);
       });
+
+      const coverageItem = locations.find((item) => item.location.coverage && item.location.polygons.length);
+      if (coverageItem) {
+        coverageLayer = window.L.featureGroup(
+          coverageItem.location.polygons.map((polygon) =>
+            window.L.polygon(polygon, {
+              color: '#ffc400',
+              weight: 2,
+              opacity: .9,
+              fillColor: '#ffc400',
+              fillOpacity: .12
+            })
+          )
+        ).bindPopup(
+          `<strong>${escapeHtml(coverageItem.location.kind)}</strong><span>${escapeHtml(coverageItem.location.name)}</span>`
+        );
+        coverageLayer.on('click', () => activate(coverageItem.button, { move: false }));
+      }
 
       hideMapStatus();
       setTimeout(() => map.invalidateSize(), 100);
@@ -447,10 +488,29 @@
       card?.classList.add('is-active');
       button.setAttribute('aria-pressed', 'true');
       setLinks(location);
+      mapNode.dataset.activeMapKey = location.key;
+      mapNode.dataset.activeMapMode = location.coverage ? 'coverage' : 'point';
 
       if (map) {
+        const isCoverage = Boolean(location.coverage && location.bounds);
+
+        if (coverageLayer) {
+          if (isCoverage && !map.hasLayer(coverageLayer)) {
+            coverageLayer.addTo(map);
+          }
+
+          if (!isCoverage && map.hasLayer(coverageLayer)) {
+            coverageLayer.remove();
+          }
+        }
+
         if (move) {
-          map.setView([location.lat, location.lng], location.zoom, { animate: true });
+          if (isCoverage) {
+            const fitTarget = coverageLayer?.getBounds?.() || location.bounds;
+            map.fitBounds(fitTarget, { padding: [26, 26], animate: true });
+          } else {
+            map.setView([location.lat, location.lng], location.zoom, { animate: true });
+          }
         }
 
         markers.forEach((marker, key) => marker.setIcon(createIcon(key === location.key)));
@@ -458,6 +518,8 @@
 
         if (marker && openPopup) {
           marker.openPopup();
+        } else if (isCoverage && coverageLayer && openPopup) {
+          coverageLayer.openPopup(window.L.latLng(location.lat, location.lng));
         }
       }
     };
@@ -472,7 +534,6 @@
 
   applyConfig();
   setupNavigation();
-  setupCalculator();
   setupModal();
   setupFloatingActions();
   setupReveal();

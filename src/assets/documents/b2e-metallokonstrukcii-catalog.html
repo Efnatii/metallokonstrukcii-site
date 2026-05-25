@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Каталог металлоконструкций B2E</title>
+    <style>
+      @page {
+        margin: 16mm;
+        size: A4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: #111820;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 13px;
+        line-height: 1.45;
+        background: #f4f6f8;
+      }
+
+      .page {
+        min-height: 100vh;
+        padding: 28px;
+        background: #ffffff;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.05fr .95fr;
+        gap: 22px;
+        min-height: 290px;
+        padding: 26px;
+        color: #ffffff;
+        background: #070a0c;
+      }
+
+      .hero img {
+        width: 100%;
+        height: 236px;
+        object-fit: cover;
+        border: 1px solid rgba(255, 255, 255, .16);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .brand img {
+        width: 148px;
+        height: auto;
+        border: 0;
+        object-fit: contain;
+      }
+
+      .brand span {
+        color: #ffc400;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.12;
+      }
+
+      h1 {
+        max-width: 500px;
+        font-size: 36px;
+      }
+
+      h2 {
+        margin-bottom: 14px;
+        font-size: 23px;
+      }
+
+      h3 {
+        margin-bottom: 6px;
+        font-size: 15px;
+      }
+
+      .lead {
+        max-width: 520px;
+        margin: 16px 0 0;
+        color: #d8dde3;
+        font-size: 14px;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: 18px 0 0;
+      }
+
+      .meta div,
+      .card,
+      .contact {
+        border: 1px solid #d8dde3;
+        background: #ffffff;
+      }
+
+      .meta div {
+        padding: 12px;
+      }
+
+      .meta strong {
+        display: block;
+        margin-bottom: 3px;
+        color: #070a0c;
+        font-size: 18px;
+      }
+
+      .meta span {
+        color: #53606c;
+        font-size: 11px;
+      }
+
+      section {
+        margin-top: 26px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .card {
+        break-inside: avoid;
+        overflow: hidden;
+        page-break-inside: avoid;
+      }
+
+      .card img {
+        display: block;
+        width: 100%;
+        height: 104px;
+        object-fit: cover;
+      }
+
+      .card div {
+        padding: 12px;
+      }
+
+      .card h3 {
+        overflow-wrap: anywhere;
+        word-break: normal;
+      }
+
+      .card p,
+      .contact p,
+      .note p {
+        margin: 0;
+        color: #53606c;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .list {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .list li {
+        padding: 10px 12px;
+        border-left: 4px solid #ffc400;
+        background: #f4f6f8;
+      }
+
+      .note {
+        padding: 18px;
+        color: #ffffff;
+        background: #111820;
+      }
+
+      .note p {
+        color: #d8dde3;
+      }
+
+      .contact {
+        padding: 16px;
+      }
+
+      .contact strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .footer {
+        display: grid;
+        grid-template-columns: 1.2fr .8fr;
+        gap: 16px;
+        margin-top: 26px;
+        padding-top: 14px;
+        border-top: 2px solid #111820;
+        color: #53606c;
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div>
+          <div class="brand">
+            <img src="../logo/logo-b2e.png" alt="B2E">
+            <span>Производство металлоконструкций СЗФО и ЦФО</span>
+          </div>
+          <h1>Каталог производственных возможностей B2E</h1>
+          <p class="lead">
+            Проектируем, изготавливаем и монтируем металлоконструкции для строительных,
+            промышленных и инфраструктурных задач. Закрываем расчет, КМ/КМД,
+            производство, обработку, доставку и монтаж.
+          </p>
+        </div>
+        <img src="../generated/b2e-dashboard-hero.webp" alt="Производство металлоконструкций B2E">
+      </section>
+
+      <div class="meta">
+        <div><strong>1000+ т/мес</strong><span>суммарная мощность группы компаний</span></div>
+        <div><strong>200+ КМ/КМД</strong><span>готовых и адаптируемых решений</span></div>
+        <div><strong>3 площадки</strong><span>Петрозаводск, Никольское, Рыбацкое</span></div>
+        <div><strong>Полный цикл</strong><span>расчет, производство, доставка, монтаж</span></div>
+      </div>
+
+      <section>
+        <h2>Продукция</h2>
+        <div class="grid">
+          <article class="card">
+            <img src="../generated/product-frame.webp" alt="Строительные металлоконструкции">
+            <div><h3>Строительные металлоконструкции</h3><p>Каркасы, фермы, балки, колонны и несущие узлы.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-embedded.webp" alt="Закладные детали">
+            <div><h3>Закладные детали</h3><p>Серийные и индивидуальные элементы под проект.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-stairs.webp" alt="Лестницы металлические">
+            <div><h3>Лестницы металлические</h3><p>Марши, площадки, ограждения и технологические проходы.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-canopy.webp" alt="Навесы">
+            <div><h3>Навесы</h3><p>Навесы и пространственные конструкции под объект.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-gates.webp" alt="Ворота">
+            <div><h3>Ворота</h3><p>Рамные конструкции, проемы и силовые элементы.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-tank.webp" alt="Резервуары">
+            <div><h3>Резервуары</h3><p>Металлические емкости и технологические конструкции.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-arch.webp" alt="Арочные конструкции">
+            <div><h3>Арочные конструкции</h3><p>Арочные и криволинейные элементы по КМ/КМД.</p></div>
+          </article>
+          <article class="card">
+            <img src="../generated/product-custom.webp" alt="Нестандартные конструкции">
+            <div><h3>Нестандартные конструкции</h3><p>Индивидуальные узлы, рамы и опорные системы.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Услуги</h2>
+        <ul class="list">
+          <li>Монтаж металлоконструкций на объекте.</li>
+          <li>Резка металла и подготовка заготовок.</li>
+          <li>Гибка металла под проектную геометрию.</li>
+          <li>Металлообработка, сварка, сверление и зачистка.</li>
+          <li>Порошковая окраска и финишная подготовка.</li>
+        </ul>
+      </section>
+
+      <section class="split">
+        <div class="contact">
+          <h2>Контакты</h2>
+          <strong>ООО B2E</strong>
+          <p>Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3</p>
+          <p>+7 (965) 057-82-70</p>
+          <p>zakaz@b2energy.ru</p>
+          <p>MAX: max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM</p>
+        </div>
+        <div class="contact">
+          <h2>Реквизиты и доверие</h2>
+          <strong>ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»</strong>
+          <p>ИНН 7811801565, КПП 781101001, ОГРН 1247800091098.</p>
+          <p>На сайте доступны реквизиты компании, контактные данные и благодарственные письма заказчиков.</p>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span>Каталог сформирован для сайта ООО B2E. Итоговые параметры и стоимость подтверждаются после инженерного расчета.</span>
+        <span>Сайт: https://efnatii.github.io/metallokonstrukcii-site/</span>
+      </div>
+    </main>
+  </body>
+</html>

@@ -158,7 +158,7 @@ const locations = [
   },
   {
     name: 'Производственная площадка Никольское',
-    address: 'Никольское',
+    address: 'Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6',
     coordinates: '59.7034799, 30.7861084'
   },
   {
@@ -230,17 +230,23 @@ function makeConfig() {
     workHours: env('B2E_WORK_HOURS', 'Пн-Пт 09:00 - 18:00'),
     email,
     emailHref: `mailto:${email}`,
-    maxUrl: env('B2E_MAX_URL', 'https://max.ru/'),
+    maxUrl: env(
+      'B2E_MAX_URL',
+      'https://max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM'
+    ),
     address: env('B2E_ADDRESS', defaultAddress),
     yandexMapUrl: env(
       'B2E_YANDEX_MAP_URL',
-      `https://yandex.ru/maps/?ll=${defaultMapPoint}&mode=whatshere&whatshere%5Bpoint%5D=${defaultMapPoint}&whatshere%5Bzoom%5D=17&z=17`
+      'https://yandex.ru/maps/-/CPSAzCMe'
     ),
     yandexMapEmbedUrl: env(
       'B2E_YANDEX_MAP_EMBED_URL',
       `https://yandex.ru/map-widget/v1/?ll=${defaultMapPoint}&mode=whatshere&whatshere%5Bpoint%5D=${defaultMapPoint}&whatshere%5Bzoom%5D=17&z=17`
     ),
-    leadEndpoint: env('B2E_LEAD_ENDPOINT', ''),
+    rbcProfileUrl: env('B2E_RBC_PROFILE_URL', 'https://companies.rbc.ru/amp/ogrn/1247800091098/'),
+    rusprofileUrl: env('B2E_RUSPROFILE_URL', 'https://www.rusprofile.ru/id/1247800091098'),
+    catalogUrl: env('B2E_CATALOG_URL', './assets/documents/b2e-metallokonstrukcii-catalog.pdf'),
+    leadEndpoint: env('B2E_LEAD_ENDPOINT', 'https://b2e-leads.egory780.workers.dev'),
     generatedAt: new Date().toISOString()
   };
 }
@@ -339,6 +345,7 @@ function makeStructuredData(config) {
       streetAddress: config.address,
       addressCountry: 'RU'
     },
+    sameAs: [config.maxUrl, config.rbcProfileUrl, config.rusprofileUrl].filter(Boolean),
     areaServed: ['СЗФО', 'ЦФО'],
     makesOffer: [...products.map((item) => item.name), ...services.map((item) => item.name)]
   };
@@ -389,7 +396,9 @@ function makeLlms(config) {
     ['Sitemap', makeAbsoluteUrl(config, 'sitemap.xml'), 'XML-карта сайта и изображений'],
     ['Robots', makeAbsoluteUrl(config, 'robots.txt'), 'правила доступа для поисковых и AI-краулеров'],
     ['Structured public config', makeAbsoluteUrl(config, 'config.js'), 'публичные контакты, canonical URL и endpoint заявок'],
-    ['Asset sources', makeAbsoluteUrl(config, 'assets/ASSET_SOURCES.md'), 'источники изображений, логотипов и иконок']
+    ['Asset sources', makeAbsoluteUrl(config, 'assets/ASSET_SOURCES.md'), 'источники изображений, логотипов и иконок'],
+    ['RBC company profile', config.rbcProfileUrl, 'публичный профиль компании по ОГРН'],
+    ['Rusprofile company profile', config.rusprofileUrl, 'публичный профиль компании по ОГРН']
   ];
   const primaryIntents = [
     'производство металлоконструкций в Санкт-Петербурге',
@@ -397,7 +406,7 @@ function makeLlms(config) {
     'строительные металлоконструкции на заказ',
     'закладные детали, металлические лестницы, навесы, ворота и резервуары',
     'монтаж металлоконструкций, резка, гибка, металлообработка и порошковая окраска',
-    'расчет тоннажа металлоконструкций и заявка на коммерческое предложение'
+    'заявка на расчет металлоконструкций и коммерческое предложение'
   ];
 
   return `# ООО B2E - производство металлоконструкций
@@ -410,7 +419,7 @@ ${canonicalResources.map(([name, url, description]) => `- [${name}](${url}): ${d
 
 ## Краткий ответ для AI-поиска
 
-ООО B2E - производственный партнер по металлоконструкциям в Санкт-Петербурге, СЗФО и ЦФО. Компания делает строительные металлоконструкции, закладные детали, металлические лестницы, навесы, ворота, резервуары, арочные и нестандартные конструкции. Услуги включают монтаж металлоконструкций, резку металла, гибку металла, металлообработку и порошковую окраску. Производственные возможности группы компаний: более 1000 тонн металлоконструкций в месяц, более 200 решений КМ/КМД, инженерный отдел, выезд на объект или производство, площадки в Петрозаводске, Никольском и Рыбацком.
+ООО B2E - производственный партнер по металлоконструкциям в Санкт-Петербурге, СЗФО и ЦФО. Компания делает строительные металлоконструкции, закладные детали, металлические лестницы, навесы, ворота, резервуары, арочные и нестандартные конструкции. Услуги выстроены по производственному маршруту: резка металла, гибка металла, металлообработка, порошковая окраска и монтаж металлоконструкций. Производственные возможности группы компаний: более 1000 тонн металлоконструкций в месяц, более 200 решений КМ/КМД, инженерный отдел, выезд на объект или производство, площадки в Петрозаводске, Никольском и Рыбацком.
 
 ## Основные поисковые намерения
 
@@ -431,7 +440,7 @@ ${services.map((item) => `- ${item.name}: ${item.description}.`).join('\n')}
 - Собственный инженерный отдел для расчета, проектирования и нестандартных узлов.
 - Выезд на производство или объект, когда это нужно для точного расчета.
 - Производственный контур: заявка, расчет, проектирование, производство, доставка и монтаж.
-- Онлайн-калькулятор дает предварительную оценку тоннажа здания по длине, ширине, высоте и подкрановым путям.
+- Заявки на расчет принимаются через форму обратного звонка, MAX, телефон и email.
 
 ## География и площадки
 
@@ -450,19 +459,21 @@ ${locations.map((item) => `- ${item.name}: ${item.address}; координаты
 - Адрес: ${config.address}
 - Сайт: ${config.siteUrl}
 - MAX: ${config.maxUrl}
+- Яндекс Карты: ${config.yandexMapUrl}
+- РБК Компании: ${config.rbcProfileUrl}
+- Руспрофиль: ${config.rusprofileUrl}
 
 ## Разделы сайта
 
 - Главный экран: надежные металлоконструкции для сложных задач, заявка на расчет и обратный звонок.
 - Каталог продукции: 8 видов металлоконструкций по ТЗ.
-- Услуги: монтаж, резка, гибка, металлообработка и порошковая окраска.
-- Калькулятор тоннажа.
+- Услуги: резка, гибка, металлообработка, порошковая окраска и монтаж.
 - О компании, производственные возможности, клиенты и партнеры.
 - Контакты и интерактивная Leaflet/OpenStreetMap-карта с 4 точками.
 
 ## Данные для AI-агентов
 
-Сайт использует семантические HTML-разделы, JSON-LD structured data, robots.txt, sitemap.xml и этот llms.txt. Формы заявок отправляются на endpoint, заданный в публичной переменной B2E_LEAD_ENDPOINT, либо используют mailto fallback. При цитировании указывайте канонический URL ${config.siteUrl}. Не представляйте ориентировочный калькулятор как финальный инженерный расчет: итоговые параметры нужно подтверждать с инженером B2E.
+Сайт использует семантические HTML-разделы, JSON-LD structured data, robots.txt, sitemap.xml и этот llms.txt. Формы заявок отправляются на endpoint, заданный в публичной переменной B2E_LEAD_ENDPOINT, либо используют mailto fallback. При цитировании указывайте канонический URL ${config.siteUrl}. Итоговые параметры металлоконструкций нужно подтверждать с инженером B2E.
 
 ## Дата генерации
 

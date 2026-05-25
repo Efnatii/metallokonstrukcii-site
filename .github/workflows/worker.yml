@@ -69,6 +69,14 @@ jobs:
           WORKER_LEAD_WEBHOOK_URL: ${{ secrets.WORKER_LEAD_WEBHOOK_URL }}
           WORKER_TELEGRAM_BOT_TOKEN: ${{ secrets.WORKER_TELEGRAM_BOT_TOKEN }}
           WORKER_TELEGRAM_CHAT_ID: ${{ secrets.WORKER_TELEGRAM_CHAT_ID }}
+          WORKER_SMTP_HOST: ${{ secrets.WORKER_SMTP_HOST }}
+          WORKER_SMTP_PORT: ${{ secrets.WORKER_SMTP_PORT }}
+          WORKER_SMTP_SECURE: ${{ secrets.WORKER_SMTP_SECURE }}
+          WORKER_SMTP_USERNAME: ${{ secrets.WORKER_SMTP_USERNAME }}
+          WORKER_SMTP_PASSWORD: ${{ secrets.WORKER_SMTP_PASSWORD }}
+          WORKER_SMTP_FROM: ${{ secrets.WORKER_SMTP_FROM }}
+          WORKER_SMTP_FROM_NAME: ${{ secrets.WORKER_SMTP_FROM_NAME }}
+          WORKER_SMTP_TO: ${{ secrets.WORKER_SMTP_TO }}
           WORKER_TURNSTILE_SECRET_KEY: ${{ secrets.WORKER_TURNSTILE_SECRET_KEY }}
         run: |
           node <<'NODE'
@@ -77,6 +85,14 @@ jobs:
             LEAD_WEBHOOK_URL: process.env.WORKER_LEAD_WEBHOOK_URL,
             TELEGRAM_BOT_TOKEN: process.env.WORKER_TELEGRAM_BOT_TOKEN,
             TELEGRAM_CHAT_ID: process.env.WORKER_TELEGRAM_CHAT_ID,
+            SMTP_HOST: process.env.WORKER_SMTP_HOST,
+            SMTP_PORT: process.env.WORKER_SMTP_PORT,
+            SMTP_SECURE: process.env.WORKER_SMTP_SECURE,
+            SMTP_USERNAME: process.env.WORKER_SMTP_USERNAME,
+            SMTP_PASSWORD: process.env.WORKER_SMTP_PASSWORD,
+            SMTP_FROM: process.env.WORKER_SMTP_FROM,
+            SMTP_FROM_NAME: process.env.WORKER_SMTP_FROM_NAME,
+            SMTP_TO: process.env.WORKER_SMTP_TO,
             TURNSTILE_SECRET_KEY: process.env.WORKER_TURNSTILE_SECRET_KEY
           };
           const secrets = Object.fromEntries(

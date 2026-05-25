@@ -38,8 +38,10 @@ npm run smoke
 - Все интерфейсные и производственные иконки заменены на единый адаптивный PNG-набор 1x/2x/3x из нового сгенерированного ChatGPT Image листа `icons/concept-c-industrial-icons-source.png`; SVG-иконки в интерфейсе не используются.
 - Значок MAX подключен отдельным PNG-набором 1x/2x/3x из полного кода сайтов-примеров в `techtask`.
 - Блок клиентов использует реальные логотипы компаний из ТЗ: АГРОТОРГ/Пятёрочка, Магнит, Гипроавтотранс, Горэлектротранс, Водоканал СПб, НПК Катарсис.
-- Hero, каталог продукции, услуги и блок производства используют AI-сгенерированные визуализации ChatGPT Image/ImageGen. Они подписаны как визуализации производственных процессов, а не как документальные фотографии цехов B2E.
-- Карта в контактах - реальная интерактивная Leaflet/OpenStreetMap-карта. Она переключает главный офис и производственные направления из ТЗ: Петрозаводск, Никольское, Рыбацкое. Главный офис выставлен по координатам 2ГИС для `Санкт-Петербург, улица Седова, 57 лит В`: `59.879804, 30.425277`. Кнопка `Открыть в Яндекс Картах` ведет на выбранную точку в Яндексе.
+- Hero, каталог продукции, услуги и блок производства переведены на реальные фото из открытых источников, существующие фото проекта и пользовательские примеры КМ/КМД. Чертежи из обновлений используются только как примеры металлоконструкций и проектной документации, не как фотографии объектов B2E.
+- На страницу добавлен блок `Инженерия и опыт`: пример КМ/КМД и благодарственные письма СЕВЗАПЭНЕРГО и ГК ИНЕРГО. Публичные реквизиты вынесены в hero-плашку и многострочный footer.
+- Кнопки каталога на публичной странице сейчас неактивны до подготовки финального каталога.
+- Карта в контактах - реальная интерактивная Leaflet/OpenStreetMap-карта. Она переключает главный офис и производственные направления из ТЗ: Петрозаводск, Никольское, Рыбацкое, а также отдельную кнопку зоны покрытия с масштабом СЗФО/ЦФО. Для Никольского указан адрес: `Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6`. Главный офис выставлен по координатам 2ГИС для `Санкт-Петербург, улица Седова, 57 лит В`: `59.879804, 30.425277`. Кнопка `Открыть в Яндекс Картах` ведет на выбранную точку или общий масштаб покрытия.
 
 ## GitHub Actions
 
@@ -64,7 +66,10 @@ npm run smoke
 | `B2E_MAX_URL` | Ссылка на MAX. |
 | `B2E_ADDRESS` | Адрес компании. |
 | `B2E_YANDEX_MAP_URL` | Ссылка на Яндекс Карты для главного офиса. |
-| `B2E_YANDEX_MAP_EMBED_URL` | Публичный URL iframe Яндекс Карты для совместимости конфигурации. Текущая видимая карта работает через Leaflet/OpenStreetMap с четырьмя точками. |
+| `B2E_YANDEX_MAP_EMBED_URL` | Публичный URL iframe Яндекс Карты для совместимости конфигурации. Текущая видимая карта работает через Leaflet/OpenStreetMap с четырьмя точками и зоной покрытия. |
+| `B2E_RBC_PROFILE_URL` | Публичный профиль компании в РБК Компании. |
+| `B2E_RUSPROFILE_URL` | Публичный профиль компании в Руспрофиль. |
+| `B2E_CATALOG_URL` | Публичный URL PDF-каталога для кнопки `Скачать каталог`. |
 | `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.egory780.workers.dev`. |
 | `CLOUDFLARE_ACCOUNT_ID` | ID аккаунта Cloudflare для деплоя Worker. |
 | `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://efnatii.github.io`. |
@@ -81,13 +86,23 @@ npm run smoke
 | `WORKER_LEAD_WEBHOOK_URL` | CRM, Make, Zapier, Formspree или другой webhook для заявок. |
 | `WORKER_TELEGRAM_BOT_TOKEN` | Токен Telegram-бота для отправки заявок. |
 | `WORKER_TELEGRAM_CHAT_ID` | ID Telegram-чата/канала. |
+| `WORKER_SMTP_HOST` | SMTP host для отправки заявки с no-reply почты. |
+| `WORKER_SMTP_PORT` | SMTP port, для Yandex SSL обычно `465`. |
+| `WORKER_SMTP_SECURE` | Режим TLS: `on` для 465 или `starttls` для 587. |
+| `WORKER_SMTP_USERNAME` | SMTP-логин no-reply. |
+| `WORKER_SMTP_PASSWORD` | Пароль приложения SMTP. |
+| `WORKER_SMTP_FROM` | Адрес отправителя. |
+| `WORKER_SMTP_FROM_NAME` | Отображаемое имя отправителя. |
+| `WORKER_SMTP_TO` | Адрес получателя заявок. |
 | `WORKER_TURNSTILE_SECRET_KEY` | Опциональный секрет Cloudflare Turnstile. |
 
-Workflow загружает только непустые `WORKER_*` secrets в Cloudflare Worker Secrets. Если ни `WORKER_LEAD_WEBHOOK_URL`, ни Telegram-секреты не заданы, Worker отвечает `503 Lead destination is not configured`, а сайт откатывается на `mailto:` fallback.
+Workflow загружает только непустые `WORKER_*` secrets в Cloudflare Worker Secrets. Если ни `WORKER_LEAD_WEBHOOK_URL`, ни Telegram-секреты, ни SMTP-секреты не заданы, Worker отвечает `503 Lead destination is not configured`, а сайт откатывается на `mailto:` fallback.
+
+SMTP/IMAP-логины, пароли приложений и почтовые пароли из локальных материалов нельзя добавлять в `src`, `dist`, README, `.env.example`, frontend config или GitHub Variables. Для автоматической доставки заявок используйте приватные `WORKER_SMTP_*` secrets, Telegram или внешний webhook.
 
 ## Cloudflare Worker
 
-Код Worker лежит в `worker/`. Он принимает POST-заявки только с `WORKER_ALLOWED_ORIGIN`, валидирует имя/телефон, опционально проверяет Turnstile и отправляет заявку в Telegram или webhook.
+Код Worker лежит в `worker/`. Он принимает POST-заявки только с `WORKER_ALLOWED_ORIGIN`, валидирует имя/телефон, опционально проверяет Turnstile и отправляет заявку в Telegram, webhook или SMTP.
 
 Локально:
 
@@ -122,6 +137,6 @@ https://efnatii.github.io/metallokonstrukcii-site/config.js
 
 Сборка генерирует `config.js`, `sitemap.xml`, `robots.txt`, `llms.txt` и `.nojekyll`. HTML содержит семантические секции и structured data для `Organization`/`LocalBusiness`.
 
-В футере выводятся публичные служебные файлы, которые имеет смысл открывать из браузера: `robots.txt`, `sitemap.xml`, `llms.txt`, `config.js`, `assets/ASSET_SOURCES.md`, а также copyright сайта. `.nojekyll` не выводится в футере, потому что это технический маркер GitHub Pages без пользовательского содержимого.
+В футере выводятся только публичные служебные файлы `robots.txt`, `sitemap.xml`, `llms.txt`, а также copyright сайта. `config.js`, `assets/ASSET_SOURCES.md`, каталог PDF и `.nojekyll` не выводятся в футере.
 
 Дополнительный чеклист соответствия концепту C, ТЗ, env split и browser QA лежит в `docs/DESIGN_QA.md`.

@@ -11,6 +11,10 @@
     "secret:webhook": "wrangler secret put LEAD_WEBHOOK_URL",
     "secret:telegram-token": "wrangler secret put TELEGRAM_BOT_TOKEN",
     "secret:telegram-chat": "wrangler secret put TELEGRAM_CHAT_ID",
+    "secret:smtp-host": "wrangler secret put SMTP_HOST",
+    "secret:smtp-username": "wrangler secret put SMTP_USERNAME",
+    "secret:smtp-password": "wrangler secret put SMTP_PASSWORD",
+    "secret:smtp-to": "wrangler secret put SMTP_TO",
     "secret:turnstile": "wrangler secret put TURNSTILE_SECRET_KEY"
   },
   "devDependencies": {

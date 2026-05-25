@@ -109,6 +109,31 @@ test('webhook delivery sends sanitized JSON payload', async () => {
   }
 });
 
+test('SMTP delivery can be configured through Worker secrets', async () => {
+  const smtpCalls = [];
+  const response = await worker.fetch(makeRequest({ body: validLead({ objectType: 'Строительные металлоконструкции' }) }), {
+    ...baseEnv,
+    SMTP_HOST: 'smtp.test',
+    SMTP_PORT: '465',
+    SMTP_USERNAME: 'sender@example.test',
+    SMTP_PASSWORD: 'app-password',
+    SMTP_FROM: 'sender@example.test',
+    SMTP_TO: 'zakaz@example.test',
+    SMTP_SEND: async (lead, env) => {
+      smtpCalls.push({ lead, to: env.SMTP_TO, from: env.SMTP_FROM });
+      return { target: 'smtp', ok: true, status: 250 };
+    }
+  });
+  const payload = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.ok, true);
+  assert.deepEqual(payload.results, [{ target: 'smtp', ok: true, status: 250 }]);
+  assert.equal(smtpCalls.length, 1);
+  assert.equal(smtpCalls[0].lead.objectType, 'Строительные металлоконструкции');
+  assert.equal(smtpCalls[0].to, 'zakaz@example.test');
+});
+
 test('Turnstile secret requires a token before delivery', async () => {
   const response = await worker.fetch(makeRequest({ body: validLead() }), {
     ...baseEnv,

@@ -1,6 +1,6 @@
 # B2E Leads Cloudflare Worker
 
-Cloudflare Worker принимает заявки с GitHub Pages и пересылает их в Telegram или внешний webhook. Приватные значения не должны попадать в frontend: они хранятся в Cloudflare Worker Secrets.
+Cloudflare Worker принимает заявки с GitHub Pages и пересылает их в Telegram, внешний webhook или SMTP. Приватные значения не должны попадать в frontend: они хранятся в Cloudflare Worker Secrets.
 
 ## Локальные команды
 
@@ -46,6 +46,14 @@ Workflow `.github/workflows/worker.yml`:
 | `WORKER_LEAD_WEBHOOK_URL` | `LEAD_WEBHOOK_URL` | Нет, если настроен Telegram. |
 | `WORKER_TELEGRAM_BOT_TOKEN` | `TELEGRAM_BOT_TOKEN` | Нет, если настроен webhook. |
 | `WORKER_TELEGRAM_CHAT_ID` | `TELEGRAM_CHAT_ID` | Нет, если настроен webhook. |
+| `WORKER_SMTP_HOST` | `SMTP_HOST` | Нет, если настроен Telegram или webhook. |
+| `WORKER_SMTP_PORT` | `SMTP_PORT` | Нет, по умолчанию `465`. |
+| `WORKER_SMTP_SECURE` | `SMTP_SECURE` | Нет, `on` для 465 или `starttls` для 587. |
+| `WORKER_SMTP_USERNAME` | `SMTP_USERNAME` | Да, если используется SMTP. |
+| `WORKER_SMTP_PASSWORD` | `SMTP_PASSWORD` | Да, если используется SMTP. |
+| `WORKER_SMTP_FROM` | `SMTP_FROM` | Нет, если совпадает с `SMTP_USERNAME`. |
+| `WORKER_SMTP_FROM_NAME` | `SMTP_FROM_NAME` | Нет. |
+| `WORKER_SMTP_TO` | `SMTP_TO` | Да, если используется SMTP. |
 | `WORKER_TURNSTILE_SECRET_KEY` | `TURNSTILE_SECRET_KEY` | Нет, опциональная captcha. |
 
 `CLOUDFLARE_API_TOKEN` остается только в GitHub Secrets и используется GitHub Actions/Wrangler для публикации. Его нельзя загружать в `dist/config.js`, `wrangler.jsonc` или Worker vars.
@@ -54,6 +62,7 @@ Workflow `.github/workflows/worker.yml`:
 
 - `WORKER_LEAD_WEBHOOK_URL`
 - или пара `WORKER_TELEGRAM_BOT_TOKEN` + `WORKER_TELEGRAM_CHAT_ID`
+- или SMTP-набор `WORKER_SMTP_HOST`, `WORKER_SMTP_USERNAME`, `WORKER_SMTP_PASSWORD`, `WORKER_SMTP_TO`
 
 Если канала нет, Worker возвращает `503 Lead destination is not configured`; frontend после этого использует `mailto:` fallback.
 
