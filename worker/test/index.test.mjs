@@ -191,7 +191,7 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   });
   const payload = await response.json();
   const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
-  const expectedSubject = Buffer.from('Новая заявка на металлоконструкции').toString('base64');
+  const expectedSubject = Buffer.from('Новая заявка на металлоконструкции: Metal frame').toString('base64');
 
   assert.equal(response.status, 200);
   assert.equal(payload.ok, true);
@@ -202,7 +202,7 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Sender: <smtp-login@b2energy\.ru>/m);
   assert.match(dataCommand, /^Content-Type: text\/plain; charset=UTF-8$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
-  assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции<\/h1>/);
+  assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
   assert.match(dataCommand, /<img src="https:\/\/efnatii\.github\.io\/metallokonstrukcii-site\/assets\/logo\/logo-b2e\.png"/);
   assert.match(dataCommand, /Текст заявки: Metal frame/);
   assert.match(dataCommand, />Текст заявки<\/td>/);
@@ -257,7 +257,9 @@ test('SMTP labels free-form callback as message and includes client comment', as
   );
   const payload = await response.json();
   const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
-  const expectedSubject = Buffer.from('Новое сообщение на металлоконструкции').toString('base64');
+  const expectedSubject = Buffer.from(
+    'Новое сообщение на металлоконструкции: Нужно изготовить лестницу и ограждения для склада.'
+  ).toString('base64');
 
   assert.equal(response.status, 200);
   assert.equal(payload.ok, true);

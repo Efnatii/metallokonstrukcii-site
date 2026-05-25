@@ -175,14 +175,21 @@ function formatLeadRequestText(lead) {
   return cleanText(lead.message || lead.objectType, 1000) || 'Не указан';
 }
 
+function formatSubjectRequestText(lead) {
+  const text = formatLeadRequestText(lead);
+
+  return text.length > 90 ? `${text.slice(0, 87).trim()}...` : text;
+}
+
 function formatLeadSubject(lead, env) {
   const configuredSubject = cleanText(env.LEAD_SUBJECT, 140);
   const fallbackSubject = isMessageLead(lead) ? DEFAULT_MESSAGE_SUBJECT : DEFAULT_LEAD_SUBJECT;
   const subject = /металлоконструкц/i.test(configuredSubject)
     ? configuredSubject
     : fallbackSubject;
+  const baseSubject = isMessageLead(lead) ? subject.replace(/^Новая заявка/i, 'Новое сообщение') : subject;
 
-  return isMessageLead(lead) ? subject.replace(/^Новая заявка/i, 'Новое сообщение') : subject;
+  return `${baseSubject}: ${formatSubjectRequestText(lead)}`;
 }
 
 function formatLeadText(lead, env) {
