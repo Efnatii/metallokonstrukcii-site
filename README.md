@@ -76,7 +76,7 @@ npm run smoke:worker-delivery
 | `CLOUDFLARE_ACCOUNT_ID` | ID аккаунта Cloudflare для деплоя Worker. |
 | `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://efnatii.github.io`. |
 | `WORKER_SITE_LABEL` | Название сайта в заявках. |
-| `WORKER_LEAD_SUBJECT` | Тема заявки для Telegram/webhook. |
+| `WORKER_LEAD_SUBJECT` | Тема заявки для Telegram/webhook/SMTP, по умолчанию `Новая заявка на металлоконструкции`. |
 
 ## Приватные GitHub Secrets
 

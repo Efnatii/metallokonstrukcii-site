@@ -63,6 +63,10 @@ function makeSmtpConnect(responses, commands) {
   });
 }
 
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 test('OPTIONS request returns CORS preflight headers', async () => {
   const response = await worker.fetch(makeRequest({ method: 'OPTIONS' }), baseEnv);
 
@@ -187,14 +191,20 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
     SMTP_CONNECT: makeSmtpConnect(responses, commands)
   });
   const payload = await response.json();
-  const dataCommand = commands.find((command) => command.includes('Content-Type: text/plain'));
+  const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
+  const expectedSubject = Buffer.from('Новая заявка на металлоконструкции: Metal frame').toString('base64');
 
   assert.equal(response.status, 200);
   assert.equal(payload.ok, true);
   assert.ok(dataCommand);
   assert.equal(commands.find((command) => command.startsWith('MAIL FROM:')), 'MAIL FROM:<smtp-login@b2energy.ru>\r\n');
+  assert.match(dataCommand, new RegExp(`^Subject: =\\?UTF-8\\?B\\?${escapeRegExp(expectedSubject)}\\?=$`, 'm'));
   assert.match(dataCommand, /^From: B2E <no-reply@b2energy\.ru>/m);
   assert.match(dataCommand, /^Sender: <smtp-login@b2energy\.ru>/m);
+  assert.match(dataCommand, /^Content-Type: text\/plain; charset=UTF-8$/m);
+  assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
+  assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
+  assert.match(dataCommand, /Открыть страницу заявки/);
 });
 
 test('Turnstile secret requires a token before delivery', async () => {

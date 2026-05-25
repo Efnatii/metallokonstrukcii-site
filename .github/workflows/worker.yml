@@ -23,7 +23,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       WORKER_ALLOWED_ORIGIN: ${{ vars.WORKER_ALLOWED_ORIGIN || 'https://efnatii.github.io' }}
       WORKER_SITE_LABEL: ${{ vars.WORKER_SITE_LABEL || 'ООО B2E' }}
-      WORKER_LEAD_SUBJECT: ${{ vars.WORKER_LEAD_SUBJECT || 'Новая заявка с сайта B2E' }}
+      WORKER_LEAD_SUBJECT: ${{ vars.WORKER_LEAD_SUBJECT || 'Новая заявка на металлоконструкции' }}
       B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || '' }}
     steps:
       - name: Checkout
