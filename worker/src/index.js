@@ -4,6 +4,21 @@ const JSON_HEADERS = {
 };
 const DEFAULT_LEAD_SUBJECT = 'Новая заявка на металлоконструкции';
 const EMAIL_BOUNDARY = 'b2e-lead-message-boundary';
+const MOSCOW_TIME_ZONE = 'Europe/Moscow';
+const DEFAULT_SITE_PROFILE = {
+  label: 'ООО B2E',
+  siteName: 'B2E Металлоконструкции',
+  siteType: 'Производство металлоконструкций',
+  defaultRoot: 'https://efnatii.github.io/metallokonstrukcii-site/',
+  logoPath: './assets/logo/logo-b2e.png',
+  legalName: 'ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»',
+  inn: '7811801565',
+  kpp: '781101001',
+  ogrn: '1247800091098',
+  address: 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3',
+  phone: '+7 (965) 057-82-70',
+  email: 'zakaz@b2energy.ru'
+};
 
 function allowedOrigins(env) {
   return String(env.ALLOWED_ORIGIN || 'https://efnatii.github.io')
@@ -82,6 +97,71 @@ function safeHttpUrl(value) {
   return /^https?:\/\//i.test(url) ? url : '';
 }
 
+function resolveSiteRoot(page, fallbackRoot) {
+  const fallback = safeHttpUrl(fallbackRoot) || DEFAULT_SITE_PROFILE.defaultRoot;
+
+  if (!page) {
+    return fallback;
+  }
+
+  try {
+    const url = new URL(page);
+    if (/\/metallokonstrukcii-site(?:\/|$)/i.test(url.pathname)) {
+      return `${url.origin}/metallokonstrukcii-site/`;
+    }
+
+    return `${url.origin}/`;
+  } catch {
+    return fallback;
+  }
+}
+
+function resolveAssetUrl(root, path) {
+  try {
+    return new URL(path, root).href;
+  } catch {
+    return new URL(DEFAULT_SITE_PROFILE.logoPath, DEFAULT_SITE_PROFILE.defaultRoot).href;
+  }
+}
+
+function getSiteProfile(lead, env) {
+  const page = safeHttpUrl(lead.page);
+  const root = resolveSiteRoot(page, env.SITE_URL || DEFAULT_SITE_PROFILE.defaultRoot);
+  const logoUrl = safeHttpUrl(env.EMAIL_LOGO_URL) || resolveAssetUrl(root, DEFAULT_SITE_PROFILE.logoPath);
+
+  return {
+    ...DEFAULT_SITE_PROFILE,
+    label: cleanText(env.SITE_LABEL || DEFAULT_SITE_PROFILE.label, 80),
+    root,
+    logoUrl
+  };
+}
+
+function formatHumanDate(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return cleanText(value, 80) || 'Не указана';
+  }
+
+  try {
+    const parts = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: MOSCOW_TIME_ZONE,
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }).formatToParts(date);
+    const part = (type) => parts.find((item) => item.type === type)?.value || '';
+
+    return `${part('day')} ${part('month')} ${part('year')} года, ${part('hour')}:${part('minute')} по московскому времени`;
+  } catch {
+    return date.toISOString();
+  }
+}
+
 function formatLeadSubject(lead, env) {
   const configuredSubject = cleanText(env.LEAD_SUBJECT, 140);
   const baseSubject = /металлоконструкц/i.test(configuredSubject)
@@ -93,15 +173,27 @@ function formatLeadSubject(lead, env) {
 }
 
 function formatLeadText(lead, env) {
+  const profile = getSiteProfile(lead, env);
+  const humanDate = formatHumanDate(lead.createdAt);
+
   return [
     formatLeadSubject(lead, env),
     '',
+    'Карточка обращения',
     `Имя: ${lead.name}`,
     `Контакт: ${lead.phone}`,
     `Тип объекта: ${lead.objectType || '-'}`,
-    `Источник: ${lead.source || '-'}`,
-    `Страница: ${lead.page || '-'}`,
-    `Дата: ${lead.createdAt}`
+    `Источник формы: ${lead.source || '-'}`,
+    `Сайт: ${profile.siteName}`,
+    `Направление сайта: ${profile.siteType}`,
+    `Страница отправки: ${lead.page || '-'}`,
+    `Когда отправлено: ${humanDate}`,
+    '',
+    'Реквизиты B2E',
+    profile.legalName,
+    `ИНН ${profile.inn}, КПП ${profile.kpp}, ОГРН ${profile.ogrn}`,
+    profile.address,
+    `Контакты компании: ${profile.phone}, ${profile.email}`
   ].join('\n');
 }
 
@@ -138,18 +230,23 @@ function smtpRecipients(value) {
 }
 
 function formatEmailHtml(lead, env) {
+  const profile = getSiteProfile(lead, env);
   const subject = escapeHtml(formatLeadSubject(lead, env), 220);
-  const siteLabel = escapeHtml(env.SITE_LABEL || 'ООО B2E', 80);
+  const siteLabel = escapeHtml(profile.label, 80);
+  const siteName = escapeHtml(profile.siteName, 120);
+  const siteType = escapeHtml(profile.siteType, 140);
+  const legalName = escapeHtml(profile.legalName, 160);
+  const companyRequisites = escapeHtml(`ИНН ${profile.inn} · КПП ${profile.kpp} · ОГРН ${profile.ogrn}`, 160);
+  const companyAddress = escapeHtml(profile.address, 220);
+  const companyContacts = escapeHtml(`${profile.phone} · ${profile.email}`, 160);
+  const logoUrl = escapeHtml(profile.logoUrl, 500);
   const name = escapeHtml(lead.name, 120);
   const phone = escapeHtml(lead.phone, 80);
   const objectType = escapeHtml(lead.objectType || 'Не указан', 180);
   const source = escapeHtml(lead.source || 'Сайт', 500);
   const page = safeHttpUrl(lead.page);
   const pageText = escapeHtml(page || 'Не указана', 500);
-  const createdAt = escapeHtml(lead.createdAt, 80);
-  const pageButton = page
-    ? `<a href="${pageText}" style="display:inline-block;background:#ffc400;color:#080808;text-decoration:none;font-weight:700;font-size:14px;line-height:18px;padding:13px 18px;border-radius:4px;">Открыть страницу заявки</a>`
-    : '';
+  const createdAt = escapeHtml(formatHumanDate(lead.createdAt), 120);
 
   return `<!doctype html>
 <html lang="ru">
@@ -168,7 +265,7 @@ function formatEmailHtml(lead, env) {
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                   <tr>
                     <td style="font-size:26px;line-height:30px;font-weight:800;color:#ffffff;letter-spacing:0;">
-                      <span style="color:#ffffff;">B</span><span style="color:#ffc400;">2</span><span style="color:#ffffff;">E</span>
+                      <img src="${logoUrl}" width="150" height="45" alt="${siteLabel}" style="display:block;width:150px;max-width:150px;height:auto;border:0;outline:none;text-decoration:none;">
                     </td>
                     <td align="right" style="font-size:12px;line-height:16px;color:#ffc400;text-transform:uppercase;font-weight:700;">
                       Заявка с сайта
@@ -176,9 +273,8 @@ function formatEmailHtml(lead, env) {
                   </tr>
                 </table>
                 <div style="height:22px;line-height:22px;font-size:22px;">&nbsp;</div>
-                <div style="font-size:12px;line-height:16px;color:#9aa3ad;text-transform:uppercase;font-weight:700;">${siteLabel}</div>
+                <div style="font-size:12px;line-height:16px;color:#9aa3ad;text-transform:uppercase;font-weight:700;">${siteName} · ${siteType}</div>
                 <h1 style="margin:8px 0 0 0;font-size:28px;line-height:34px;color:#ffffff;font-weight:800;">${subject}</h1>
-                <p style="margin:10px 0 0 0;font-size:15px;line-height:22px;color:#d6dce3;">Новая входящая заявка на расчет и производство. Ниже собраны контакт, тип конструкции и источник обращения.</p>
               </td>
             </tr>
             <tr>
@@ -189,10 +285,15 @@ function formatEmailHtml(lead, env) {
                       <div style="font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;">Контакт клиента</div>
                       <div style="margin-top:6px;font-size:24px;line-height:30px;color:#101418;font-weight:800;">${name}</div>
                       <div style="margin-top:4px;font-size:18px;line-height:24px;color:#101418;font-weight:700;">${phone}</div>
+                      <div style="margin-top:10px;display:inline-block;background:#fff5c2;color:#4d3a00;font-size:13px;line-height:18px;font-weight:700;padding:8px 10px;border-left:4px solid #ffc400;">Нужно связаться с клиентом и уточнить параметры проекта.</div>
                     </td>
                   </tr>
                 </table>
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border-top:1px solid #e3e7ec;border-bottom:1px solid #e3e7ec;">
+                  <tr>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Сайт</td>
+                    <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${siteName}</td>
+                  </tr>
                   <tr>
                     <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Тип объекта</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;font-weight:700;border-bottom:1px solid #e3e7ec;">${objectType}</td>
@@ -202,21 +303,30 @@ function formatEmailHtml(lead, env) {
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${source}</td>
                   </tr>
                   <tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Страница</td>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;border-bottom:1px solid #e3e7ec;">Страница отправки</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;border-bottom:1px solid #e3e7ec;">${pageText}</td>
                   </tr>
                   <tr>
-                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;">Дата</td>
+                    <td style="width:34%;padding:14px 12px 14px 0;font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;">Когда отправлено</td>
                     <td style="padding:14px 0;font-size:15px;line-height:21px;color:#151515;">${createdAt}</td>
                   </tr>
                 </table>
-                <div style="height:22px;line-height:22px;font-size:22px;">&nbsp;</div>
-                ${pageButton}
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-top:22px;border-collapse:collapse;background:#f8fafc;border:1px solid #e3e7ec;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <div style="font-size:12px;line-height:16px;color:#707983;text-transform:uppercase;font-weight:700;">Реквизиты B2E</div>
+                      <div style="margin-top:7px;font-size:15px;line-height:22px;color:#151515;font-weight:800;">${legalName}</div>
+                      <div style="margin-top:3px;font-size:13px;line-height:20px;color:#343b43;">${companyRequisites}</div>
+                      <div style="margin-top:3px;font-size:13px;line-height:20px;color:#343b43;">${companyAddress}</div>
+                      <div style="margin-top:3px;font-size:13px;line-height:20px;color:#343b43;">${companyContacts}</div>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
               <td style="background:#f8fafc;padding:18px 28px;font-size:12px;line-height:18px;color:#66717d;border-top:1px solid #e3e7ec;">
-                Автоматическое письмо Cloudflare Worker. Ответ на него не требуется; для связи используйте контакт клиента выше.
+                Служебное уведомление сформировано после отправки формы на сайте. Для ответа используйте контакт клиента из карточки обращения.
               </td>
             </tr>
           </table>

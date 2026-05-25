@@ -6,7 +6,7 @@ import worker from '../src/index.js';
 const baseEnv = {
   ALLOWED_ORIGIN: 'https://efnatii.github.io',
   SITE_LABEL: 'ООО B2E',
-  LEAD_SUBJECT: 'Новая заявка с сайта B2E'
+  LEAD_SUBJECT: 'Новая заявка на металлоконструкции'
 };
 
 function makeRequest({ method = 'POST', origin = baseEnv.ALLOWED_ORIGIN, body } = {}) {
@@ -204,7 +204,16 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Content-Type: text\/plain; charset=UTF-8$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
   assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
-  assert.match(dataCommand, /Открыть страницу заявки/);
+  assert.match(dataCommand, /<img src="https:\/\/efnatii\.github\.io\/metallokonstrukcii-site\/assets\/logo\/logo-b2e\.png"/);
+  assert.match(dataCommand, /Сайт: B2E Металлоконструкции/);
+  assert.match(dataCommand, /Когда отправлено: 25 апреля 2026 года, 12:00 по московскому времени/);
+  assert.match(dataCommand, /Реквизиты B2E/);
+  assert.match(dataCommand, /ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»/);
+  assert.match(dataCommand, /ИНН 7811801565 · КПП 781101001 · ОГРН 1247800091098/);
+  assert.match(dataCommand, /Служебное уведомление сформировано после отправки формы на сайте/);
+  assert.doesNotMatch(dataCommand, /Открыть страницу заявки/);
+  assert.doesNotMatch(dataCommand, /Новая входящая заявка/);
+  assert.doesNotMatch(dataCommand, /Cloudflare Worker/);
 });
 
 test('Turnstile secret requires a token before delivery', async () => {
