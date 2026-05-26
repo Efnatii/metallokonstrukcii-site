@@ -246,42 +246,71 @@
 
       <section class="company-flow section-dark" id="company" aria-labelledby="company-title">
         <span class="section-anchor" id="services" aria-hidden="true"></span>
+        <div class="company-atmosphere" aria-hidden="true">
+          <img class="company-float company-float--truss" src="./assets/generated/company-float-truss.png" alt="" width="1788" height="879">
+          <img class="company-float company-float--stairs" src="./assets/generated/company-float-stairs.png" alt="" width="1536" height="1024">
+          <img class="company-float company-float--frame" src="./assets/generated/company-float-frame.png" alt="" width="1536" height="1024">
+        </div>
         <div class="container company-flow-layout">
-          <aside class="company-flow-rail reveal" aria-label="Единый производственный контур B2E">
-            <strong>Единый контур</strong>
-            <div class="company-flow-rail__line" aria-hidden="true"></div>
-          </aside>
-
           <div class="company-flow-body">
-            <div class="company-flow-intro reveal">
-              <div class="company-copy">
-                <p class="section-kicker">О компании</p>
-                <h2 id="company-title">Производство металлоконструкций в едином контуре</h2>
-                <p>
-                  B2E подключается до того, как металл уходит в резку и сборку. Сначала разбираем
-                  исходные данные, проверяем геометрию и узлы, уточняем требования к покрытию,
-                  логистике и монтажу.
-                </p>
-                <p>
-                  После этого формируем понятный производственный маршрут: КМ/КМД, резка, гибка,
-                  металлообработка, порошковая окраска, доставка и монтаж. Если задачу нельзя
-                  корректно оценить по документам, организуем выезд на производство или объект.
-                </p>
+            <div class="company-map-panel company-scene reveal">
+              <div class="company-flow-intro">
+                <div class="company-copy">
+                  <p class="section-kicker">О компании</p>
+                  <h2 id="company-title">Производство металлоконструкций с инженерной подготовкой</h2>
+                  <p>
+                    B2E работает как производственный партнер, а не просто как отдельный участок.
+                    Мы входим в задачу до запуска металла: проверяем КМ/КМД, уточняем узлы,
+                    допуски, покрытие, логистику и требования к монтажу.
+                  </p>
+                  <p>
+                    Для заказчика это означает меньше разрывов между инженерией, изготовлением
+                    и объектом: маршрут партии собирается заранее, а спорные места закрываются
+                    до резки, гибки, сварки и окраски.
+                  </p>
+                  <ul class="company-proof-list" aria-label="Как B2E ведет проект">
+                    <li>разбираем исходные данные и проектную деталировку;</li>
+                    <li>согласуем производство, покрытие, упаковку и доставку;</li>
+                    <li>готовим изделия к отгрузке, монтажу и приемке на объекте.</li>
+                  </ul>
+                </div>
+                <div class="company-flow-stats" aria-label="Производственные показатели B2E">
+                  <article>
+                    <strong>1000+ т/мес</strong>
+                    <span>мощности группы компаний</span>
+                  </article>
+                  <article>
+                    <strong>200+ КМ/КМД</strong>
+                    <span>готовых проектных решений</span>
+                  </article>
+                  <article>
+                    <strong>3 площадки</strong>
+                    <span>производство и отгрузка</span>
+                  </article>
+                </div>
               </div>
               <div class="company-flow-locations" aria-label="Производственные площадки B2E">
-                <span>Производственные площадки группы компаний</span>
-                <strong>Петрозаводск</strong>
-                <strong>Никольское</strong>
-                <strong>Рыбацкое</strong>
+                <span>Петрозаводск</span>
+                <span>Никольское</span>
+                <span>Рыбацкое</span>
               </div>
             </div>
 
-            <div class="company-flow-capabilities reveal" aria-label="Единый контур работ B2E">
-              <article class="company-flow-engineering">
-                <span>00</span>
-                <strong>Инженерная подготовка</strong>
-                <p>Берем производство и обработку металла в один контур: от чертежей и проверки узлов до запуска партии.</p>
-              </article>
+            <div class="company-flow-capabilities company-scene reveal" aria-label="Услуги B2E">
+              <div class="company-flow-services-head">
+                <span>Услуги</span>
+                <strong>Операции под проект без разрыва между производством и монтажом</strong>
+                <p>
+                  Подключаем нужные участки под чертеж, сроки, покрытие и логистику объекта.
+                  В одном контуре держим заготовку, обработку, сварку, окраску, комплектность
+                  и монтажную готовность.
+                </p>
+                <p>
+                  Такой подход особенно важен для партий с разными типами элементов: каркасы,
+                  закладные, лестницы, площадки, резервуары, арочные и нестандартные конструкции
+                  идут по понятному производственному сценарию.
+                </p>
+              </div>
               <div class="service-grid">
                 <article class="service-card reveal">
                   <img src="./assets/generated/service-montage.webp" srcset="./assets/generated/service-montage.webp 1x, ./assets/generated/service-montage@2x.webp 2x" alt="Фото монтажа металлического каркаса" width="720" height="460">
@@ -311,11 +340,16 @@
               </div>
             </div>
 
-            <div class="company-flow-route" id="production" aria-label="Производственный маршрут заказа">
+            <div class="company-flow-route company-scene reveal" id="production" aria-label="Производственный маршрут заказа">
               <div class="production-lead production-lead--text reveal">
-                <span>Производственный маршрут</span>
+                <span>Маршрут заказа</span>
                 <strong>От чертежа до отгрузки</strong>
-                <em>заготовка, обработка, сборка, покрытие, комплектность и передача на доставку или монтаж</em>
+                <em>подготовка, заготовка, сборка, покрытие, комплектность и передача на доставку или монтаж</em>
+                <p>
+                  Роад-мап нужен, чтобы заказчик видел не абстрактную «металлообработку»,
+                  а последовательность решений: что проверяется, где появляется риск,
+                  когда партия готова к объекту и кто отвечает за следующий шаг.
+                </p>
               </div>
               <div class="production-facts reveal" aria-label="Производственные возможности B2E">
                 <article>

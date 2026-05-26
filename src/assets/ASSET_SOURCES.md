@@ -64,6 +64,14 @@
 
 Все новые фото были локально кадрированы, выровнены по размеру и слегка приведены по контрасту/цвету под темный industrial-стиль сайта. Полноценная AI-генерация для фото-замен не использовалась.
 
+### Company section generated scene assets
+
+`generated/company-master-seamless.png` - ImageGen master background generated as one continuous vertical factory scene for the `О компании` section.
+
+`generated/company-info-seamless.png`, `generated/company-services-seamless.png`, `generated/company-route-seamless.png` - contiguous cropped chunks from `generated/company-master-seamless.png` for main company information, services, and production road-map scenes.
+
+`generated/company-float-truss.png`, `generated/company-float-stairs.png`, `generated/company-float-frame.png` - ImageGen metal-structure objects generated on green chroma-key and locally converted to transparent PNG for the floating background layer. The `*-key.png` siblings are the retained green-screen source images.
+
 ## Документы доверия
 
 | Файл | Источник |
