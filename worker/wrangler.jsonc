@@ -6,6 +6,22 @@
   "observability": {
     "enabled": true
   },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SITE_VISIT_COUNTER",
+        "class_name": "SiteVisitCounter"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1_site_visit_counter",
+      "new_sqlite_classes": [
+        "SiteVisitCounter"
+      ]
+    }
+  ],
   "vars": {
     "ALLOWED_ORIGIN": "https://efnatii.github.io",
     "SITE_LABEL": "ООО B2E",

@@ -72,12 +72,41 @@
 
 `generated/company-float-truss.png`, `generated/company-float-stairs.png`, `generated/company-float-frame.png` - ImageGen metal-structure objects generated on green chroma-key and locally converted to transparent PNG for the floating background layer. The `*-key.png` siblings are the retained green-screen source images.
 
+`generated/company-work-montage-assembly.png` - retained ImageGen steel column-to-beam bolted assembly still generated on green chroma-key and locally converted to transparent PNG. `generated/company-work-montage-assembly-key.png` is the retained green-screen source.
+
+`generated/company-work-montage-install-imagegen-material.png` is the built-in ImageGen material atlas used only for blackened steel, edge, plate, and bolt surface texture in the public montage frames. It is intentionally not a generated assembly frame, so ImageGen cannot introduce mismatched parts or per-frame geometry drift.
+
+`generated/company-work-montage-install-sprite.png`, `generated/company-work-montage-sprite.png`, `generated/company-work-cut-sprite.png`, `generated/company-work-bend-sprite.png`, `generated/company-work-machining-sprite.png`, `generated/company-work-paint-sprite.png` - normalized frame reference sheets rebuilt from the final transparent frames for QA only. The public markup does not scroll these sheets.
+
+`generated/company-work-cut-grinder-imagegen-source.png` is the built-in ImageGen style-transfer sprite source for the public cutting visual: a realistic six-frame angle-grinder cutting a black steel pipe on chroma-key green, matched to the dark industrial operation-frame style. `generated/company-work-cut-grinder-imagegen-transparent.png` is the local chroma-key removal output. `generated/company-work-cut-grinder-frame-1.png` ... `generated/company-work-cut-grinder-frame-6.png` are the normalized transparent 543x724 px public frames. `generated/company-work-cut-grinder-sprite.png` is the QA sheet rebuilt from those frames.
+
+`generated/company-work-montage-install-frame-1.png` ... `generated/company-work-montage-install-frame-4.png` are the public montage sequence: one compatible steel connection is assembled from a fixed column receiver and one beam with a welded end plate. The sequence is alignment, seating on the same hole pattern, bolt insertion, and tightened bolts. These frames are composed on one fixed 543x724 px canvas from the same geometry and clipped ImageGen material texture, so the column, beam profile, end plate, bolt centers, scale, and glow stay locked between cuts instead of drifting from per-frame cropping or AI-regenerated parts. `generated/company-work-montage-frame-1.png` ... `generated/company-work-montage-frame-4.png` are retained as the previous montage sequence assets. `generated/company-work-cut-frame-1.png` ... `generated/company-work-cut-frame-4.png` are retained as the previous cutting sequence assets. `generated/company-work-bend-frame-1.png` ... `generated/company-work-bend-frame-4.png`, `generated/company-work-machining-frame-1.png` ... `generated/company-work-machining-frame-4.png`, `generated/company-work-paint-frame-1.png` ... `generated/company-work-paint-frame-4.png` - final transparent ImageGen operation frames used in the public markup. Every final frame is normalized to the same fixed 543x724 px canvas and aligned per service so the foreground object keeps consistent size and position during discrete frame-by-frame animation.
+
+`generated/company-work-cut-frame-1-edit-source.png` ... `generated/company-work-cut-frame-4-edit-source.png` - retained ImageGen single-frame edit sources for the cutting sequence. They were generated as separate frames based on the previous frame, then converted into the fixed 543x724 transparent canvas without per-frame content fitting.
+
+The public machining visual uses `generated/company-work-machining-frame-1.png` ... `generated/company-work-machining-frame-4.png` as a dedicated four-frame drilling cycle: positioning, drill entry, chip formation, and finished hole/retract hold.
+
 ## Документы доверия
 
 | Файл | Источник |
 | --- | --- |
 | `documents/letters/sevzapenergo-letter.pdf`, `documents/letters/sevzapenergo-letter.webp` | Пользовательский файл `update/Благодарственные письма/Благодарственное_письмо_от_СЕВЗАПЭНЕРГО_18_05_26.pdf`. |
 | `documents/letters/inergo-letter.pdf`, `documents/letters/inergo-letter.webp` | Пользовательский файл `update/Благодарственные письма/исх.25-117.pdf`. |
+
+## Примеры проектов КМ/КМД
+
+PDF-файлы в `documents/projects/` взяты из файлов, переданных пользователем в чате 06.06.2026. PNG-миниатюры с теми же базовыми именами получены локальным рендером первой страницы через Poppler `pdftoppm`.
+
+| Файл | Источник |
+| --- | --- |
+| `documents/projects/warehouse-autobusnaya-gpr-kmd.pdf`, `documents/projects/warehouse-autobusnaya-gpr-kmd.png` | Пользовательский файл `Downloads/Telegram Desktop/01-02-2025-1-ГПР-КМД .pdf`. |
+| `documents/projects/termeks-test-chamber-km.pdf`, `documents/projects/termeks-test-chamber-km.png` | Пользовательский файл `Downloads/Telegram Desktop/КМ ТЕРМЕКС КАМЕРА ИСПЫТАНИЙ (2).pdf`. |
+| `documents/projects/km-17-01-2025.pdf`, `documents/projects/km-17-01-2025.png` | Пользовательский файл `Downloads/Telegram Desktop/17_01-2025-КМ от 31-03-25.pdf`. |
+| `documents/projects/azs-kmd.pdf`, `documents/projects/azs-kmd.png` | Пользовательский файл `Downloads/Telegram Desktop/КМД АЗС.pdf`. |
+| `documents/projects/novosibirsk-carwash-2-posts-kmd.pdf`, `documents/projects/novosibirsk-carwash-2-posts-kmd.png` | Пользовательский файл `Downloads/Telegram Desktop/КМД гНовосибирск. Мойка 2 поста..pdf`. |
+| `documents/projects/kmd-project.pdf`, `documents/projects/kmd-project.png` | Пользовательский файл `Downloads/Telegram Desktop/КМД.pdf`. |
+| `documents/projects/production-building-24x60-km.pdf`, `documents/projects/production-building-24x60-km.png` | Пользовательский файл `Downloads/Telegram Desktop/0115-78-25-КМ (Планы, сборки) 26.03.25.pdf`. |
+| `documents/projects/trade-building-24x42-km.pdf`, `documents/projects/trade-building-24x42-km.png` | Пользовательский файл `Downloads/Telegram Desktop/07-25-25-КМ (Планы, сборки).pdf`. |
 
 ## Логотипы клиентов и партнеров
 

@@ -25,6 +25,8 @@
     <script src="./main.js" defer></script>
   </head>
   <body>
+    <div class="site-stage-shell" data-site-stage-shell>
+      <div class="site-stage" data-site-stage>
     <header class="site-header" id="top">
       <a class="brand" href="#top" aria-label="B2E - производство металлоконструкций">
         <img class="brand-logo" src="./assets/logo/logo-b2e.png" srcset="./assets/logo/logo-b2e.png 1x, ./assets/logo/logo-b2e@2x.png 2x, ./assets/logo/logo-b2e@3x.png 3x" alt="" width="360" height="108" aria-hidden="true">
@@ -160,7 +162,7 @@
                 <dd>качество, комплектность и отгрузка</dd>
               </div>
             </dl>
-            <a class="panel-link" href="#production">
+            <a class="panel-link" href="#proof" data-production-tour-trigger>
               Смотреть производство
               <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
             </a>
@@ -245,11 +247,13 @@
       </section>
 
       <section class="company-flow section-dark" id="company" aria-labelledby="company-title">
-        <span class="section-anchor" id="services" aria-hidden="true"></span>
         <div class="company-atmosphere" aria-hidden="true">
           <img class="company-float company-float--truss" src="./assets/generated/company-float-truss.png" alt="" width="1788" height="879">
           <img class="company-float company-float--stairs" src="./assets/generated/company-float-stairs.png" alt="" width="1536" height="1024">
           <img class="company-float company-float--frame" src="./assets/generated/company-float-frame.png" alt="" width="1536" height="1024">
+          <img class="company-float company-float--truss-secondary" src="./assets/generated/company-float-truss.png" alt="" width="1788" height="879">
+          <img class="company-float company-float--stairs-secondary" src="./assets/generated/company-float-stairs.png" alt="" width="1536" height="1024">
+          <img class="company-float company-float--frame-secondary" src="./assets/generated/company-float-frame.png" alt="" width="1536" height="1024">
         </div>
         <div class="container company-flow-layout">
           <div class="company-flow-body">
@@ -296,7 +300,7 @@
               </div>
             </div>
 
-            <div class="company-flow-capabilities company-scene reveal" aria-label="Услуги B2E">
+            <div class="company-flow-capabilities company-scene reveal" id="services" aria-label="Услуги B2E">
               <div class="company-flow-services-head">
                 <span>Услуги</span>
                 <strong>Операции под проект без разрыва между производством и монтажом</strong>
@@ -312,30 +316,45 @@
                 </p>
               </div>
               <div class="service-grid">
-                <article class="service-card reveal">
+                <article class="service-card service-card--montage service-card--has-visual reveal">
                   <img src="./assets/generated/service-montage.webp" srcset="./assets/generated/service-montage.webp 1x, ./assets/generated/service-montage@2x.webp 2x" alt="Фото монтажа металлического каркаса" width="720" height="460">
                   <h3>Монтаж металлоконструкций</h3>
                   <p>Сборка, доставка и монтаж конструкций на объекте с учетом проектных узлов.</p>
+                  <span class="service-card-visual service-card-visual--work service-card-visual--montage" aria-hidden="true">
+                    <img class="company-work-still" src="./assets/generated/service-process-montage.png" alt="" width="543" height="724">
+                  </span>
                 </article>
-                <article class="service-card reveal">
+                <article class="service-card service-card--cut service-card--has-visual reveal">
                   <img src="./assets/generated/service-cutting.webp" srcset="./assets/generated/service-cutting.webp 1x, ./assets/generated/service-cutting@2x.webp 2x" alt="Фото плазменной резки металла" width="720" height="460">
                   <h3>Резка металла</h3>
                   <p>Подготовка листа, профиля и заготовок под серийные и нестандартные изделия.</p>
+                  <span class="service-card-visual service-card-visual--work service-card-visual--cut" aria-hidden="true">
+                    <img class="company-work-still" src="./assets/generated/service-process-cutting.png" alt="" width="543" height="724">
+                  </span>
                 </article>
-                <article class="service-card reveal">
+                <article class="service-card service-card--bending service-card--has-visual reveal">
                   <img src="./assets/generated/service-bending.webp" srcset="./assets/generated/service-bending.webp 1x, ./assets/generated/service-bending@2x.webp 2x" alt="Фото листогибочного пресса для гибки металла" width="720" height="460">
                   <h3>Гибка металла</h3>
                   <p>Формирование деталей с контролем геометрии и дальнейшей сборкой.</p>
+                  <span class="service-card-visual service-card-visual--work service-card-visual--bend" aria-hidden="true">
+                    <img class="company-work-still" src="./assets/generated/service-process-bending.png" alt="" width="543" height="724">
+                  </span>
                 </article>
-                <article class="service-card reveal">
+                <article class="service-card service-card--machining service-card--has-visual reveal">
                   <img src="./assets/generated/service-machining.webp" srcset="./assets/generated/service-machining.webp 1x, ./assets/generated/service-machining@2x.webp 2x" alt="Фото металлообработки с искрами" width="720" height="460">
                   <h3>Металлообработка</h3>
                   <p>Сварка, сверление, зачистка, подготовка узлов и партий к покраске.</p>
+                  <span class="service-card-visual service-card-visual--work service-card-visual--machining" aria-hidden="true">
+                    <img class="company-work-still" src="./assets/generated/service-process-machining.png" alt="" width="543" height="724">
+                  </span>
                 </article>
-                <article class="service-card reveal">
+                <article class="service-card service-card--powder service-card--has-visual reveal">
                   <img src="./assets/generated/service-powder.webp" srcset="./assets/generated/service-powder.webp 1x, ./assets/generated/service-powder@2x.webp 2x" alt="Фото пистолета для порошковой окраски" width="720" height="460">
                   <h3>Порошковая окраска</h3>
                   <p>Финишное покрытие для элементов, которым важны ресурс и внешний вид.</p>
+                  <span class="service-card-visual service-card-visual--work service-card-visual--paint" aria-hidden="true">
+                    <img class="company-work-still" src="./assets/generated/service-process-powder.png" alt="" width="543" height="724">
+                  </span>
                 </article>
               </div>
             </div>
@@ -393,43 +412,147 @@
         <div class="container">
           <div class="section-head section-head-row">
             <div>
-              <p class="section-kicker">Инженерия и опыт</p>
-              <h2 id="proof-title">Инженерная подготовка перед производством</h2>
+              <p class="section-kicker">Проекты КМ/КМД</p>
+              <h2 id="proof-title">Примеры рабочей документации по металлоконструкциям</h2>
             </div>
           </div>
-          <div class="proof-layout">
-            <article class="proof-main reveal">
-              <img src="./assets/generated/proof-kmkd-generated.png" srcset="./assets/generated/proof-kmkd-generated.png 1x, ./assets/generated/proof-kmkd-generated@2x.png 2x" alt="Инженерная схема металлического каркаса перед производством" width="720" height="450">
+          <div class="projects-showcase reveal" aria-label="Выборка проектов КМ и КМД">
+            <div class="projects-showcase-head">
               <div>
-                <h3>Фиксируем конструктив до запуска металла в работу</h3>
-                <p>На инженерном этапе проверяем геометрию, узлы, соединения и последовательность операций, чтобы производство получило понятную задачу без переделок на площадке.</p>
+                <span>КМ/КМД по объектам</span>
+                <h3>Проектная документация для производства и монтажа</h3>
+                <p>Примеры комплектов по складам, АЗС, мойкам, производственным и торговым зданиям: схемы, узлы, ведомости, отправочные марки и спецификации металла.</p>
               </div>
-            </article>
-            <div class="proof-docs" aria-label="Благодарственные письма заказчиков">
-              <a class="proof-doc reveal" href="./assets/documents/letters/sevzapenergo-letter.pdf" target="_blank" rel="noreferrer">
-                <img src="./assets/documents/letters/sevzapenergo-letter.webp" alt="Благодарственное письмо СЕВЗАПЭНЕРГО" width="760" height="980">
+              <dl class="projects-summary" aria-label="Состав подборки проектов">
+                <div>
+                  <dt>8</dt>
+                  <dd>комплектов документации</dd>
+                </div>
+                <div>
+                  <dt>КМ/КМД</dt>
+                  <dd>чертежи, узлы и ведомости</dd>
+                </div>
+                <div>
+                  <dt>2024-2025</dt>
+                  <dd>период подготовки проектов</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="projects-list" aria-label="Список примеров проектов">
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/warehouse-autobusnaya-gpr-kmd.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/warehouse-autobusnaya-gpr-kmd.png" alt="Титульный лист проекта склада на Автобусной" width="360" height="510">
                 <div class="proof-doc-text">
-                  <span>Благодарственное письмо</span>
-                  <strong>СЕВЗАПЭНЕРГО</strong>
-                  <small>Изготовление и монтаж металлоконструкций общей массой 35 т.</small>
-                  <em>Открыть PDF</em>
+                  <span>ГПР-КМД · 293 листа</span>
+                  <strong>Склад на Автобусной</strong>
+                  <small>Ведомости, монтажные схемы и отправочные марки для здания склада в Санкт-Петербурге.</small>
+                  <em>Открыть проект</em>
                 </div>
               </a>
-              <a class="proof-doc reveal" href="./assets/documents/letters/inergo-letter.pdf" target="_blank" rel="noreferrer">
-                <img src="./assets/documents/letters/inergo-letter.webp" alt="Благодарственное письмо ГК ИНЕРГО" width="760" height="980">
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/termeks-test-chamber-km.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/termeks-test-chamber-km.png" alt="Титульный лист проекта испытательной камеры ТЕРМЕКС" width="360" height="255">
                 <div class="proof-doc-text">
-                  <span>Благодарственное письмо</span>
-                  <strong>ГК ИНЕРГО</strong>
-                  <small>Изготовление и монтаж металлоконструкций в проекте КМ-2020АК, общий тоннаж 25 т.</small>
-                  <em>Открыть PDF</em>
+                  <span>КМ · испытательная камера</span>
+                  <strong>ТЕРМЕКС 8x16x9,5</strong>
+                  <small>Исходные данные, изометрия, виды, разрезы, узлы и ведомости для испытательной камеры.</small>
+                  <em>Открыть проект</em>
                 </div>
               </a>
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/km-17-01-2025.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/km-17-01-2025.png" alt="Лист с изометрией и ведомостями проекта КМ" width="360" height="255">
+                <div class="proof-doc-text">
+                  <span>КМ · ведомость элементов</span>
+                  <strong>Комплект 17_01-2025</strong>
+                  <small>Листы с профилями, марками, сечениями, материалами и массой металла по комплекту.</small>
+                  <em>Открыть проект</em>
+                </div>
+              </a>
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/azs-kmd.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/azs-kmd.png" alt="Лист ведомости рабочих чертежей проекта АЗС" width="360" height="254">
+                <div class="proof-doc-text">
+                  <span>КМД · АЗС</span>
+                  <strong>Конструкции АЗС</strong>
+                  <small>Общий вид, схемы колонн и стоек, прогоны покрытия, отправочные марки, спецификации металла и метизов.</small>
+                  <em>Открыть проект</em>
+                </div>
+              </a>
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/novosibirsk-carwash-2-posts-kmd.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/novosibirsk-carwash-2-posts-kmd.png" alt="Титульный лист проекта автомойки в Новосибирске" width="360" height="254">
+                <div class="proof-doc-text">
+                  <span>КМД · автомойка</span>
+                  <strong>Мойка на 2 поста, Новосибирск</strong>
+                  <small>Рабочая документация КМД для автоматической бесконтактной мойки на ул. Никитина.</small>
+                  <em>Открыть проект</em>
+                </div>
+              </a>
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/kmd-project.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/kmd-project.png" alt="Титульный лист проекта здания магазина" width="360" height="510">
+                <div class="proof-doc-text">
+                  <span>КМД · здание магазина</span>
+                  <strong>Здание магазина</strong>
+                  <small>Комплект деталировочных чертежей, узлов, спецификаций и ведомостей отправочных марок.</small>
+                  <em>Открыть проект</em>
+                </div>
+              </a>
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/production-building-24x60-km.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/production-building-24x60-km.png" alt="Титульный лист проекта производственного здания 24 на 60 метров" width="360" height="254">
+                <div class="proof-doc-text">
+                  <span>КМ · 24x60 м</span>
+                  <strong>Производственное здание</strong>
+                  <small>Спецификация металлопроката, ведомости отправочных элементов, планы и сборки каркаса.</small>
+                  <em>Открыть проект</em>
+                </div>
+              </a>
+              <a class="proof-doc project-doc reveal" href="./assets/documents/projects/trade-building-24x42-km.pdf" target="_blank" rel="noreferrer">
+                <img src="./assets/documents/projects/trade-building-24x42-km.png" alt="Титульный лист проекта торгового здания 24 на 42 метра" width="360" height="510">
+                <div class="proof-doc-text">
+                  <span>КМ · 24x42 м</span>
+                  <strong>Торговое здание</strong>
+                  <small>Раздел КМ для здания со свободной планировкой: общие данные, расчетные условия, планы и сборки металлокаркаса.</small>
+                  <em>Открыть проект</em>
+                </div>
+              </a>
+            </div>
+
+            <div class="projects-more reveal" aria-label="Другие проекты КМ и КМД">
+              <span aria-hidden="true">...</span>
+              <div>
+                <strong>Еще проекты</strong>
+                <p>Список на сайте будет расширяться по мере подготовки материалов для публикации.</p>
+              </div>
+            </div>
+
+            <div class="trust-docs reveal" aria-label="Благодарственные письма заказчиков">
+              <div class="trust-docs-head">
+                <span>Отзывы заказчиков</span>
+                <strong>Благодарственные письма</strong>
+              </div>
+              <div class="trust-docs-list">
+                <a class="proof-doc trust-doc" href="./assets/documents/letters/sevzapenergo-letter.pdf" target="_blank" rel="noreferrer">
+                  <img src="./assets/documents/letters/sevzapenergo-letter.webp" alt="Благодарственное письмо СЕВЗАПЭНЕРГО" width="760" height="980">
+                  <div class="proof-doc-text">
+                    <span>Благодарственное письмо</span>
+                    <strong>СЕВЗАПЭНЕРГО</strong>
+                    <small>Изготовление и монтаж металлоконструкций общей массой 35 т.</small>
+                    <em>Открыть PDF</em>
+                  </div>
+                </a>
+                <a class="proof-doc trust-doc" href="./assets/documents/letters/inergo-letter.pdf" target="_blank" rel="noreferrer">
+                  <img src="./assets/documents/letters/inergo-letter.webp" alt="Благодарственное письмо ГК ИНЕРГО" width="760" height="980">
+                  <div class="proof-doc-text">
+                    <span>Благодарственное письмо</span>
+                    <strong>ГК ИНЕРГО</strong>
+                    <small>Изготовление и монтаж металлоконструкций в проекте КМ-2020АК, общий тоннаж 25 т.</small>
+                    <em>Открыть PDF</em>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="clients section-light" aria-labelledby="clients-title">
+      <section class="clients section-light" id="clients" aria-labelledby="clients-title">
         <div class="container">
           <div class="section-head">
             <p class="section-kicker">Клиенты и партнеры</p>
@@ -504,7 +627,7 @@
                 </button>
               </article>
               <article class="location-card location-card-coverage">
-                <button type="button" data-map-key="coverage" data-map-coverage="true" data-map-lat="59.200000" data-map-lng="37.200000" data-map-zoom="5" data-map-polygons="54.2,19.5;55.3,19.6;55.4,21.5;54.9,22.8;54.3,22.6;54.2,19.5|50.3,30.6;52.0,27.5;55.5,27.0;58.2,28.2;60.2,29.5;62.4,31.6;65.0,29.0;67.8,30.2;69.6,34.2;68.6,45.5;65.0,53.8;61.0,52.2;58.3,47.8;55.8,44.4;53.2,42.2;50.4,39.0;50.3,30.6" data-map-name="Санкт-Петербург, Ленинградская область, СЗФО и ЦФО" data-map-kind="Зона покрытия B2E" data-map-url="https://yandex.ru/maps/?ll=37.200000%2C59.200000&z=5">
+                <button type="button" data-map-key="coverage" data-map-coverage="true" data-map-lat="59.200000" data-map-lng="37.200000" data-map-zoom="5" data-map-bounds="49.5581257,19.4041722;82.0586232,69.9572252" data-map-geojson="./assets/data/coverage-szfo-cfo.geojson" data-map-name="Санкт-Петербург, Ленинградская область, СЗФО и ЦФО" data-map-kind="Зона покрытия B2E" data-map-url="https://yandex.ru/maps/?ll=37.200000%2C59.200000&z=5">
                   <span>Зона покрытия</span>
                   <strong>СЗФО и ЦФО</strong>
                   <small>Санкт-Петербург, Ленинградская область и выездные объекты</small>
@@ -527,23 +650,78 @@
       </section>
     </main>
 
-    <footer class="site-footer">
+    <footer class="site-footer" id="footer">
       <div class="container footer-layout">
-        <div class="footer-company">
-          <strong>ООО B2E</strong>
-          <span>Производство металлоконструкций СЗФО и ЦФО</span>
-          <small>ООО «БИЗНЕС В ЭНЕРГЕТИКЕ» · ИНН 7811801565 · КПП 781101001 · ОГРН 1247800091098</small>
-          <small>Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3</small>
-          <small><a data-config-href="phoneHref" href="tel:+79650578270" data-config-text="phoneDisplay">+7 (965) 057-82-70</a> · <a data-config-href="emailHref" href="mailto:zakaz@b2energy.ru" data-config-text="email">zakaz@b2energy.ru</a></small>
-          <small>© 2026 ООО B2E. Все права на сайт защищены.</small>
+        <div class="footer-brand">
+          <a class="footer-logo" href="#top" aria-label="ООО B2E - к началу страницы">
+            <strong>ООО B2E</strong>
+            <span>Металлоконструкции СЗФО и ЦФО</span>
+          </a>
+          <p>Проектирование, производство, обработка и монтаж металлоконструкций для строительных и промышленных объектов.</p>
+          <div class="footer-traffic" aria-label="Посещаемость сайта">
+            <span class="footer-label">Посещаемость сайта</span>
+            <dl class="footer-traffic-list" data-visit-stats aria-busy="true">
+              <div>
+                <dt>Сегодня</dt>
+                <dd data-visit-stat="today">-</dd>
+              </div>
+              <div>
+                <dt>7 дней</dt>
+                <dd data-visit-stat="week">-</dd>
+              </div>
+              <div>
+                <dt>30 дней</dt>
+                <dd data-visit-stat="month">-</dd>
+              </div>
+              <div>
+                <dt>Все время</dt>
+                <dd data-visit-stat="allTime">-</dd>
+              </div>
+            </dl>
+          </div>
         </div>
-        <nav aria-label="Служебные файлы">
+
+        <address class="footer-block footer-contacts" aria-label="Контакты ООО B2E">
+          <span class="footer-label">Контакты</span>
+          <a data-config-href="phoneHref" href="tel:+79650578270" data-config-text="phoneDisplay">+7 (965) 057-82-70</a>
+          <a data-config-href="emailHref" href="mailto:zakaz@b2energy.ru" data-config-text="email">zakaz@b2energy.ru</a>
+          <span data-config-text="address">Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3</span>
+        </address>
+
+        <div class="footer-block footer-legal">
+          <span class="footer-label">Реквизиты</span>
+          <p>ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»</p>
+          <dl>
+            <div aria-label="ИНН 7811801565">
+              <dt>ИНН</dt>
+              <dd>7811801565</dd>
+            </div>
+            <div aria-label="КПП 781101001">
+              <dt>КПП</dt>
+              <dd>781101001</dd>
+            </div>
+            <div aria-label="ОГРН 1247800091098">
+              <dt>ОГРН</dt>
+              <dd>1247800091098</dd>
+            </div>
+          </dl>
+        </div>
+
+        <nav class="footer-block footer-service-links" aria-label="Служебные файлы сайта">
+          <span class="footer-label">Индексирование</span>
           <a href="./robots.txt">robots.txt</a>
           <a href="./sitemap.xml">sitemap.xml</a>
           <a href="./llms.txt">llms.txt</a>
         </nav>
+
+        <div class="footer-bottom">
+          <span>© 2026 ООО B2E. Все права на сайт защищены.</span>
+          <span>Санкт-Петербург · Петрозаводск · Никольское · Рыбацкое</span>
+        </div>
       </div>
     </footer>
+      </div>
+    </div>
 
     <div class="floating-actions" aria-label="Быстрые действия">
       <button class="float-button phone-float callback-trigger" type="button" aria-label="Заказать обратный звонок">
@@ -556,6 +734,10 @@
       <a class="float-button max-float" data-config-href="maxUrl" href="https://max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM" target="_blank" rel="noreferrer" aria-label="Написать в MAX">
         <img class="max-icon" src="./assets/icons/max-logo.png" srcset="./assets/icons/max-logo.png 1x, ./assets/icons/max-logo@2x.png 2x, ./assets/icons/max-logo@3x.png 3x" alt="" width="32" height="32" aria-hidden="true">
       </a>
+    </div>
+
+    <div class="production-tour-hint" data-production-tour-hint hidden>
+      Тур можно остановить: Esc, клик, скролл или касание экрана
     </div>
 
     <dialog class="lead-modal" id="leadModal" aria-labelledby="leadModalTitle">

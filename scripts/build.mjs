@@ -247,6 +247,7 @@ function makeConfig() {
     rusprofileUrl: env('B2E_RUSPROFILE_URL', 'https://www.rusprofile.ru/id/1247800091098'),
     catalogUrl: env('B2E_CATALOG_URL', './assets/documents/b2e-metallokonstrukcii-catalog.pdf'),
     leadEndpoint: env('B2E_LEAD_ENDPOINT', 'https://b2e-leads.egory780.workers.dev'),
+    statsEndpoint: env('B2E_STATS_ENDPOINT', 'https://b2e-leads.egory780.workers.dev/stats'),
     generatedAt: new Date().toISOString()
   };
 }

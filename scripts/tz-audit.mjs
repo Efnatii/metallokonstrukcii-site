@@ -55,6 +55,7 @@ const publicVars = [
   'B2E_RUSPROFILE_URL',
   'B2E_CATALOG_URL',
   'B2E_LEAD_ENDPOINT',
+  'B2E_STATS_ENDPOINT',
   'CLOUDFLARE_ACCOUNT_ID',
   'WORKER_ALLOWED_ORIGIN',
   'WORKER_SITE_LABEL',
@@ -102,7 +103,7 @@ const dropdown = extractBetween(
   '</div>'
 );
 const modalSelect = extractBetween(html, '<select name="objectType">', '</select>');
-const footer = extractBetween(html, '<footer class="site-footer">', '</footer>');
+const footer = html.match(/<footer class="site-footer"[^>]*>[\s\S]*?<\/footer>/)?.[0] || '';
 const productTitles = extractTexts(html, /<article class="product-card[^"]*">[\s\S]*?<h3>([\s\S]*?)<\/h3>/g);
 const serviceTitles = extractTexts(html, /<article class="service-card[^"]*">[\s\S]*?<h3>([\s\S]*?)<\/h3>/g);
 const dropdownProducts = extractTexts(dropdown, /<a href="#products">([^<]+)<\/a>/g);
@@ -177,9 +178,9 @@ const checks = [
       html.includes('leaflet') &&
       hasAll(html, ['office', 'petrozavodsk', 'nikolskoe', 'rybatskoe', 'coverage']) &&
       main.includes('fitBounds') &&
-      main.includes('L.polygon') &&
-      html.includes('data-map-polygons='),
-    `${(html.match(/data-map-key=/g) || []).length} map controls + Leaflet polygon coverage`
+      main.includes('L.geoJSON') &&
+      html.includes('data-map-geojson="./assets/data/coverage-szfo-cfo.geojson"'),
+    `${(html.match(/data-map-key=/g) || []).length} map controls + Leaflet GeoJSON coverage`
   ),
   check(
     'Карта показывает точный адрес Никольского и зону покрытия',
@@ -229,18 +230,21 @@ const checks = [
     'disabled hero/catalog CTA'
   ),
   check(
-    'Footer содержит только публичные служебные ссылки и copyright',
+    'Footer содержит публичные ссылки, copyright и посещаемость',
     hasAll(footer, ['robots.txt', 'sitemap.xml', 'llms.txt', '©', 'ИНН 7811801565', 'КПП 781101001', 'ОГРН 1247800091098']) &&
+      hasAll(footer, ['Посещаемость сайта', 'Сегодня', '7 дней', '30 дней', 'Все время']) &&
       !hasAll(footer, ['config.js']) &&
       !footer.includes('Каталог PDF') &&
       !footer.includes('ASSET_SOURCES.md'),
-    'footer trimmed service links + legal lines + copyright'
+    'footer public links + legal lines + copyright + visit stats'
   ),
   check(
     'Публичные env переменные рассортированы',
     publicVars.every((value) => envExample.includes(value)) &&
       pagesWorkflow.includes('vars.B2E_LEAD_ENDPOINT') &&
-      !pagesWorkflow.includes('secrets.B2E_LEAD_ENDPOINT'),
+      pagesWorkflow.includes('vars.B2E_STATS_ENDPOINT') &&
+      !pagesWorkflow.includes('secrets.B2E_LEAD_ENDPOINT') &&
+      !pagesWorkflow.includes('secrets.B2E_STATS_ENDPOINT'),
     'GitHub Variables used by Pages build'
   ),
   check(

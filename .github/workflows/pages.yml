@@ -32,6 +32,7 @@ jobs:
       B2E_RUSPROFILE_URL: ${{ vars.B2E_RUSPROFILE_URL || 'https://www.rusprofile.ru/id/1247800091098' }}
       B2E_CATALOG_URL: ${{ vars.B2E_CATALOG_URL || './assets/documents/b2e-metallokonstrukcii-catalog.pdf' }}
       B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || 'https://b2e-leads.egory780.workers.dev' }}
+      B2E_STATS_ENDPOINT: ${{ vars.B2E_STATS_ENDPOINT || 'https://b2e-leads.egory780.workers.dev/stats' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

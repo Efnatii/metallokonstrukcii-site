@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import worker from '../src/index.js';
+import worker, { SiteVisitCounter } from '../src/index.js';
 
 const baseEnv = {
   ALLOWED_ORIGIN: 'https://efnatii.github.io',
@@ -9,7 +9,7 @@ const baseEnv = {
   LEAD_SUBJECT: 'Новая заявка на металлоконструкции'
 };
 
-function makeRequest({ method = 'POST', origin = baseEnv.ALLOWED_ORIGIN, body } = {}) {
+function makeRequest({ method = 'POST', origin = baseEnv.ALLOWED_ORIGIN, path = '/', body } = {}) {
   const init = {
     method,
     headers: {
@@ -22,7 +22,49 @@ function makeRequest({ method = 'POST', origin = baseEnv.ALLOWED_ORIGIN, body } 
     init.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  return new Request('https://b2e-leads.test/', init);
+  return new Request(`https://b2e-leads.test${path}`, init);
+}
+
+function makeStatsStorage(initial = {}) {
+  const store = new Map(Object.entries(initial));
+
+  return {
+    async get(key) {
+      return store.get(key) || null;
+    },
+    async put(key, value) {
+      store.set(key, String(value));
+    }
+  };
+}
+
+function makeDurableObjectState(initial = {}) {
+  return {
+    storage: makeStatsStorage(initial)
+  };
+}
+
+function makeDurableObjectNamespace(ClassRef) {
+  const instances = new Map();
+
+  return {
+    idFromName(name) {
+      return name;
+    },
+    get(id) {
+      if (!instances.has(id)) {
+        instances.set(id, new ClassRef(makeDurableObjectState(), {}));
+      }
+
+      const instance = instances.get(id);
+
+      return {
+        fetch(request) {
+          return instance.fetch(request);
+        }
+      };
+    }
+  };
 }
 
 function validLead(overrides = {}) {
@@ -72,6 +114,71 @@ test('OPTIONS request returns CORS preflight headers', async () => {
   assert.equal(response.status, 204);
   assert.equal(response.headers.get('Access-Control-Allow-Origin'), baseEnv.ALLOWED_ORIGIN);
   assert.match(response.headers.get('Access-Control-Allow-Methods'), /POST/);
+  assert.match(response.headers.get('Access-Control-Allow-Methods'), /GET/);
+});
+
+test('GET stats returns explicit 503 when stats storage is not configured', async () => {
+  const response = await worker.fetch(makeRequest({ method: 'GET', path: '/stats' }), baseEnv);
+  const payload = await response.json();
+
+  assert.equal(response.status, 503);
+  assert.equal(payload.error, 'Site stats storage is not configured');
+});
+
+test('stats visit endpoint records counters in Durable Object storage', async () => {
+  const env = {
+    ...baseEnv,
+    SITE_VISIT_COUNTER: makeDurableObjectNamespace(SiteVisitCounter)
+  };
+
+  const first = await worker.fetch(makeRequest({ path: '/stats/visit' }), env);
+  const firstPayload = await first.json();
+  const second = await worker.fetch(makeRequest({ path: '/stats/visit' }), env);
+  const secondPayload = await second.json();
+  const read = await worker.fetch(makeRequest({ method: 'GET', path: '/stats' }), env);
+  const readPayload = await read.json();
+
+  assert.equal(first.status, 200);
+  assert.deepEqual(firstPayload.stats, {
+    today: 1,
+    week: 1,
+    month: 1,
+    allTime: 1
+  });
+  assert.equal(second.status, 200);
+  assert.deepEqual(secondPayload.stats, {
+    today: 2,
+    week: 2,
+    month: 2,
+    allTime: 2
+  });
+  assert.deepEqual(readPayload.stats, secondPayload.stats);
+});
+
+test('SiteVisitCounter keeps stats between direct backend requests', async () => {
+  const counter = new SiteVisitCounter(makeDurableObjectState(), {});
+  const first = await counter.fetch(new Request('https://site-stats.test/visit', { method: 'POST' }));
+  const second = await counter.fetch(new Request('https://site-stats.test/visit', { method: 'POST' }));
+  const read = await counter.fetch(new Request('https://site-stats.test/stats'));
+
+  assert.deepEqual(await first.json(), {
+    today: 1,
+    week: 1,
+    month: 1,
+    allTime: 1
+  });
+  assert.deepEqual(await second.json(), {
+    today: 2,
+    week: 2,
+    month: 2,
+    allTime: 2
+  });
+  assert.deepEqual(await read.json(), {
+    today: 2,
+    week: 2,
+    month: 2,
+    allTime: 2
+  });
 });
 
 test('POST from unknown origin is rejected', async () => {

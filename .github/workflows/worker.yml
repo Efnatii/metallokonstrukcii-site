@@ -128,3 +128,12 @@ jobs:
             echo "Worker CORS preflight returned $status"
             exit 1
           fi
+
+          stats_status="$(curl -sS -o /dev/null -w "%{http_code}" \
+            "${B2E_LEAD_ENDPOINT%/}/stats" \
+            -H "Origin: $WORKER_ALLOWED_ORIGIN")"
+
+          if [ "$stats_status" != "200" ]; then
+            echo "Worker stats endpoint returned $stats_status"
+            exit 1
+          fi

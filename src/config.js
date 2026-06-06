@@ -14,5 +14,6 @@ window.B2E_CONFIG = window.B2E_CONFIG || {
   rbcProfileUrl: 'https://companies.rbc.ru/amp/ogrn/1247800091098/',
   rusprofileUrl: 'https://www.rusprofile.ru/id/1247800091098',
   catalogUrl: './assets/documents/b2e-metallokonstrukcii-catalog.pdf',
-  leadEndpoint: 'https://b2e-leads.egory780.workers.dev'
+  leadEndpoint: 'https://b2e-leads.egory780.workers.dev',
+  statsEndpoint: 'https://b2e-leads.egory780.workers.dev/stats'
 };

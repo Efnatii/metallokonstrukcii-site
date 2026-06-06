@@ -6,6 +6,9 @@ const DEFAULT_LEAD_SUBJECT = 'Новая заявка на металлокон�
 const DEFAULT_MESSAGE_SUBJECT = 'Новое сообщение на металлоконструкции';
 const EMAIL_BOUNDARY = 'b2e-lead-message-boundary';
 const MOSCOW_TIME_ZONE = 'Europe/Moscow';
+const SITE_VISIT_COUNTER_NAME = 'b2e-site-visits';
+const VISIT_DATE_PREFIX = 'visit:date:';
+const VISIT_TOTAL_KEY = 'visit:total';
 const DEFAULT_SITE_PROFILE = {
   label: 'ООО B2E',
   siteName: 'B2E Металлоконструкции',
@@ -36,7 +39,7 @@ function corsHeaders(request, env) {
   return {
     ...JSON_HEADERS,
     'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     Vary: 'Origin'
   };
@@ -52,12 +55,191 @@ function jsonResponse(request, env, body, init = {}) {
   });
 }
 
+function workerJsonResponse(body, init = {}) {
+  return new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      ...JSON_HEADERS,
+      ...(init.headers || {})
+    }
+  });
+}
+
 function cleanText(value, maxLength = 800) {
   return String(value || '')
     .replace(/[\u0000-\u001f\u007f]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, maxLength);
+}
+
+function toCounter(value) {
+  const count = Number(value);
+
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+}
+
+function formatMoscowDateKey(value = new Date()) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: MOSCOW_TIME_ZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(value);
+    const part = (type) => parts.find((item) => item.type === type)?.value || '';
+
+    return `${part('year')}-${part('month')}-${part('day')}`;
+  } catch {
+    return value.toISOString().slice(0, 10);
+  }
+}
+
+function getDateKeysForPeriod(length, todayKey = formatMoscowDateKey()) {
+  const [year, month, day] = todayKey.split('-').map(Number);
+  const baseTime = Date.UTC(year, month - 1, day);
+
+  return Array.from({ length }, (_, index) => {
+    const date = new Date(baseTime - (index * 86400000));
+
+    return date.toISOString().slice(0, 10);
+  });
+}
+
+function getStatsKvStore(env) {
+  return env.SITE_STATS_KV || env.VISIT_STATS_KV || env.STATS_KV || null;
+}
+
+function getVisitCounterStub(env) {
+  const namespace = env.SITE_VISIT_COUNTER || env.SITE_VISITS || null;
+
+  if (!namespace?.idFromName || !namespace?.get) {
+    return null;
+  }
+
+  return namespace.get(namespace.idFromName(SITE_VISIT_COUNTER_NAME));
+}
+
+async function readCounter(store, key) {
+  if (!store?.get) {
+    return 0;
+  }
+
+  return toCounter(await store.get(key));
+}
+
+async function writeCounter(store, key, value) {
+  if (!store?.put) {
+    return;
+  }
+
+  await store.put(key, String(toCounter(value)));
+}
+
+async function incrementCounter(store, key) {
+  const next = await readCounter(store, key) + 1;
+
+  await writeCounter(store, key, next);
+  return next;
+}
+
+async function readVisitStatsFromStore(store, todayKey = formatMoscowDateKey()) {
+  if (!store?.get) {
+    return null;
+  }
+
+  const dateKeys = getDateKeysForPeriod(30, todayKey);
+  const counts = await Promise.all(
+    dateKeys.map((key) => readCounter(store, `${VISIT_DATE_PREFIX}${key}`))
+  );
+
+  return {
+    today: counts[0] || 0,
+    week: counts.slice(0, 7).reduce((sum, value) => sum + value, 0),
+    month: counts.reduce((sum, value) => sum + value, 0),
+    allTime: await readCounter(store, VISIT_TOTAL_KEY)
+  };
+}
+
+async function recordVisitStatsInStore(store, todayKey = formatMoscowDateKey()) {
+  if (!store?.get || !store?.put) {
+    return null;
+  }
+
+  await Promise.all([
+    incrementCounter(store, `${VISIT_DATE_PREFIX}${todayKey}`),
+    incrementCounter(store, VISIT_TOTAL_KEY)
+  ]);
+
+  return readVisitStatsFromStore(store, todayKey);
+}
+
+async function readVisitStatsFromBackend(env) {
+  const stub = getVisitCounterStub(env);
+
+  if (stub?.fetch) {
+    const response = await stub.fetch(new Request('https://site-stats.internal/stats'));
+    return response.ok ? response.json() : null;
+  }
+
+  return readVisitStatsFromStore(getStatsKvStore(env));
+}
+
+async function recordVisitStatsInBackend(env) {
+  const stub = getVisitCounterStub(env);
+
+  if (stub?.fetch) {
+    const response = await stub.fetch(
+      new Request('https://site-stats.internal/visit', { method: 'POST' })
+    );
+    return response.ok ? response.json() : null;
+  }
+
+  return recordVisitStatsInStore(getStatsKvStore(env));
+}
+
+async function visitStatsResponse(request, env, { record = false } = {}) {
+  const stats = record ? await recordVisitStatsInBackend(env) : await readVisitStatsFromBackend(env);
+
+  if (!stats) {
+    return jsonResponse(
+      request,
+      env,
+      { error: 'Site stats storage is not configured' },
+      { status: 503 }
+    );
+  }
+
+  return jsonResponse(request, env, { ok: true, stats });
+}
+
+export class SiteVisitCounter {
+  constructor(state) {
+    this.state = state;
+  }
+
+  async readStats(todayKey = formatMoscowDateKey()) {
+    return readVisitStatsFromStore(this.state.storage, todayKey);
+  }
+
+  async recordVisit() {
+    return recordVisitStatsInStore(this.state.storage);
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+    const pathname = url.pathname.replace(/\/$/, '') || '/';
+
+    if (pathname === '/stats' && request.method === 'GET') {
+      return workerJsonResponse(await this.readStats());
+    }
+
+    if (pathname === '/visit' && request.method === 'POST') {
+      return workerJsonResponse(await this.recordVisit());
+    }
+
+    return workerJsonResponse({ error: 'Method not allowed' }, { status: 405 });
+  }
 }
 
 function normalizeLead(input) {
@@ -586,13 +768,24 @@ export default {
       });
     }
 
-    if (request.method !== 'POST') {
-      return jsonResponse(request, env, { error: 'Method not allowed' }, { status: 405 });
-    }
-
     const origin = request.headers.get('Origin') || '';
     if (!allowedOrigins(env).includes(origin)) {
       return jsonResponse(request, env, { error: 'Forbidden origin' }, { status: 403 });
+    }
+
+    const url = new URL(request.url);
+    const pathname = url.pathname.replace(/\/$/, '') || '/';
+
+    if (pathname === '/stats' && request.method === 'GET') {
+      return visitStatsResponse(request, env);
+    }
+
+    if (pathname === '/stats/visit' && request.method === 'POST') {
+      return visitStatsResponse(request, env, { record: true });
+    }
+
+    if (request.method !== 'POST') {
+      return jsonResponse(request, env, { error: 'Method not allowed' }, { status: 405 });
     }
 
     const contentLength = Number(request.headers.get('Content-Length') || '0');

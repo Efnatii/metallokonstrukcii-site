@@ -107,6 +107,8 @@ SMTP/IMAP-логины, пароли приложений и почтовые п
 
 Код Worker лежит в `worker/`. Он принимает POST-заявки только с `WORKER_ALLOWED_ORIGIN`, валидирует имя/телефон, опционально проверяет Turnstile и отправляет заявку в Telegram, webhook или SMTP.
 
+Этот же Worker отдает backend-счетчик посещаемости для футера: `GET /stats` и `POST /stats/visit`. Подсчет хранится в Durable Object `SiteVisitCounter` с binding `SITE_VISIT_COUNTER`, поэтому значения сохраняются между посетителями, перезагрузками страницы и деплоями Worker.
+
 Для Cloudflare Workers Builds / git-deploy в корне репозитория есть `wrangler.jsonc`. Он указывает на `worker/src/index.js`, поэтому в Cloudflare можно оставить root directory корнем репозитория и deploy command по умолчанию `npx wrangler deploy`.
 
 Если Worker подключен к репозиторию напрямую через Cloudflare Workers Builds, SMTP нужно задавать в Cloudflare как Worker Secrets с runtime-именами без префикса `WORKER_`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`, `SMTP_ENVELOPE_FROM`, `SMTP_TO`. GitHub Secrets вида `WORKER_SMTP_*` используются только workflow `.github/workflows/worker.yml`, который синхронизирует их через `wrangler secret bulk`.
