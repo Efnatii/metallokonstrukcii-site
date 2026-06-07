@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages
+name: Deploy Cloudflare Pages
 
 on:
   push:
@@ -8,18 +8,16 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: cloudflare-pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy-pages:
     runs-on: ubuntu-latest
     env:
-      B2E_SITE_URL: ${{ vars.B2E_SITE_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+      B2E_SITE_URL: ${{ vars.B2E_SITE_URL || 'https://metallb2e-site.pages.dev/' }}
       B2E_CONTACT_PHONE: ${{ vars.B2E_CONTACT_PHONE || '+79650578270' }}
       B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 (965) 057-82-70' }}
       B2E_WORK_HOURS: ${{ vars.B2E_WORK_HOURS || 'Пн-Пт 09:00 - 18:00' }}
@@ -31,8 +29,10 @@ jobs:
       B2E_RBC_PROFILE_URL: ${{ vars.B2E_RBC_PROFILE_URL || 'https://companies.rbc.ru/amp/ogrn/1247800091098/' }}
       B2E_RUSPROFILE_URL: ${{ vars.B2E_RUSPROFILE_URL || 'https://www.rusprofile.ru/id/1247800091098' }}
       B2E_CATALOG_URL: ${{ vars.B2E_CATALOG_URL || './assets/documents/b2e-metallokonstrukcii-catalog.pdf' }}
-      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || 'https://b2e-leads.egory780.workers.dev' }}
-      B2E_STATS_ENDPOINT: ${{ vars.B2E_STATS_ENDPOINT || 'https://b2e-leads.egory780.workers.dev/stats' }}
+      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev' }}
+      B2E_STATS_ENDPOINT: ${{ vars.B2E_STATS_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev/stats' }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'metallb2e-site' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,24 +42,48 @@ jobs:
         with:
           node-version: 22
 
+      - name: Install Wrangler
+        run: npm ci --prefix worker
+
       - name: Test static site and Worker logic
         run: npm test
 
       - name: Build static site
         run: npm run build
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+      - name: Check Cloudflare credentials
+        id: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::warning::CLOUDFLARE_ACCOUNT_ID variable or CLOUDFLARE_API_TOKEN secret is missing; Cloudflare Pages deploy is skipped."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Ensure Cloudflare Pages project exists
+        if: steps.cloudflare.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set +e
+          create_output="$(./worker/node_modules/.bin/wrangler pages project create "$CLOUDFLARE_PAGES_PROJECT" --production-branch=main 2>&1)"
+          create_status="$?"
+          set -e
+          echo "$create_output"
+          if [ "$create_status" -ne 0 ] && ! echo "$create_output" | grep -Eiq "already exists|409"; then
+            exit "$create_status"
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.cloudflare.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          ./worker/node_modules/.bin/wrangler pages deploy dist \
+            --project-name "$CLOUDFLARE_PAGES_PROJECT" \
+            --branch main \
+            --commit-hash "$GITHUB_SHA" \
+            --commit-message "$GITHUB_SHA"

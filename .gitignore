@@ -3,8 +3,11 @@
 !.env.example
 worker/.dev.vars
 dist/
+dist-yandex/
 node_modules/
 worker/node_modules/
+.yandex-cloud/
+.yc/
 .codex-server.pid
 .playwright/
 .playwright-cli/

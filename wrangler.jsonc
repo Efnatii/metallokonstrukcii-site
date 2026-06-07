@@ -3,6 +3,7 @@
   "name": "b2e-leads",
   "main": "worker/src/index.js",
   "compatibility_date": "2026-04-25",
+  "workers_dev": true,
   "observability": {
     "enabled": true
   },
@@ -23,7 +24,7 @@
     }
   ],
   "vars": {
-    "ALLOWED_ORIGIN": "https://efnatii.github.io",
+    "ALLOWED_ORIGIN": "https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev",
     "SITE_LABEL": "ООО B2E",
     "LEAD_SUBJECT": "Новая заявка на металлоконструкции"
   }

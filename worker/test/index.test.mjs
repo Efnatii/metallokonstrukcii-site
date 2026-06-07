@@ -3,13 +3,15 @@ import test from 'node:test';
 
 import worker, { SiteVisitCounter } from '../src/index.js';
 
+const primaryOrigin = 'https://metallb2e-site.pages.dev';
+const previewOrigin = 'https://34da04c4.metallb2e-site.pages.dev';
 const baseEnv = {
-  ALLOWED_ORIGIN: 'https://efnatii.github.io',
+  ALLOWED_ORIGIN: `${primaryOrigin},https://*.metallb2e-site.pages.dev`,
   SITE_LABEL: 'ООО B2E',
   LEAD_SUBJECT: 'Новая заявка на металлоконструкции'
 };
 
-function makeRequest({ method = 'POST', origin = baseEnv.ALLOWED_ORIGIN, path = '/', body } = {}) {
+function makeRequest({ method = 'POST', origin = primaryOrigin, path = '/', body } = {}) {
   const init = {
     method,
     headers: {
@@ -72,7 +74,7 @@ function validLead(overrides = {}) {
     name: 'Test User',
     phone: '+79650578270',
     objectType: 'Metal frame',
-    page: 'https://efnatii.github.io/metallokonstrukcii-site/',
+    page: `${primaryOrigin}/`,
     createdAt: '2026-04-25T09:00:00.000Z',
     ...overrides
   };
@@ -112,9 +114,19 @@ test('OPTIONS request returns CORS preflight headers', async () => {
   const response = await worker.fetch(makeRequest({ method: 'OPTIONS' }), baseEnv);
 
   assert.equal(response.status, 204);
-  assert.equal(response.headers.get('Access-Control-Allow-Origin'), baseEnv.ALLOWED_ORIGIN);
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'), primaryOrigin);
   assert.match(response.headers.get('Access-Control-Allow-Methods'), /POST/);
   assert.match(response.headers.get('Access-Control-Allow-Methods'), /GET/);
+});
+
+test('Pages deployment preview origin is allowed by wildcard', async () => {
+  const response = await worker.fetch(
+    makeRequest({ method: 'OPTIONS', origin: previewOrigin }),
+    baseEnv
+  );
+
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'), previewOrigin);
 });
 
 test('GET stats returns explicit 503 when stats storage is not configured', async () => {
@@ -310,7 +322,7 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Content-Type: text\/plain; charset=UTF-8$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
   assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
-  assert.match(dataCommand, /<img src="https:\/\/efnatii\.github\.io\/metallokonstrukcii-site\/assets\/logo\/logo-b2e\.png"/);
+  assert.match(dataCommand, /<img src="https:\/\/metallb2e-site\.pages\.dev\/assets\/logo\/logo-b2e\.png"/);
   assert.match(dataCommand, /Текст заявки: Metal frame/);
   assert.match(dataCommand, />Текст заявки<\/td>/);
   assert.match(dataCommand, /Сайт: B2E Металлоконструкции/);

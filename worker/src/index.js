@@ -9,11 +9,13 @@ const MOSCOW_TIME_ZONE = 'Europe/Moscow';
 const SITE_VISIT_COUNTER_NAME = 'b2e-site-visits';
 const VISIT_DATE_PREFIX = 'visit:date:';
 const VISIT_TOTAL_KEY = 'visit:total';
+const DEFAULT_SITE_ROOT = 'https://metallb2e-site.pages.dev/';
+const DEFAULT_ALLOWED_ORIGINS = 'https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev';
 const DEFAULT_SITE_PROFILE = {
   label: 'ООО B2E',
   siteName: 'B2E Металлоконструкции',
   siteType: 'Производство металлоконструкций',
-  defaultRoot: 'https://efnatii.github.io/metallokonstrukcii-site/',
+  defaultRoot: DEFAULT_SITE_ROOT,
   logoPath: './assets/logo/logo-b2e.png',
   legalName: 'ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»',
   inn: '7811801565',
@@ -25,16 +27,49 @@ const DEFAULT_SITE_PROFILE = {
 };
 
 function allowedOrigins(env) {
-  return String(env.ALLOWED_ORIGIN || 'https://efnatii.github.io')
+  return String(env.ALLOWED_ORIGIN || DEFAULT_ALLOWED_ORIGINS)
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 }
 
+function originMatchesPattern(origin, pattern) {
+  if (origin === pattern) {
+    return true;
+  }
+
+  if (!origin || !pattern.includes('*')) {
+    return false;
+  }
+
+  try {
+    const originUrl = new URL(origin);
+    const patternUrl = new URL(pattern.replace('*.', 'wildcard.'));
+    const suffix = patternUrl.hostname.replace(/^wildcard\./, '.');
+
+    return (
+      pattern.startsWith(`${patternUrl.protocol}//*.`) &&
+      originUrl.protocol === patternUrl.protocol &&
+      originUrl.hostname.endsWith(suffix) &&
+      originUrl.hostname !== suffix.slice(1) &&
+      originUrl.port === patternUrl.port
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedOrigin(origin, env) {
+  return allowedOrigins(env).some((pattern) => originMatchesPattern(origin, pattern));
+}
+
+function fallbackAllowedOrigin(env) {
+  return allowedOrigins(env).find((origin) => !origin.includes('*')) || DEFAULT_SITE_ROOT.replace(/\/$/, '');
+}
+
 function corsHeaders(request, env) {
   const origin = request.headers.get('Origin') || '';
-  const allowed = allowedOrigins(env);
-  const allowOrigin = allowed.includes(origin) ? origin : allowed[0];
+  const allowOrigin = isAllowedOrigin(origin, env) ? origin : fallbackAllowedOrigin(env);
 
   return {
     ...JSON_HEADERS,
@@ -621,6 +656,10 @@ async function getSocketConnect(env) {
     return env.SMTP_CONNECT;
   }
 
+  if (typeof env.SOCKET_CONNECT === 'function') {
+    return env.SOCKET_CONNECT;
+  }
+
   const sockets = await import('cloudflare:sockets');
   return sockets.connect;
 }
@@ -769,7 +808,7 @@ export default {
     }
 
     const origin = request.headers.get('Origin') || '';
-    if (!allowedOrigins(env).includes(origin)) {
+    if (!isAllowedOrigin(origin, env)) {
       return jsonResponse(request, env, { error: 'Forbidden origin' }, { status: 403 });
     }
 

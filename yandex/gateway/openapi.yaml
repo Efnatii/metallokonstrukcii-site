@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: B2E Metallokonstrukcii
+  version: 1.0.0
+
+x-yc-apigateway:
+  variables:
+    site_bucket:
+      default: b2e-metallokonstrukcii-site
+      description: Object Storage bucket with built static site files.
+    function_id:
+      default: replace-with-function-id
+      description: Cloud Functions backend function ID.
+    service_account_id:
+      default: replace-with-service-account-id
+      description: Service account used by API Gateway integrations.
+
+paths:
+  /api:
+    x-yc-apigateway-any-method:
+      operationId: apiRoot
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${var.function_id}
+        tag: "$latest"
+        service_account_id: ${var.service_account_id}
+        payload_format_version: "1.0"
+
+  /api/{proxy+}:
+    x-yc-apigateway-any-method:
+      operationId: apiProxy
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: ${var.function_id}
+        tag: "$latest"
+        service_account_id: ${var.service_account_id}
+        payload_format_version: "1.0"
+
+  /:
+    get:
+      operationId: siteIndex
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: ${var.site_bucket}
+        object: index.html
+        error_object:
+          object: index.html
+          statusCode: 200
+        service_account_id: ${var.service_account_id}
+
+  /{file+}:
+    get:
+      operationId: siteFiles
+      parameters:
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: ${var.site_bucket}
+        object: "{file}"
+        error_object:
+          object: index.html
+          statusCode: 200
+        service_account_id: ${var.service_account_id}

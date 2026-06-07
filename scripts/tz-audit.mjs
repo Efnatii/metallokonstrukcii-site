@@ -57,6 +57,7 @@ const publicVars = [
   'B2E_LEAD_ENDPOINT',
   'B2E_STATS_ENDPOINT',
   'CLOUDFLARE_ACCOUNT_ID',
+  'CLOUDFLARE_PAGES_PROJECT',
   'WORKER_ALLOWED_ORIGIN',
   'WORKER_SITE_LABEL',
   'WORKER_LEAD_SUBJECT'
@@ -259,7 +260,10 @@ const checks = [
     'Cloudflare git-deploy из корня публикует Worker',
     rootWrangler.includes('"name": "b2e-leads"') &&
       rootWrangler.includes('"main": "worker/src/index.js"') &&
-      rootWrangler.includes('"ALLOWED_ORIGIN": "https://efnatii.github.io"'),
+      rootWrangler.includes('"workers_dev": true') &&
+      rootWrangler.includes('https://metallb2e-site.pages.dev') &&
+      rootWrangler.includes('https://*.metallb2e-site.pages.dev') &&
+      !rootWrangler.includes('"routes"'),
     'root wrangler.jsonc -> worker/src/index.js'
   ),
   check('Все локальные asset refs существуют', missingRefs.length === 0, missingRefs.join(', ') || 'all local refs exist'),

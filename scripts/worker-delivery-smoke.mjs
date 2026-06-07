@@ -1,7 +1,7 @@
 import process from 'node:process';
 
-const siteUrl = process.env.B2E_SITE_URL || 'https://efnatii.github.io/metallokonstrukcii-site/';
-const leadEndpoint = process.env.B2E_LEAD_ENDPOINT || 'https://b2e-leads.egory780.workers.dev';
+const siteUrl = process.env.B2E_SITE_URL || 'https://metallb2e-site.pages.dev/';
+const leadEndpoint = process.env.B2E_LEAD_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev';
 const origin = new URL(siteUrl).origin;
 
 async function readJson(response) {

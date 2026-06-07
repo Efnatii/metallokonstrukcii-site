@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      WORKER_ALLOWED_ORIGIN: ${{ vars.WORKER_ALLOWED_ORIGIN || 'https://efnatii.github.io' }}
+      WORKER_ALLOWED_ORIGIN: ${{ vars.WORKER_ALLOWED_ORIGIN || 'https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev' }}
       WORKER_SITE_LABEL: ${{ vars.WORKER_SITE_LABEL || 'ООО B2E' }}
       WORKER_LEAD_SUBJECT: ${{ vars.WORKER_LEAD_SUBJECT || 'Новая заявка на металлоконструкции' }}
-      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || '' }}
+      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -118,9 +118,11 @@ jobs:
       - name: Smoke test Worker CORS
         if: steps.cloudflare.outputs.enabled == 'true' && env.B2E_LEAD_ENDPOINT != ''
         run: |
+          smoke_origin="${WORKER_ALLOWED_ORIGIN%%,*}"
+
           status="$(curl -sS -o /dev/null -w "%{http_code}" \
             -X OPTIONS "$B2E_LEAD_ENDPOINT" \
-            -H "Origin: $WORKER_ALLOWED_ORIGIN" \
+            -H "Origin: $smoke_origin" \
             -H "Access-Control-Request-Method: POST" \
             -H "Access-Control-Request-Headers: Content-Type")"
 
@@ -131,7 +133,7 @@ jobs:
 
           stats_status="$(curl -sS -o /dev/null -w "%{http_code}" \
             "${B2E_LEAD_ENDPOINT%/}/stats" \
-            -H "Origin: $WORKER_ALLOWED_ORIGIN")"
+            -H "Origin: $smoke_origin")"
 
           if [ "$stats_status" != "200" ]; then
             echo "Worker stats endpoint returned $stats_status"

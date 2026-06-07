@@ -1,6 +1,6 @@
 # Сайт производства металлоконструкций ООО B2E
 
-Статический сайт для GitHub Pages и Cloudflare Worker для приема заявок. Публичные настройки сайта попадают в `dist/config.js` при сборке. Приватные токены не попадают в сайт: они хранятся в GitHub Actions Secrets и при деплое синхронизируются в Cloudflare Worker Secrets.
+Статический сайт для Cloudflare Pages и Cloudflare Worker для приема заявок. Публичные настройки сайта попадают в `dist/config.js` при сборке. Приватные токены не попадают в сайт: они хранятся в GitHub Actions Secrets и при деплое синхронизируются в Cloudflare Worker Secrets.
 
 ## Быстрый старт
 
@@ -29,8 +29,16 @@ npm run smoke:worker-delivery
 
 - `npm test` проверяет сборочный конфиг сайта и логику Worker.
 - `npm run check` дополнительно проверяет синтаксис, сборку и `wrangler deploy --dry-run`.
-- `npm run smoke` проверяет опубликованный GitHub Pages сайт, `config.js`, `sitemap.xml` и CORS Cloudflare Worker.
+- `npm run smoke` проверяет опубликованный Cloudflare Pages сайт, `config.js`, `sitemap.xml` и CORS Cloudflare Worker.
 - `npm run smoke:worker-delivery` отправляет тестовую заявку в опубликованный Worker и должен вернуть `200`; `503` означает, что в Cloudflare Worker не заданы runtime secrets доставки.
+- `npm run yandex:package` собирает ZIP для Yandex Cloud Functions.
+- `npm run smoke:yandex` проверяет опубликованный Yandex API Gateway из `YANDEX_GATEWAY_URL`.
+
+## Yandex Cloud
+
+Подготовлен перенос на Yandex Cloud без привязки к домену: статика лежит в Object Storage, backend работает как Cloud Function, единая публичная точка входа - API Gateway. Домен потом подключается к Gateway отдельно, без переименования bucket/function.
+
+Инструкция и проверенные официальные источники: [docs/yandex-cloud-migration.md](docs/yandex-cloud-migration.md).
 
 ## Контент и карты
 
@@ -49,7 +57,7 @@ npm run smoke:worker-delivery
 
 В репозитории два workflow:
 
-- `.github/workflows/pages.yml` собирает и публикует GitHub Pages.
+- `.github/workflows/pages.yml` собирает и публикует Cloudflare Pages.
 - `.github/workflows/worker.yml` тестирует, деплоит Cloudflare Worker и синхронизирует приватные Worker Secrets.
 
 Если `CLOUDFLARE_API_TOKEN` или `CLOUDFLARE_ACCOUNT_ID` не заданы, workflow Worker не падает, а пропускает деплой с warning. Это сделано, чтобы тесты и Pages не ломались из-за еще не добавленных секретов.
@@ -72,9 +80,11 @@ npm run smoke:worker-delivery
 | `B2E_RBC_PROFILE_URL` | Публичный профиль компании в РБК Компании. |
 | `B2E_RUSPROFILE_URL` | Публичный профиль компании в Руспрофиль. |
 | `B2E_CATALOG_URL` | Публичный URL PDF-каталога для кнопки `Скачать каталог`. |
-| `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.egory780.workers.dev`. |
+| `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.zakaz-749.workers.dev`. |
+| `B2E_STATS_ENDPOINT` | Публичный URL счетчика посещаемости Worker, сейчас `https://b2e-leads.zakaz-749.workers.dev/stats`. |
 | `CLOUDFLARE_ACCOUNT_ID` | ID аккаунта Cloudflare для деплоя Worker. |
-| `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://efnatii.github.io`. |
+| `CLOUDFLARE_PAGES_PROJECT` | Имя проекта Cloudflare Pages, по умолчанию `metallb2e-site`. |
+| `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev`. |
 | `WORKER_SITE_LABEL` | Название сайта в заявках. |
 | `WORKER_LEAD_SUBJECT` | Тема заявки для Telegram/webhook/SMTP, по умолчанию `Новая заявка на металлоконструкции`. |
 
@@ -133,10 +143,10 @@ npm --prefix worker run deploy
 Откройте:
 
 ```text
-https://efnatii.github.io/metallokonstrukcii-site/config.js
+https://metallb2e-site.pages.dev/config.js
 ```
 
-Если переменная изменена в GitHub Variables, но сайт не поменялся, нужно дождаться или вручную перезапустить workflow `Deploy GitHub Pages`. Статический сайт получает переменные только во время сборки.
+Если переменная изменена в GitHub Variables, но сайт не поменялся, нужно дождаться или вручную перезапустить workflow `Deploy Cloudflare Pages`. Статический сайт получает переменные только во время сборки.
 
 ## Безопасность
 
