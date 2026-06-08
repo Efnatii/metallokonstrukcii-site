@@ -3,10 +3,11 @@ import test from 'node:test';
 
 import worker, { SiteVisitCounter } from '../src/index.js';
 
-const primaryOrigin = 'https://metallb2e-site.pages.dev';
-const previewOrigin = 'https://34da04c4.metallb2e-site.pages.dev';
+const primaryOrigin = 'https://metallb2e-site-2v8.pages.dev';
+const legacyOrigin = 'https://metallb2e-site.pages.dev';
+const previewOrigin = 'https://34da04c4.metallb2e-site-2v8.pages.dev';
 const baseEnv = {
-  ALLOWED_ORIGIN: `${primaryOrigin},https://*.metallb2e-site.pages.dev`,
+  ALLOWED_ORIGIN: `${primaryOrigin},https://*.metallb2e-site-2v8.pages.dev,${legacyOrigin},https://*.metallb2e-site.pages.dev`,
   SITE_LABEL: 'ООО B2E',
   LEAD_SUBJECT: 'Новая заявка на металлоконструкции'
 };
@@ -110,6 +111,18 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function decodeBase64MimePart(message, contentType) {
+  const pattern = new RegExp(
+    `Content-Type: ${escapeRegExp(contentType)}; charset=UTF-8\\r?\\n` +
+      'Content-Transfer-Encoding: base64\\r?\\n\\r?\\n' +
+      '([A-Za-z0-9+/=\\r\\n]+)',
+    'm'
+  );
+  const encoded = message.match(pattern)?.[1] || '';
+
+  return Buffer.from(encoded.replace(/\s/g, ''), 'base64').toString('utf8');
+}
+
 test('OPTIONS request returns CORS preflight headers', async () => {
   const response = await worker.fetch(makeRequest({ method: 'OPTIONS' }), baseEnv);
 
@@ -127,6 +140,13 @@ test('Pages deployment preview origin is allowed by wildcard', async () => {
 
   assert.equal(response.status, 204);
   assert.equal(response.headers.get('Access-Control-Allow-Origin'), previewOrigin);
+});
+
+test('Legacy Pages origin remains allowed during migration', async () => {
+  const response = await worker.fetch(makeRequest({ method: 'OPTIONS', origin: legacyOrigin }), baseEnv);
+
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'), legacyOrigin);
 });
 
 test('GET stats returns explicit 503 when stats storage is not configured', async () => {
@@ -212,14 +232,25 @@ test('invalid JSON is rejected', async () => {
   assert.equal(payload.error, 'Invalid JSON');
 });
 
-test('lead validation rejects missing name and invalid phone', async () => {
+test('lead validation rejects missing name and invalid contact', async () => {
   const noName = await worker.fetch(makeRequest({ body: validLead({ name: '' }) }), baseEnv);
   const badPhone = await worker.fetch(makeRequest({ body: validLead({ phone: '12' }) }), baseEnv);
+  const badSymbols = await worker.fetch(makeRequest({ body: validLead({ phone: '.......' }) }), baseEnv);
 
   assert.equal(noName.status, 400);
   assert.equal((await noName.json()).error, 'Name is required');
   assert.equal(badPhone.status, 400);
-  assert.equal((await badPhone.json()).error, 'Valid phone is required');
+  assert.equal((await badPhone.json()).error, 'Valid phone or email is required');
+  assert.equal(badSymbols.status, 400);
+  assert.equal((await badSymbols.json()).error, 'Valid phone or email is required');
+});
+
+test('lead validation accepts email contact', async () => {
+  const response = await worker.fetch(makeRequest({ body: validLead({ phone: 'client@example.test' }) }), baseEnv);
+  const payload = await response.json();
+
+  assert.equal(response.status, 503);
+  assert.equal(payload.error, 'Lead destination is not configured');
 });
 
 test('valid lead without delivery target returns explicit 503', async () => {
@@ -310,6 +341,8 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   });
   const payload = await response.json();
   const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
+  const textPart = decodeBase64MimePart(dataCommand, 'text/plain');
+  const htmlPart = decodeBase64MimePart(dataCommand, 'text/html');
   const expectedSubject = Buffer.from('Новая заявка на металлоконструкции: Metal frame').toString('base64');
 
   assert.equal(response.status, 200);
@@ -320,24 +353,26 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^From: B2E <no-reply@b2energy\.ru>/m);
   assert.match(dataCommand, /^Sender: <smtp-login@b2energy\.ru>/m);
   assert.match(dataCommand, /^Content-Type: text\/plain; charset=UTF-8$/m);
+  assert.match(dataCommand, /^Content-Transfer-Encoding: base64$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
-  assert.match(dataCommand, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
-  assert.match(dataCommand, /<img src="https:\/\/metallb2e-site\.pages\.dev\/assets\/logo\/logo-b2e\.png"/);
-  assert.match(dataCommand, /Текст заявки: Metal frame/);
-  assert.match(dataCommand, />Текст заявки<\/td>/);
-  assert.match(dataCommand, /Сайт: B2E Металлоконструкции/);
-  assert.match(dataCommand, /Когда отправлено: 25 апреля 2026 года, 12:00 по московскому времени/);
-  assert.match(dataCommand, /Реквизиты B2E/);
-  assert.match(dataCommand, /ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»/);
-  assert.match(dataCommand, /ИНН 7811801565 · КПП 781101001 · ОГРН 1247800091098/);
-  assert.match(dataCommand, /Служебное уведомление сформировано после отправки формы на сайте/);
-  assert.doesNotMatch(dataCommand, /Открыть страницу заявки/);
-  assert.doesNotMatch(dataCommand, /Новая входящая заявка/);
-  assert.doesNotMatch(dataCommand, /Cloudflare Worker/);
-  assert.doesNotMatch(dataCommand, />Источник<\/td>/);
-  assert.doesNotMatch(dataCommand, />Объект или услуга<\/td>/);
-  assert.doesNotMatch(dataCommand, />Тип объекта<\/td>/);
-  assert.doesNotMatch(dataCommand, /Тип обращения/);
+  assert.match(htmlPart, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
+  assert.match(htmlPart, /<img src="https:\/\/metallb2e-site-2v8\.pages\.dev\/assets\/logo\/logo-b2e\.png"/);
+  assert.match(textPart, /Текст заявки: Metal frame/);
+  assert.match(htmlPart, />Текст заявки<\/td>/);
+  assert.match(textPart, /Сайт: B2E Металлоконструкции/);
+  assert.match(textPart, /Когда отправлено: 25 апреля 2026 года, 12:00 по московскому времени/);
+  assert.match(textPart, /Реквизиты B2E/);
+  assert.match(textPart, /ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»/);
+  assert.match(textPart, /ИНН 7811801565, КПП 781101001, ОГРН 1247800091098/);
+  assert.match(htmlPart, /ИНН 7811801565 · КПП 781101001 · ОГРН 1247800091098/);
+  assert.match(htmlPart, /Служебное уведомление сформировано после отправки формы на сайте/);
+  assert.doesNotMatch(htmlPart, /Открыть страницу заявки/);
+  assert.doesNotMatch(textPart, /Новая входящая заявка/);
+  assert.doesNotMatch(textPart, /Cloudflare Worker/);
+  assert.doesNotMatch(htmlPart, />Источник<\/td>/);
+  assert.doesNotMatch(htmlPart, />Объект или услуга<\/td>/);
+  assert.doesNotMatch(htmlPart, />Тип объекта<\/td>/);
+  assert.doesNotMatch(textPart, /Тип обращения/);
 });
 
 test('SMTP labels free-form callback as message and includes client comment', async () => {
@@ -376,6 +411,8 @@ test('SMTP labels free-form callback as message and includes client comment', as
   );
   const payload = await response.json();
   const dataCommand = commands.find((command) => command.includes('Content-Type: multipart/alternative'));
+  const textPart = decodeBase64MimePart(dataCommand, 'text/plain');
+  const htmlPart = decodeBase64MimePart(dataCommand, 'text/html');
   const expectedSubject = Buffer.from(
     'Новое сообщение на металлоконструкции: Нужно изготовить лестницу и ограждения для склада.'
   ).toString('base64');
@@ -384,10 +421,12 @@ test('SMTP labels free-form callback as message and includes client comment', as
   assert.equal(payload.ok, true);
   assert.ok(dataCommand);
   assert.match(dataCommand, new RegExp(`^Subject: =\\?UTF-8\\?B\\?${escapeRegExp(expectedSubject)}\\?=$`, 'm'));
-  assert.match(dataCommand, /Текст заявки/);
-  assert.match(dataCommand, /Нужно изготовить лестницу и ограждения для склада\./);
-  assert.doesNotMatch(dataCommand, /Комментарий клиента/);
-  assert.doesNotMatch(dataCommand, /Тип обращения/);
+  assert.match(dataCommand, /^Content-Transfer-Encoding: base64$/m);
+  assert.match(textPart, /Текст заявки/);
+  assert.match(textPart, /Нужно изготовить лестницу и ограждения для склада\./);
+  assert.match(htmlPart, />Текст заявки<\/td>/);
+  assert.doesNotMatch(textPart, /Комментарий клиента/);
+  assert.doesNotMatch(textPart, /Тип обращения/);
 });
 
 test('Turnstile secret requires a token before delivery', async () => {

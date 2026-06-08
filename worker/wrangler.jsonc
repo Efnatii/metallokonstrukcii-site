@@ -24,7 +24,7 @@
     }
   ],
   "vars": {
-    "ALLOWED_ORIGIN": "https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev",
+    "ALLOWED_ORIGIN": "https://metallb2e-site-2v8.pages.dev,https://*.metallb2e-site-2v8.pages.dev,https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev",
     "SITE_LABEL": "ООО B2E",
     "LEAD_SUBJECT": "Новая заявка на металлоконструкции"
   }

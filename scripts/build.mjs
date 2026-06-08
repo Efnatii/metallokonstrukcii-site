@@ -486,7 +486,7 @@ export async function build() {
   await loadDotEnv();
   const config = makeConfig();
 
-  await rm(distDir, { recursive: true, force: true });
+  await rm(distDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
   await mkdir(distDir, { recursive: true });
   await cp(srcDir, distDir, { recursive: true });
 

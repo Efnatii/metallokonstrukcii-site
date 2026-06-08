@@ -465,14 +465,54 @@
     }
 
     const originalFormHtml = form.innerHTML;
+    let isSubmitting = false;
     const syncModalLock = () => {
       document.body.classList.toggle('modal-open', Boolean(modal.open));
+    };
+
+    const isValidContact = (value) => {
+      const contact = String(value || '').trim();
+      const digits = contact.replace(/\D/g, '');
+      const looksLikePhone = /^\+?[\d\s().-]{7,}$/.test(contact) && digits.length >= 7;
+      const looksLikeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+
+      return looksLikePhone || looksLikeEmail;
+    };
+
+    const setSubmitDisabled = (disabled) => {
+      const submitButton = form.querySelector('button[type="submit"]');
+      if (submitButton) {
+        submitButton.disabled = disabled;
+      }
+    };
+
+    const showFormError = (message) => {
+      const status = $('.form-status', form);
+      if (status) {
+        status.textContent = message;
+      }
+    };
+
+    const readLeadError = async (response) => {
+      try {
+        const payload = await response.clone().json();
+        if (payload?.error === 'Valid phone or email is required' || payload?.error === 'Valid phone is required') {
+          return 'Укажите корректный телефон или email.';
+        }
+      } catch {
+        // Ignore non-JSON error responses and use a generic message below.
+      }
+
+      return 'Не удалось отправить заявку. Проверьте контакт и попробуйте еще раз.';
     };
 
     const restoreForm = () => {
       if (!form.elements.namedItem('name')) {
         form.innerHTML = originalFormHtml;
       }
+
+      isSubmitting = false;
+      setSubmitDisabled(false);
 
       const status = $('.form-status', form);
       if (status) {
@@ -538,50 +578,47 @@
         createdAt: new Date().toISOString()
       };
 
-      const openMailFallback = () => {
-        const requestType =
-          payload.message && (!payload.objectType || payload.objectType === 'Общая заявка') ? 'Сообщение' : 'Заявка';
-        const subject = encodeURIComponent(`${requestType} с сайта B2E`);
-        const body = encodeURIComponent(
-          `Имя: ${payload.name}\nКонтакт: ${payload.phone}\nТекст заявки: ${payload.message || payload.objectType || 'не указан'}\nСтраница: ${payload.page}`
-        );
-        window.location.href = `${config.emailHref}?subject=${subject}&body=${body}`;
-      };
-
       try {
-        let sentAutomatically = false;
-
-        if (config.leadEndpoint) {
-          try {
-            const response = await fetch(config.leadEndpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            sentAutomatically = response.ok;
-
-            if (!response.ok) {
-              console.error(new Error(`Endpoint responded ${response.status}`));
-            }
-          } catch (endpointError) {
-            console.error(endpointError);
-          }
+        if (isSubmitting) {
+          return;
         }
 
-        if (!sentAutomatically) {
-          openMailFallback();
+        if (!isValidContact(payload.phone)) {
+          showFormError('Укажите корректный телефон или email.');
+          form.elements.phone.focus();
+          return;
+        }
+
+        if (!config.leadEndpoint) {
+          showFormError('Не настроена автоматическая отправка заявки. Позвоните нам по телефону в контактах.');
+          return;
+        }
+
+        isSubmitting = true;
+        setSubmitDisabled(true);
+
+        const response = await fetch(config.leadEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const message = await readLeadError(response);
+          console.error(new Error(`Endpoint responded ${response.status}`));
+          showFormError(message);
+          return;
         }
 
         if (successTemplate) {
           form.replaceChildren(successTemplate.content.cloneNode(true));
         }
       } catch (error) {
-        if (status) {
-          status.textContent =
-            'Не удалось отправить автоматически. Позвоните нам или отправьте письмо на почту, указанную в контактах.';
-        }
+        showFormError('Не удалось отправить заявку. Проверьте соединение и попробуйте еще раз.');
         console.error(error);
+      } finally {
+        isSubmitting = false;
+        setSubmitDisabled(false);
       }
     });
   }

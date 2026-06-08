@@ -10,7 +10,8 @@ const SITE_VISIT_COUNTER_NAME = 'b2e-site-visits';
 const VISIT_DATE_PREFIX = 'visit:date:';
 const VISIT_TOTAL_KEY = 'visit:total';
 const DEFAULT_SITE_ROOT = 'https://metallb2e-site.pages.dev/';
-const DEFAULT_ALLOWED_ORIGINS = 'https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev';
+const DEFAULT_ALLOWED_ORIGINS =
+  'https://metallb2e-site-2v8.pages.dev,https://*.metallb2e-site-2v8.pages.dev,https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev';
 const DEFAULT_SITE_PROFILE = {
   label: 'ООО B2E',
   siteName: 'B2E Металлоконструкции',
@@ -293,8 +294,12 @@ function validateLead(lead) {
     return 'Name is required';
   }
 
-  if (!/^\+?[\d\s().-]{7,}$/.test(lead.phone)) {
-    return 'Valid phone is required';
+  const digits = lead.phone.replace(/\D/g, '');
+  const validPhone = /^\+?[\d\s().-]{7,}$/.test(lead.phone) && digits.length >= 7;
+  const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.phone);
+
+  if (!validPhone && !validEmail) {
+    return 'Valid phone or email is required';
   }
 
   return '';
@@ -447,6 +452,10 @@ function base64Utf8(value) {
   return Buffer.from(bytes).toString('base64');
 }
 
+function base64MimeUtf8(value) {
+  return base64Utf8(value).match(/.{1,76}/g)?.join('\r\n') || '';
+}
+
 function encodeHeader(value) {
   const text = cleanText(value, 180);
   return /^[\x20-\x7e]*$/.test(text) ? text : `=?UTF-8?B?${base64Utf8(text)}?=`;
@@ -593,14 +602,14 @@ function formatEmailMessage(lead, env) {
     '',
     `--${EMAIL_BOUNDARY}`,
     'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
+    'Content-Transfer-Encoding: base64',
     '',
-    text,
+    base64MimeUtf8(text),
     `--${EMAIL_BOUNDARY}`,
     'Content-Type: text/html; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
+    'Content-Transfer-Encoding: base64',
     '',
-    html,
+    base64MimeUtf8(html),
     `--${EMAIL_BOUNDARY}--`
   ].join('\r\n');
 }
