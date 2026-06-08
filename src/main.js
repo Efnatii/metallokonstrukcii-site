@@ -81,6 +81,7 @@
     const root = document.documentElement;
     const desktopQuery = window.matchMedia('(min-width: 1121px)');
     const designWidth = 1519;
+    const maxUpscale = 1.32;
     let frameRequest = 0;
 
     if (!shell || !stage) {
@@ -101,19 +102,38 @@
         root.style.removeProperty('--site-stage-scale');
         root.style.removeProperty('--site-stage-offset-x');
         root.style.removeProperty('--site-stage-height');
+        root.style.removeProperty('--site-stage-width');
         root.style.removeProperty('--site-action-offset');
         shell.style.removeProperty('height');
         return;
       }
 
-      const scale = getScale();
-      const scaledHeight = Math.ceil(stage.scrollHeight * scale);
+      const widthScale = Math.min(maxUpscale, getScale());
+      const currentScale = Number(root.style.getPropertyValue('--site-stage-scale')) || 1;
+      const header = $('.site-header', stage);
+      const hero = $('.hero', stage);
+      const firstScreenHeight = [header, hero].reduce((height, node) => {
+        if (!node) {
+          return height;
+        }
+
+        return height + (node.getBoundingClientRect().height / currentScale);
+      }, 0);
+      const heightScale = firstScreenHeight > 0
+        ? Math.max(0.6, window.innerHeight / firstScreenHeight)
+        : widthScale;
+      const scale = Math.min(widthScale, heightScale);
+      const stageWidth = Math.ceil(window.innerWidth / scale);
 
       root.classList.add('site-stage-active');
       root.style.setProperty('--site-stage-scale', scale.toFixed(6));
       root.style.setProperty('--site-stage-offset-x', '0px');
-      root.style.setProperty('--site-stage-height', `${scaledHeight}px`);
+      root.style.setProperty('--site-stage-width', `${stageWidth}px`);
       root.style.setProperty('--site-action-offset', `${Math.max(14, 22 * scale).toFixed(2)}px`);
+
+      const scaledHeight = Math.ceil(stage.scrollHeight * scale);
+
+      root.style.setProperty('--site-stage-height', `${scaledHeight}px`);
       shell.style.height = `${scaledHeight}px`;
     };
 
