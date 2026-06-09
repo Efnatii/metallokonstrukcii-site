@@ -218,7 +218,7 @@ function makeConfig() {
   const phoneDisplay = formatPhoneDisplay(env('B2E_CONTACT_PHONE_DISPLAY', '+7 (965) 057-82-70'));
   const email = env('B2E_CONTACT_EMAIL', 'zakaz@b2energy.ru');
   const siteUrl = withTrailingSlash(
-    env('B2E_SITE_URL', 'https://metallb2e-site-2v8.pages.dev/')
+    env('B2E_SITE_URL', 'https://metallb2e-site.pages.dev/')
   );
 
   return {
@@ -246,8 +246,8 @@ function makeConfig() {
     rbcProfileUrl: env('B2E_RBC_PROFILE_URL', 'https://companies.rbc.ru/amp/ogrn/1247800091098/'),
     rusprofileUrl: env('B2E_RUSPROFILE_URL', 'https://www.rusprofile.ru/id/1247800091098'),
     catalogUrl: env('B2E_CATALOG_URL', './assets/documents/b2e-metallokonstrukcii-catalog.pdf'),
-    leadEndpoint: env('B2E_LEAD_ENDPOINT', 'https://b2e-leads.egory780.workers.dev'),
-    statsEndpoint: env('B2E_STATS_ENDPOINT', 'https://b2e-leads.egory780.workers.dev/stats'),
+    leadEndpoint: env('B2E_LEAD_ENDPOINT', 'https://b2e-leads.zakaz-749.workers.dev'),
+    statsEndpoint: env('B2E_STATS_ENDPOINT', 'https://b2e-leads.zakaz-749.workers.dev/stats'),
     generatedAt: new Date().toISOString()
   };
 }

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import process from 'node:process';
 
-const siteUrl = process.env.B2E_SITE_URL || 'https://metallb2e-site-2v8.pages.dev/';
+const siteUrl = process.env.B2E_SITE_URL || 'https://metallb2e-site.pages.dev/';
 const leadEndpoint =
-  process.env.B2E_LEAD_ENDPOINT || 'https://b2e-leads.egory780.workers.dev';
+  process.env.B2E_LEAD_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev';
 const origin = new URL(siteUrl).origin;
 
 async function expectOk(url, label) {

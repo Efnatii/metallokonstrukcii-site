@@ -3,7 +3,7 @@ import test from 'node:test';
 
 import worker, { SiteVisitCounter } from '../src/index.js';
 
-const primaryOrigin = 'https://metallb2e-site-2v8.pages.dev';
+const primaryOrigin = 'https://metallb2e-site.pages.dev';
 const rejectedOrigin = 'https://preview.example.invalid';
 const baseEnv = {
   ALLOWED_ORIGIN: primaryOrigin,
@@ -348,7 +348,7 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Content-Transfer-Encoding: base64$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
   assert.match(htmlPart, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
-  assert.match(htmlPart, /<img src="https:\/\/metallb2e-site-2v8\.pages\.dev\/assets\/logo\/logo-b2e\.png"/);
+  assert.match(htmlPart, /<img src="https:\/\/metallb2e-site\.pages\.dev\/assets\/logo\/logo-b2e\.png"/);
   assert.match(textPart, /Текст заявки: Metal frame/);
   assert.match(htmlPart, />Текст заявки<\/td>/);
   assert.match(textPart, /Сайт: B2E Металлоконструкции/);

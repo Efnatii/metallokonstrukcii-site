@@ -43,7 +43,7 @@ https://efnatii.github.io/metallokonstrukcii-site/
 Публичный Worker endpoint:
 
 ```text
-https://b2e-leads.egory780.workers.dev
+https://b2e-leads.zakaz-749.workers.dev
 ```
 
 Основная команда проверки:

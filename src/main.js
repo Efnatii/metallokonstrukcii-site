@@ -4,7 +4,7 @@
 
   const defaults = {
     siteName: 'ООО B2E - производство металлоконструкций',
-    siteUrl: 'https://metallb2e-site-2v8.pages.dev/',
+    siteUrl: 'https://metallb2e-site.pages.dev/',
     phone: '+79650578270',
     phoneDisplay: '+7 (965) 057-82-70',
     phoneHref: 'tel:+79650578270',
@@ -18,8 +18,8 @@
     rbcProfileUrl: 'https://companies.rbc.ru/amp/ogrn/1247800091098/',
     rusprofileUrl: 'https://www.rusprofile.ru/id/1247800091098',
     catalogUrl: './assets/documents/b2e-metallokonstrukcii-catalog.pdf',
-    leadEndpoint: 'https://b2e-leads.egory780.workers.dev',
-    statsEndpoint: 'https://b2e-leads.egory780.workers.dev/stats'
+    leadEndpoint: 'https://b2e-leads.zakaz-749.workers.dev',
+    statsEndpoint: 'https://b2e-leads.zakaz-749.workers.dev/stats'
   };
 
   const config = { ...defaults, ...(window.B2E_CONFIG || {}) };

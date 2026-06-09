@@ -74,7 +74,7 @@ Workflow `.github/workflows/worker.yml`:
 Текущий публичный URL:
 
 ```text
-https://b2e-leads.egory780.workers.dev
+https://b2e-leads.zakaz-749.workers.dev
 ```
 
 Этот URL не является секретом. Его можно хранить в GitHub Variable `B2E_LEAD_ENDPOINT`.
@@ -82,10 +82,10 @@ https://b2e-leads.egory780.workers.dev
 ## Проверка CORS
 
 ```powershell
-curl.exe -i -X OPTIONS "https://b2e-leads.egory780.workers.dev" `
-  -H "Origin: https://metallb2e-site-2v8.pages.dev" `
+curl.exe -i -X OPTIONS "https://b2e-leads.zakaz-749.workers.dev" `
+  -H "Origin: https://metallb2e-site.pages.dev" `
   -H "Access-Control-Request-Method: POST" `
   -H "Access-Control-Request-Headers: Content-Type"
 ```
 
-Ожидаемый статус: `204 No Content`, header `Access-Control-Allow-Origin: https://metallb2e-site-2v8.pages.dev`.
+Ожидаемый статус: `204 No Content`, header `Access-Control-Allow-Origin: https://metallb2e-site.pages.dev`.

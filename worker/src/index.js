@@ -9,8 +9,8 @@ const MOSCOW_TIME_ZONE = 'Europe/Moscow';
 const SITE_VISIT_COUNTER_NAME = 'b2e-site-visits';
 const VISIT_DATE_PREFIX = 'visit:date:';
 const VISIT_TOTAL_KEY = 'visit:total';
-const DEFAULT_SITE_ROOT = 'https://metallb2e-site-2v8.pages.dev/';
-const DEFAULT_ALLOWED_ORIGINS = 'https://metallb2e-site-2v8.pages.dev';
+const DEFAULT_SITE_ROOT = 'https://metallb2e-site.pages.dev/';
+const DEFAULT_ALLOWED_ORIGINS = 'https://metallb2e-site.pages.dev';
 const DEFAULT_SITE_PROFILE = {
   label: 'ООО B2E',
   siteName: 'B2E Металлоконструкции',
