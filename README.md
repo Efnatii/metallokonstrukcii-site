@@ -80,11 +80,11 @@ npm run smoke:worker-delivery
 | `B2E_RBC_PROFILE_URL` | Публичный профиль компании в РБК Компании. |
 | `B2E_RUSPROFILE_URL` | Публичный профиль компании в Руспрофиль. |
 | `B2E_CATALOG_URL` | Публичный URL PDF-каталога для кнопки `Скачать каталог`. |
-| `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.zakaz-749.workers.dev`. |
-| `B2E_STATS_ENDPOINT` | Публичный URL счетчика посещаемости Worker, сейчас `https://b2e-leads.zakaz-749.workers.dev/stats`. |
+| `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.egory780.workers.dev`. |
+| `B2E_STATS_ENDPOINT` | Публичный URL счетчика посещаемости Worker, сейчас `https://b2e-leads.egory780.workers.dev/stats`. |
 | `CLOUDFLARE_ACCOUNT_ID` | ID аккаунта Cloudflare для деплоя Worker. |
 | `CLOUDFLARE_PAGES_PROJECT` | Имя проекта Cloudflare Pages, по умолчанию `metallb2e-site`. |
-| `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev`. |
+| `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://metallb2e-site-2v8.pages.dev`. |
 | `WORKER_SITE_LABEL` | Название сайта в заявках. |
 | `WORKER_LEAD_SUBJECT` | Тема заявки для Telegram/webhook/SMTP, по умолчанию `Новая заявка на металлоконструкции`. |
 
@@ -94,7 +94,7 @@ npm run smoke:worker-delivery
 
 | Secret | Куда используется |
 | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Деплой Worker из GitHub Actions. Нужны права Workers Scripts Edit. |
+| `CLOUDFLARE_API_TOKEN` | Деплой Pages и Worker из GitHub Actions. Нужны права Cloudflare Pages Edit и Workers Scripts Write. |
 | `WORKER_LEAD_WEBHOOK_URL` | CRM, Make, Zapier, Formspree или другой webhook для заявок. |
 | `WORKER_TELEGRAM_BOT_TOKEN` | Токен Telegram-бота для отправки заявок. |
 | `WORKER_TELEGRAM_CHAT_ID` | ID Telegram-чата/канала. |
@@ -143,7 +143,7 @@ npm --prefix worker run deploy
 Откройте:
 
 ```text
-https://metallb2e-site.pages.dev/config.js
+https://metallb2e-site-2v8.pages.dev/config.js
 ```
 
 Если переменная изменена в GitHub Variables, но сайт не поменялся, нужно дождаться или вручную перезапустить workflow `Deploy Cloudflare Pages`. Статический сайт получает переменные только во время сборки.

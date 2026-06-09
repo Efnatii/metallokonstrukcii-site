@@ -12,6 +12,9 @@ const pagesWorkflow = read('.github/workflows/pages.yml');
 const workerWorkflow = read('.github/workflows/worker.yml');
 const rootWrangler = read('wrangler.jsonc');
 const distHtml = read('dist/index.html');
+const canonicalSiteOrigin = 'https://metallb2e-site-2v8.pages.dev';
+const canonicalSiteHost = new URL(canonicalSiteOrigin).hostname;
+const legacyPagesOrigin = ['https://metallb2e-site', 'pages.dev'].join('.');
 
 const products = [
   'Строительные металлоконструкции',
@@ -261,8 +264,9 @@ const checks = [
     rootWrangler.includes('"name": "b2e-leads"') &&
       rootWrangler.includes('"main": "worker/src/index.js"') &&
       rootWrangler.includes('"workers_dev": true') &&
-      rootWrangler.includes('https://metallb2e-site.pages.dev') &&
-      rootWrangler.includes('https://*.metallb2e-site.pages.dev') &&
+      rootWrangler.includes(canonicalSiteOrigin) &&
+      !rootWrangler.includes(`https://*.${canonicalSiteHost}`) &&
+      !rootWrangler.includes(legacyPagesOrigin) &&
       !rootWrangler.includes('"routes"'),
     'root wrangler.jsonc -> worker/src/index.js'
   ),

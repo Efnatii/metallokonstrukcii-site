@@ -4,10 +4,9 @@ import test from 'node:test';
 import worker, { SiteVisitCounter } from '../src/index.js';
 
 const primaryOrigin = 'https://metallb2e-site-2v8.pages.dev';
-const legacyOrigin = 'https://metallb2e-site.pages.dev';
-const previewOrigin = 'https://34da04c4.metallb2e-site-2v8.pages.dev';
+const rejectedOrigin = 'https://preview.example.invalid';
 const baseEnv = {
-  ALLOWED_ORIGIN: `${primaryOrigin},https://*.metallb2e-site-2v8.pages.dev,${legacyOrigin},https://*.metallb2e-site.pages.dev`,
+  ALLOWED_ORIGIN: primaryOrigin,
   SITE_LABEL: 'ООО B2E',
   LEAD_SUBJECT: 'Новая заявка на металлоконструкции'
 };
@@ -132,21 +131,14 @@ test('OPTIONS request returns CORS preflight headers', async () => {
   assert.match(response.headers.get('Access-Control-Allow-Methods'), /GET/);
 });
 
-test('Pages deployment preview origin is allowed by wildcard', async () => {
+test('non-canonical origin is rejected', async () => {
   const response = await worker.fetch(
-    makeRequest({ method: 'OPTIONS', origin: previewOrigin }),
+    makeRequest({ method: 'OPTIONS', origin: rejectedOrigin }),
     baseEnv
   );
 
-  assert.equal(response.status, 204);
-  assert.equal(response.headers.get('Access-Control-Allow-Origin'), previewOrigin);
-});
-
-test('Legacy Pages origin remains allowed during migration', async () => {
-  const response = await worker.fetch(makeRequest({ method: 'OPTIONS', origin: legacyOrigin }), baseEnv);
-
-  assert.equal(response.status, 204);
-  assert.equal(response.headers.get('Access-Control-Allow-Origin'), legacyOrigin);
+  assert.equal(response.status, 403);
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'), null);
 });
 
 test('GET stats returns explicit 503 when stats storage is not configured', async () => {

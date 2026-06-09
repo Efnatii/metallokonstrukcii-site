@@ -9,9 +9,8 @@ const MOSCOW_TIME_ZONE = 'Europe/Moscow';
 const SITE_VISIT_COUNTER_NAME = 'b2e-site-visits';
 const VISIT_DATE_PREFIX = 'visit:date:';
 const VISIT_TOTAL_KEY = 'visit:total';
-const DEFAULT_SITE_ROOT = 'https://metallb2e-site.pages.dev/';
-const DEFAULT_ALLOWED_ORIGINS =
-  'https://metallb2e-site-2v8.pages.dev,https://*.metallb2e-site-2v8.pages.dev,https://metallb2e-site.pages.dev,https://*.metallb2e-site.pages.dev';
+const DEFAULT_SITE_ROOT = 'https://metallb2e-site-2v8.pages.dev/';
+const DEFAULT_ALLOWED_ORIGINS = 'https://metallb2e-site-2v8.pages.dev';
 const DEFAULT_SITE_PROFILE = {
   label: 'ООО B2E',
   siteName: 'B2E Металлоконструкции',
@@ -810,6 +809,18 @@ async function sendWebhook(lead, env) {
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
+      const origin = request.headers.get('Origin') || '';
+
+      if (origin && !isAllowedOrigin(origin, env)) {
+        return new Response(null, {
+          status: 403,
+          headers: {
+            ...JSON_HEADERS,
+            Vary: 'Origin'
+          }
+        });
+      }
+
       return new Response(null, {
         status: 204,
         headers: corsHeaders(request, env)
