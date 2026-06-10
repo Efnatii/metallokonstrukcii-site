@@ -466,8 +466,8 @@
         setVisitStats(remoteStats);
         markVisitRecorded(todayKey);
         return;
-      } catch (error) {
-        console.error(error);
+      } catch {
+        // Visit stats are non-critical; keep the public UI usable when the endpoint is offline locally.
       }
     }
 
@@ -526,6 +526,302 @@
       return 'Не удалось отправить заявку. Проверьте контакт и попробуйте еще раз.';
     };
 
+    const guidancePresets = {
+      ready: {
+        title: 'Есть КМ/КМД или ведомость',
+        copy: 'Добавьте данные, по которым инженер сможет быстрее проверить объем, покрытие и производственный маршрут.',
+        actions: [
+          ['Состав комплекта', 'Исходники: есть КМ/КМД, спецификация или ведомость металла.'],
+          ['Тоннаж и марки', 'Ориентир по тоннажу, маркам элементов и габаритам: нужно уточнить.'],
+          ['Покрытие и срок', 'Покрытие, адрес объекта, желаемый срок и условия отгрузки: нужно уточнить.']
+        ]
+      },
+      sketch: {
+        title: 'Есть эскиз, фото или идея',
+        copy: 'Зафиксируйте минимум вводных, чтобы инженер понял форму, функцию и ограничения конструкции.',
+        actions: [
+          ['Эскиз или фото', 'Исходники: есть эскиз, фото или пример похожей конструкции.'],
+          ['Размеры', 'Габариты, высота, пролет, нагрузка или условия эксплуатации: нужно уточнить.'],
+          ['Назначение', 'Назначение конструкции, материал, покрытие и место установки: нужно уточнить.']
+        ]
+      },
+      site: {
+        title: 'Нужен выезд или проверка объекта',
+        copy: 'Помогает заранее оценить монтажные ограничения, доступ, подъем, упаковку и доставку.',
+        actions: [
+          ['Адрес объекта', 'Адрес объекта и удобное время для связи или выезда: нужно уточнить.'],
+          ['Ограничения', 'Ограничения по доступу, высоте, подъему, существующим конструкциям и монтажу: нужно уточнить.'],
+          ['Фото площадки', 'Фото площадки, места установки или подъезда можно подготовить для инженера.']
+        ]
+      },
+      operation: {
+        title: 'Нужна отдельная операция',
+        copy: 'Для резки, гибки, обработки или окраски важны материал, размеры партии и требования к результату.',
+        actions: [
+          ['Материал', 'Материал, толщина, профиль или марка стали: нужно уточнить.'],
+          ['Партия', 'Количество деталей, размеры партии и желаемый срок готовности: нужно уточнить.'],
+          ['Требования', 'Требования к резке, гибке, обработке, покрытию или упаковке: нужно уточнить.']
+        ]
+      },
+      general: {
+        title: 'Что ускорит расчет',
+        copy: 'Добавьте любые известные вводные. Если данных мало, инженер подскажет следующий шаг.',
+        actions: [
+          ['Исходники', 'Исходники: КМ/КМД, эскиз, фото или ведомость нужно уточнить.'],
+          ['Объем', 'Габариты, тоннаж, материал и покрытие: нужно уточнить.'],
+          ['Срок и адрес', 'Адрес объекта, желаемый срок и состав работ: нужно уточнить.']
+        ]
+      }
+    };
+
+    const objectGuidanceKeys = {
+      'Расчет металлоконструкций': 'ready',
+      'Строительные металлоконструкции': 'ready',
+      'Закладные детали': 'ready',
+      'Лестницы металлические': 'sketch',
+      'Навесы': 'sketch',
+      'Ворота': 'sketch',
+      'Резервуары': 'sketch',
+      'Арочные конструкции': 'ready',
+      'Нестандартные конструкции': 'sketch',
+      'Монтаж металлоконструкций': 'site',
+      'Резка металла': 'operation',
+      'Гибка металла': 'operation',
+      'Металлообработка': 'operation',
+      'Порошковая окраска': 'operation'
+    };
+
+    const normalizeText = (value) => String(value || '').toLocaleLowerCase('ru-RU');
+
+    const resolveGuidanceKey = (objectType = '', message = '', explicitKey = '') => {
+      if (explicitKey && guidancePresets[explicitKey]) {
+        return explicitKey;
+      }
+
+      const text = normalizeText(`${objectType} ${message}`);
+
+      if (objectGuidanceKeys[objectType]) {
+        return objectGuidanceKeys[objectType];
+      }
+
+      if (text.includes('объект требует проверки') || text.includes('выезд') || text.includes('замер') || text.includes('монтажные ограничения')) {
+        return 'site';
+      }
+
+      if (text.includes('неполные') || text.includes('эскиз') || text.includes('идея конструкции') || text.includes('фото')) {
+        return 'sketch';
+      }
+
+      if (text.includes('км/кмд') || text.includes('ведомость')) {
+        return 'ready';
+      }
+
+      return 'general';
+    };
+
+    const renderLeadGuidance = (guidanceKey = 'general') => {
+      const guidance = $('[data-lead-guidance]', form);
+      const title = $('[data-lead-guidance-title]', form);
+      const copy = $('[data-lead-guidance-copy]', form);
+      const actions = $('[data-lead-guidance-actions]', form);
+      const preset = guidancePresets[guidanceKey] || guidancePresets.general;
+
+      if (!guidance || !title || !copy || !actions) {
+        return;
+      }
+
+      guidance.dataset.guidanceKey = guidanceKey;
+      title.textContent = preset.title;
+      copy.textContent = preset.copy;
+      actions.replaceChildren(
+        ...preset.actions.map(([label, insertText]) => {
+          const button = document.createElement('button');
+          button.className = 'lead-guidance-action';
+          button.type = 'button';
+          button.dataset.leadInsert = insertText;
+          button.textContent = label;
+          return button;
+        })
+      );
+    };
+
+    const appendLeadGuidance = (insertText) => {
+      const message = form.elements.message;
+      const text = String(insertText || '').trim();
+
+      if (!message || !text) {
+        return;
+      }
+
+      const current = message.value.trim();
+      if (!current.includes(text)) {
+        message.value = current ? `${current}\n${text}` : text;
+      }
+
+      message.focus();
+      updateLeadReadiness();
+      updateLeadBrief();
+    };
+
+    const readinessChecks = [
+      {
+        label: 'исходники',
+        test: (text) => /км|кмд|эскиз|ведомост|спецификац|фото|чертеж/i.test(text)
+      },
+      {
+        label: 'объем',
+        test: (text) => /тонн|т\b|габарит|размер|высот|пролет|профил|количеств|парт/i.test(text)
+      },
+      {
+        label: 'срок/адрес',
+        test: (text) => /адрес|объект|срок|отгруз|достав|монтаж|выезд|площадк/i.test(text)
+      }
+    ];
+
+    const nextStepByGuidance = {
+      ready: {
+        partial: 'Инженер проверит комплект, отметит недостающие данные и вернет вопросы до подготовки КП.',
+        complete: 'Инженер проверит комплект, зафиксирует допущения и передаст задачу в расчет КП.'
+      },
+      sketch: {
+        partial: 'Инженер уточнит реализуемость, габариты и ограничения, затем предложит расчетный маршрут.',
+        complete: 'Инженер проверит реализуемость по эскизу и подготовит следующий шаг для КП.'
+      },
+      site: {
+        partial: 'Инженер уточнит доступ, ограничения и необходимость выезда или входной проверки объекта.',
+        complete: 'Инженер проверит монтажные ограничения и соберет КП с учетом объекта, доставки или выезда.'
+      },
+      operation: {
+        partial: 'Инженер уточнит материал, партию и требования к операции, затем оценит производственный маршрут.',
+        complete: 'Инженер проверит материал, партию и требования, затем передаст операцию в расчет.'
+      },
+      general: {
+        partial: 'Инженер проверит вводные и подскажет, что нужно уточнить для КП.',
+        complete: 'Инженер проверит вводные и передаст задачу в расчет КП.'
+      }
+    };
+
+    function updateLeadReadiness() {
+      const root = $('[data-lead-readiness]', form);
+      const label = $('[data-lead-readiness-label]', form);
+      const score = $('[data-lead-readiness-score]', form);
+      const copy = $('[data-lead-readiness-copy]', form);
+      const bar = $('[data-lead-readiness-bar]', form);
+      const list = $('[data-lead-readiness-list]', form);
+      const nextStep = $('[data-lead-next-step]', form);
+
+      if (!root || !label || !score || !copy || !bar || !list || !nextStep) {
+        return;
+      }
+
+      const message = String(form.elements.message?.value || '');
+      const objectType = String(form.elements.objectType?.value || '');
+      const checkText = `${objectType}\n${message}`;
+      const states = readinessChecks.map((item) => ({ ...item, ready: item.test(checkText) }));
+      const readyCount = states.filter((item) => item.ready).length;
+      const percent = Math.max(1, readyCount) / states.length * 100;
+      const guidanceKey = $('[data-lead-guidance]', form)?.dataset.guidanceKey || resolveGuidanceKey(objectType, message);
+      const nextStepPreset = nextStepByGuidance[guidanceKey] || nextStepByGuidance.general;
+      const status =
+        readyCount === states.length
+          ? ['Инженеру хватит для старта', 'Можно отправлять: ключевые вводные уже есть в заявке.']
+          : readyCount === 2
+            ? ['Почти готово', 'Остался один блок вводных. Если его нет, инженер уточнит после заявки.']
+            : ['Стартовая заявка', 'Добавьте исходники, объем и срок, чтобы инженер быстрее подготовил КП.'];
+
+      root.dataset.readiness = String(readyCount);
+      label.textContent = status[0];
+      score.textContent = `${readyCount}/${states.length}`;
+      copy.textContent = status[1];
+      bar.style.width = `${percent}%`;
+      nextStep.textContent = readyCount === states.length ? nextStepPreset.complete : nextStepPreset.partial;
+      list.replaceChildren(
+        ...states.map((item) => {
+          const node = document.createElement('li');
+          node.classList.toggle('is-ready', item.ready);
+          node.textContent = item.ready ? `${item.label} есть` : `${item.label} ?`;
+          return node;
+        })
+      );
+    }
+
+    const buildLeadBrief = () => {
+      const objectType = String(form.elements.objectType?.value || 'Общая заявка').trim();
+      const name = String(form.elements.name?.value || '').trim();
+      const contact = String(form.elements.phone?.value || '').trim();
+      const message = String(form.elements.message?.value || '').trim();
+      const readinessLabel = $('[data-lead-readiness-label]', form)?.textContent.trim() || 'Стартовая заявка';
+      const readinessScore = $('[data-lead-readiness-score]', form)?.textContent.trim() || '0/3';
+      const nextStep = $('[data-lead-next-step]', form)?.textContent.trim() || '';
+
+      return [
+        'Заявка на расчет B2E',
+        `Тип проекта: ${objectType}`,
+        name ? `Имя/компания: ${name}` : 'Имя/компания: нужно уточнить',
+        contact ? `Контакт: ${contact}` : 'Контакт: нужно уточнить',
+        `Готовность вводных: ${readinessLabel} (${readinessScore})`,
+        nextStep ? `Следующий шаг: ${nextStep}` : '',
+        '',
+        'Задача:',
+        message || 'Описание задачи нужно уточнить.',
+        '',
+        `Страница: ${window.location.href.split('#')[0]}`
+      ].filter((line) => line !== '').join('\n');
+    };
+
+    const updateLeadBrief = (statusText = 'Бриф обновляется из выбранных вводных.') => {
+      const emailLink = $('[data-lead-email-brief]', form);
+      const briefText = $('[data-lead-brief-text]', form);
+      const status = $('[data-lead-brief-status]', form);
+      const brief = buildLeadBrief();
+      const subject = encodeURIComponent(`Заявка на расчет B2E: ${form.elements.objectType?.value || 'металлоконструкции'}`);
+      const body = encodeURIComponent(brief);
+
+      if (emailLink) {
+        emailLink.href = `mailto:${config.email}?subject=${subject}&body=${body}`;
+      }
+
+      if (briefText && briefText.value !== brief) {
+        briefText.value = brief;
+      }
+
+      if (status) {
+        status.textContent = statusText;
+      }
+    };
+
+    const copyLeadBrief = async () => {
+      const brief = buildLeadBrief();
+
+      try {
+        await navigator.clipboard?.writeText(brief);
+        return 'copied';
+      } catch {
+        const buffer = $('[data-lead-brief-text]', form) || document.createElement('textarea');
+
+        if (!buffer.isConnected) {
+          buffer.value = brief;
+          buffer.setAttribute('readonly', '');
+          buffer.style.position = 'fixed';
+          buffer.style.inset = '0 auto auto -9999px';
+          buffer.style.opacity = '0';
+          document.body.append(buffer);
+        }
+
+        buffer.focus();
+        buffer.select();
+        buffer.scrollTop = 0;
+
+        try {
+          return document.execCommand('copy') ? 'copied' : 'selected';
+        } finally {
+          if (!buffer.matches('[data-lead-brief-text]')) {
+            buffer.remove();
+          }
+        }
+      }
+    };
+
     const restoreForm = () => {
       if (!form.elements.namedItem('name')) {
         form.innerHTML = originalFormHtml;
@@ -540,12 +836,23 @@
       }
     };
 
-    const openModal = (objectType) => {
+    const openModal = (objectType, message = '', guidanceKey = '') => {
       restoreForm();
 
-      if (objectType) {
-        form.elements.objectType.value = objectType;
+      if (objectType && form.elements.objectType) {
+        const objectTypeControl = form.elements.objectType;
+        const hasOption = Array.from(objectTypeControl.options).some((option) => option.value === objectType);
+
+        objectTypeControl.value = hasOption ? objectType : 'Общая заявка';
       }
+
+      if (message && form.elements.message) {
+        form.elements.message.value = message;
+      }
+
+      renderLeadGuidance(resolveGuidanceKey(form.elements.objectType?.value || objectType, message, guidanceKey));
+      updateLeadReadiness();
+      updateLeadBrief();
 
       if (typeof modal.showModal === 'function') {
         modal.showModal();
@@ -566,9 +873,63 @@
     $$('.callback-trigger').forEach((button) => {
       button.addEventListener('click', () => {
         const typeFromButton = button.dataset.objectType;
-        openModal(typeFromButton);
+        const messageFromButton = button.dataset.prefillMessage || '';
+        const guidanceFromButton = button.dataset.leadContext || '';
+        openModal(typeFromButton, messageFromButton, guidanceFromButton);
       });
     });
+
+    window.addEventListener('b2e:open-lead-modal', (event) => {
+      openModal(event.detail?.objectType, event.detail?.message, event.detail?.guidanceKey);
+    });
+
+    form.addEventListener('change', (event) => {
+      const target = event.target;
+
+      if (target instanceof HTMLSelectElement && target.name === 'objectType') {
+        renderLeadGuidance(resolveGuidanceKey(target.value, form.elements.message?.value || ''));
+        updateLeadReadiness();
+        updateLeadBrief();
+      }
+    });
+
+    form.addEventListener('input', (event) => {
+      const target = event.target;
+
+      if (target instanceof HTMLTextAreaElement && target.name === 'message') {
+        updateLeadReadiness();
+        updateLeadBrief();
+      }
+
+      if (target instanceof HTMLInputElement && (target.name === 'name' || target.name === 'phone')) {
+        updateLeadBrief();
+      }
+    });
+
+    form.addEventListener('click', async (event) => {
+      const copyButton = event.target instanceof Element ? event.target.closest('[data-lead-copy-brief]') : null;
+      const insertButton = event.target instanceof Element ? event.target.closest('[data-lead-insert]') : null;
+
+      if (copyButton) {
+        const copyState = await copyLeadBrief();
+        updateLeadBrief(
+          copyState === 'copied'
+            ? 'Бриф скопирован. Его можно отправить по email, MAX или в мессенджер.'
+            : 'Бриф выделен в поле ниже. Нажмите Ctrl+C, если браузер не разрешил автокопирование.'
+        );
+        return;
+      }
+
+      if (!insertButton) {
+        return;
+      }
+
+      appendLeadGuidance(insertButton.dataset.leadInsert);
+    });
+
+    renderLeadGuidance();
+    updateLeadReadiness();
+    updateLeadBrief();
 
     close?.addEventListener('click', closeModal);
     modal.addEventListener('click', (event) => {
@@ -641,6 +1002,190 @@
         setSubmitDisabled(false);
       }
     });
+  }
+
+  function setupQuoteBuilder() {
+    const root = $('[data-quote-builder]');
+
+    if (!root) {
+      return;
+    }
+
+    const summary = $('[data-quote-summary]', root);
+    const submit = $('[data-quote-submit]', root);
+    const groups = $$('[data-quote-group]', root);
+
+    const readSelections = () =>
+      groups.reduce((acc, group) => {
+        const active = $('.quote-option.is-active', group) || $('.quote-option', group);
+        if (!active) {
+          return acc;
+        }
+
+        acc[group.dataset.quoteGroup] = {
+          value: active.dataset.quoteValue || active.textContent.trim(),
+          label: active.dataset.quoteLabel || active.textContent.trim()
+        };
+        return acc;
+      }, {});
+
+    const buildMessage = () => {
+      const selected = readSelections();
+
+      return [
+        `Сценарий: ${selected.scenario?.label || selected.scenario?.value || 'заказчик проекта'}.`,
+        `Тип: ${selected.objectType?.label || selected.objectType?.value || 'металлоконструкции'}.`,
+        `Исходные данные: ${selected.source?.label || selected.source?.value || 'требуется уточнение'}.`,
+        `Ориентир по объему: ${selected.scale?.label || selected.scale?.value || 'нужно уточнить'}.`,
+        `Нужно включить: ${selected.scope?.label || selected.scope?.value || 'изготовление'}.`,
+        'Прошу связаться, уточнить недостающие данные и подготовить расчет.'
+      ].join('\n');
+    };
+
+    const updateSummary = () => {
+      if (summary) {
+        summary.textContent = buildMessage().replace(/\n/g, ' ');
+      }
+    };
+
+    const resolveQuoteGuidanceKey = (selected) => {
+      const source = String(selected.source?.value || selected.source?.label || '').toLocaleLowerCase('ru-RU');
+
+      if (source.includes('выезд')) {
+        return 'site';
+      }
+
+      if (source.includes('эскиз')) {
+        return 'sketch';
+      }
+
+      return 'ready';
+    };
+
+    root.addEventListener('click', (event) => {
+      const option = event.target instanceof Element ? event.target.closest('.quote-option') : null;
+
+      if (!option) {
+        return;
+      }
+
+      const group = option.closest('[data-quote-group]');
+      if (!group) {
+        return;
+      }
+
+      $$('.quote-option', group).forEach((item) => {
+        const isActive = item === option;
+
+        item.classList.toggle('is-active', isActive);
+        item.setAttribute('aria-pressed', String(isActive));
+      });
+
+      updateSummary();
+    });
+
+    submit?.addEventListener('click', () => {
+      const selected = readSelections();
+
+      window.dispatchEvent(new CustomEvent('b2e:open-lead-modal', {
+        detail: {
+          objectType: selected.objectType?.value || 'Общая заявка',
+          message: buildMessage(),
+          guidanceKey: resolveQuoteGuidanceKey(selected)
+        }
+      }));
+    });
+
+    updateSummary();
+  }
+
+  function setupQuoteFactors() {
+    const root = $('[data-quote-factors]');
+
+    if (!root) {
+      return;
+    }
+
+    const buttons = $$('[data-factor-value]', root);
+    const count = $('[data-quote-factor-count]', root);
+    const summary = $('[data-quote-factor-summary]', root);
+    const list = $('[data-quote-factor-summary-list]', root);
+    const submit = $('[data-quote-factor-submit]', root);
+
+    const readActive = () => buttons.filter((button) => button.classList.contains('is-active'));
+    const readFactor = (button) => ({
+      label: button.dataset.factorLabel || button.textContent.trim(),
+      line: button.dataset.factorLine || ''
+    });
+
+    const buildFactorMessage = () => {
+      const selected = readActive().map(readFactor);
+      const labels = selected.map((item) => item.label).join(', ');
+      const lines = selected.map((item) => `- ${item.label}: ${item.line}`).join('\n');
+
+      return [
+        `Факторы КП: ${labels}.`,
+        'Нужно подготовить расчет металлоконструкций и показать, как эти факторы влияют на цену, срок, состав работ и допущения.',
+        'Что известно или нужно уточнить:',
+        lines,
+        'Прошу связаться, проверить достаточность вводных и зафиксировать следующий шаг для КП.'
+      ].join('\n');
+    };
+
+    const updateFactors = () => {
+      const selected = readActive().map(readFactor);
+
+      if (count) {
+        count.textContent = `${selected.length}/${buttons.length} факторов`;
+      }
+
+      if (summary) {
+        const labels = selected.map((item) => item.label.toLocaleLowerCase('ru-RU'));
+        summary.textContent =
+          selected.length >= 4
+            ? 'Инженер увидит не только объем, но и ограничения по производству, объекту и срокам.'
+            : `${labels.join(', ')} уже дают основу для первичного КП.`;
+      }
+
+      if (list) {
+        list.replaceChildren(
+          ...selected.map((item) => {
+            const node = document.createElement('li');
+            node.textContent = item.line;
+            return node;
+          })
+        );
+      }
+    };
+
+    root.addEventListener('click', (event) => {
+      const button = event.target instanceof Element ? event.target.closest('[data-factor-value]') : null;
+
+      if (!button) {
+        return;
+      }
+
+      const isActive = button.classList.contains('is-active');
+      if (isActive && readActive().length === 1) {
+        return;
+      }
+
+      button.classList.toggle('is-active', !isActive);
+      button.setAttribute('aria-pressed', String(!isActive));
+      updateFactors();
+    });
+
+    submit?.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('b2e:open-lead-modal', {
+        detail: {
+          objectType: 'Расчет металлоконструкций',
+          message: buildFactorMessage(),
+          guidanceKey: 'ready'
+        }
+      }));
+    });
+
+    updateFactors();
   }
 
   function setupFloatingActions() {
@@ -1421,6 +1966,8 @@
   setupNavigation();
   setupHeaderReveal();
   setupModal();
+  setupQuoteBuilder();
+  setupQuoteFactors();
   setupFloatingActions();
   setupReveal();
   setupLocationMap();

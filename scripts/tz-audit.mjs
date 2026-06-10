@@ -150,8 +150,54 @@ const checks = [
   ),
   check(
     'Callback форма универсальная и содержит success-state',
-    hasAll(html, ['name="name"', 'name="phone"', 'name="message"', 'name="objectType"', 'Оставить заявку', 'Заявка принята', 'В ближайшее время с вами свяжутся']),
-    'name + contact + task + hidden objectType + success copy'
+    hasAll(html, ['name="name"', 'name="phone"', 'name="message"', 'name="objectType"', 'Передать задачу в расчет', 'Заявка принята', 'В ближайшее время с вами свяжутся']),
+    'name + contact + task + objectType select + success copy'
+  ),
+  check(
+    'Форма заявки подсказывает пакет исходников и добавляет вводные в описание',
+    hasAll(html, ['data-lead-guidance', 'data-lead-guidance-actions', 'Пакет исходников', 'Что ускорит расчет']) &&
+      hasAll(main, ['guidancePresets', 'resolveGuidanceKey', 'appendLeadGuidance', 'dataset.leadInsert', 'data-lead-insert']),
+    'contextual lead guidance + textarea insert buttons'
+  ),
+  check(
+    'Форма заявки показывает готовность вводных к расчету',
+    hasAll(html, ['data-lead-readiness', 'data-lead-readiness-score', 'data-lead-readiness-bar', 'data-lead-next-step', 'После отправки', 'Стартовая заявка']) &&
+      hasAll(main, ['readinessChecks', 'nextStepByGuidance', 'updateLeadReadiness', 'dataset.readiness', 'Инженеру хватит для старта']),
+    'lead readiness score + dynamic next step'
+  ),
+  check(
+    'Форма заявки собирает готовый бриф для копирования и email',
+    hasAll(html, ['data-lead-brief-panel', 'data-lead-copy-brief', 'data-lead-email-brief', 'data-lead-brief-text', 'Готовый бриф', 'Открыть email']) &&
+      hasAll(main, ['buildLeadBrief', 'updateLeadBrief', 'copyLeadBrief', 'document.execCommand', 'buffer.select()', 'mailto:']),
+    'copyable lead brief + mailto draft + visible fallback copy'
+  ),
+  check(
+    'Быстрый расчет в первом экране собирает вводные и открывает форму с готовой задачей',
+    hasAll(html, ['id="quote"', 'hero-quote-panel', 'data-quote-builder', 'data-quote-submit', 'data-quote-summary', 'Вводные для КП', 'quote-details']) &&
+      hasAll(main, ['setupQuoteBuilder', 'b2e:open-lead-modal', 'buildMessage', 'selected.scenario', 'form.elements.message.value = message']),
+    'hero RFQ builder + JS prefill flow'
+  ),
+  check(
+    'Сценарии заказчика ведут в заявку с готовым контекстом',
+    hasAll(html, ['id="scenarios"', 'Генподрядчик', 'Проектировщик', 'Снабжение', 'data-prefill-message', 'Расчет металлоконструкций']) &&
+      hasAll(main, ['messageFromButton', 'dataset.prefillMessage']),
+    'buyer scenarios + prefilled callback buttons'
+  ),
+  check(
+    'Пакет КП показывает состав предложения и проверку рисков',
+    hasAll(html, ['id="quote-output"', 'Пакет КП', 'Состав работ', 'Объем и допущения', 'Исключения', 'Проверяем до запуска металла', 'Проверить исходники']),
+    'quote output package + risk panel'
+  ),
+  check(
+    'Факторы КП объясняют влияние вводных и передаются в заявку',
+    hasAll(html, ['id="quote-factors"', 'data-quote-factors', 'Факторы КП', 'Что сильнее всего меняет цену', 'data-factor-value="source"', 'data-factor-value="schedule"', 'data-quote-factor-submit']) &&
+      hasAll(main, ['setupQuoteFactors', 'buildFactorMessage', 'data-quote-factor-summary-list', 'Факторы КП:', 'b2e:open-lead-modal']),
+    'quote factor matrix + dynamic lead prefill'
+  ),
+  check(
+    'Маршруты заявки разделяют готовый КМ/КМД, эскиз и выезд',
+    hasAll(html, ['id="request-routes"', 'Маршрут заявки', 'Готовый комплект', 'Неполные исходники', 'Объект требует проверки', 'Отправить комплект', 'Собрать вводные', 'Запросить выезд']),
+    'request routes + readiness-based CTAs'
   ),
   check(
     'Раздел калькулятора тоннажа полностью удален',
@@ -225,13 +271,13 @@ const checks = [
     'dist robots/sitemap/llms/config + JSON-LD'
   ),
   check(
-    'Каталог помечен неактивным, пока нет финального каталога',
-    html.includes('btn btn-ghost is-disabled') &&
+    'Каталог доступен как PDF из hero и раздела продукции',
+    html.includes('data-config-href="catalogUrl"') &&
       html.includes('Скачать каталог') &&
-      html.includes('text-link is-disabled') &&
+      html.includes('download="b2e-metallokonstrukcii-catalog.pdf"') &&
       html.includes('Смотреть весь каталог') &&
-      !html.includes('download="b2e-metallokonstrukcii-catalog.pdf"'),
-    'disabled hero/catalog CTA'
+      fs.existsSync('src/assets/documents/b2e-metallokonstrukcii-catalog.pdf'),
+    'active hero/catalog PDF CTA'
   ),
   check(
     'Footer содержит публичные ссылки, copyright и посещаемость',

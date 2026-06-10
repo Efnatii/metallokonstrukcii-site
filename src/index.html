@@ -85,7 +85,7 @@
         <a class="max-link" data-config-href="maxUrl" href="https://max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM" target="_blank" rel="noreferrer" aria-label="Написать в MAX">
           <img class="max-icon" src="./assets/icons/max-logo.png" srcset="./assets/icons/max-logo.png 1x, ./assets/icons/max-logo@2x.png 2x, ./assets/icons/max-logo@3x.png 3x" alt="" width="32" height="32" aria-hidden="true">
         </a>
-        <button class="btn btn-primary callback-trigger" type="button">Заказать звонок</button>
+        <button class="btn btn-primary callback-trigger" type="button" data-object-type="Расчет металлоконструкций">Расчет</button>
       </div>
     </header>
 
@@ -105,68 +105,90 @@
               с гарантией качества, соблюдением сроков и инженерной проработкой КМ/КМД.
             </p>
             <div class="hero-actions">
-              <button class="btn btn-primary callback-trigger" type="button">
-                Отправить задачу
+              <a class="btn btn-primary" href="#quote">
+                Собрать заявку
                 <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
-              </button>
-              <button class="btn btn-ghost is-disabled" type="button" disabled aria-disabled="true">
+              </a>
+              <a class="btn btn-ghost" data-config-href="catalogUrl" href="./assets/documents/b2e-metallokonstrukcii-catalog.pdf" download="b2e-metallokonstrukcii-catalog.pdf">
                 Скачать каталог
                 <img src="./assets/icons/download-on-dark.png" srcset="./assets/icons/download-on-dark.png 1x, ./assets/icons/download-on-dark@2x.png 2x, ./assets/icons/download-on-dark@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
-              </button>
+              </a>
+            </div>
+            <div class="hero-brief" aria-label="Что подготовить для расчета">
+              <span>Для расчета хватит</span>
+              <ul>
+                <li>КМ/КМД или эскиз</li>
+                <li>габариты и тоннаж</li>
+                <li>адрес, срок, покрытие</li>
+              </ul>
             </div>
           </div>
 
-          <aside class="capacity-panel reveal" aria-label="Производственные мощности">
-            <p>Производственные мощности</p>
-            <dl>
-              <div>
-                <dt>
-                  <img src="./assets/icons/factory.png" srcset="./assets/icons/factory.png 1x, ./assets/icons/factory@2x.png 2x, ./assets/icons/factory@3x.png 3x" alt="" width="44" height="44" aria-hidden="true">
-                  <strong>1000+ т/мес</strong>
-                </dt>
-                <dd>производственная мощность группы компаний</dd>
+          <form class="quote-builder-panel hero-quote-panel reveal" id="quote" data-quote-builder aria-label="Быстрый расчет металлоконструкций">
+            <div class="quote-panel-head">
+              <span>Быстрый расчет</span>
+              <strong>Вводные для КП</strong>
+              <small>тип, исходники, тоннаж и состав работ</small>
+            </div>
+
+            <fieldset data-quote-group="scenario">
+              <legend>Сценарий заказчика</legend>
+              <div class="quote-option-grid quote-option-grid--triple">
+                <button class="quote-option is-active" type="button" data-quote-value="генподрядчик или заказчик объекта" data-quote-label="генподрядчик или заказчик объекта" aria-pressed="true">Генподряд</button>
+                <button class="quote-option" type="button" data-quote-value="проектировщик или инженерная служба" data-quote-label="проектировщик или инженерная служба" aria-pressed="false">Проектировщик</button>
+                <button class="quote-option" type="button" data-quote-value="снабжение или тендерная закупка" data-quote-label="снабжение или тендерная закупка" aria-pressed="false">Снабжение</button>
               </div>
-              <div>
-                <dt>
-                  <img src="./assets/icons/truss.png" srcset="./assets/icons/truss.png 1x, ./assets/icons/truss@2x.png 2x, ./assets/icons/truss@3x.png 3x" alt="" width="44" height="44" aria-hidden="true">
-                  <strong>200+ КМ/КМД</strong>
-                </dt>
-                <dd>готовых проектных решений</dd>
+            </fieldset>
+
+            <fieldset data-quote-group="objectType">
+              <legend>Что нужно изготовить</legend>
+              <div class="quote-option-grid">
+                <button class="quote-option is-active" type="button" data-quote-value="Строительные металлоконструкции" data-quote-label="строительные металлоконструкции" aria-pressed="true">Каркас / фермы</button>
+                <button class="quote-option" type="button" data-quote-value="Закладные детали" data-quote-label="закладные детали" aria-pressed="false">Закладные</button>
+                <button class="quote-option" type="button" data-quote-value="Лестницы металлические" data-quote-label="лестницы и площадки" aria-pressed="false">Лестницы</button>
+                <button class="quote-option" type="button" data-quote-value="Нестандартные конструкции" data-quote-label="нестандартные конструкции" aria-pressed="false">Нестандарт</button>
               </div>
-              <div>
-                <dt>
-                  <img src="./assets/icons/document-kmd.png" srcset="./assets/icons/document-kmd.png 1x, ./assets/icons/document-kmd@2x.png 2x, ./assets/icons/document-kmd@3x.png 3x" alt="" width="44" height="44" aria-hidden="true">
-                  <strong>Инженерный отдел</strong>
-                </dt>
-                <dd>расчет, деталировка и сопровождение проекта</dd>
+            </fieldset>
+
+            <fieldset data-quote-group="source">
+              <legend>Исходные данные</legend>
+              <div class="quote-option-grid quote-option-grid--triple">
+                <button class="quote-option is-active" type="button" data-quote-value="есть КМ/КМД" data-quote-label="есть КМ/КМД" aria-pressed="true">КМ/КМД</button>
+                <button class="quote-option" type="button" data-quote-value="есть эскиз или ведомость" data-quote-label="есть эскиз или ведомость" aria-pressed="false">Эскиз</button>
+                <button class="quote-option" type="button" data-quote-value="нужен выезд или уточнение на объекте" data-quote-label="нужен выезд или уточнение на объекте" aria-pressed="false">Выезд</button>
               </div>
-              <div>
-                <dt>
-                  <img src="./assets/icons/delivery.png" srcset="./assets/icons/delivery.png 1x, ./assets/icons/delivery@2x.png 2x, ./assets/icons/delivery@3x.png 3x" alt="" width="44" height="44" aria-hidden="true">
-                  <strong>Выезд на объект</strong>
-                </dt>
-                <dd>организуем на производство или объект</dd>
+            </fieldset>
+
+            <fieldset data-quote-group="scale">
+              <legend>Объем</legend>
+              <div class="quote-option-grid quote-option-grid--triple">
+                <button class="quote-option" type="button" data-quote-value="до 5 тонн" data-quote-label="до 5 тонн" aria-pressed="false">до 5 т</button>
+                <button class="quote-option is-active" type="button" data-quote-value="5-50 тонн" data-quote-label="5-50 тонн" aria-pressed="true">5-50 т</button>
+                <button class="quote-option" type="button" data-quote-value="50+ тонн" data-quote-label="50+ тонн" aria-pressed="false">50+ т</button>
               </div>
-              <div>
-                <dt>
-                  <img src="./assets/icons/team.png" srcset="./assets/icons/team.png 1x, ./assets/icons/team@2x.png 2x, ./assets/icons/team@3x.png 3x" alt="" width="44" height="44" aria-hidden="true">
-                  <strong>3 площадки</strong>
-                </dt>
-                <dd>Петрозаводск, Никольское, Рыбацкое</dd>
+            </fieldset>
+
+            <fieldset data-quote-group="scope">
+              <legend>Состав КП</legend>
+              <div class="quote-option-grid quote-option-grid--triple">
+                <button class="quote-option is-active" type="button" data-quote-value="изготовление" data-quote-label="изготовление" aria-pressed="true">Изготовление</button>
+                <button class="quote-option" type="button" data-quote-value="изготовление и покрытие по проекту" data-quote-label="изготовление и покрытие" aria-pressed="false">+ покрытие</button>
+                <button class="quote-option" type="button" data-quote-value="доставку или монтаж" data-quote-label="доставку или монтаж" aria-pressed="false">+ монтаж</button>
               </div>
-              <div>
-                <dt>
-                  <img src="./assets/icons/quality-shield.png" srcset="./assets/icons/quality-shield.png 1x, ./assets/icons/quality-shield@2x.png 2x, ./assets/icons/quality-shield@3x.png 3x" alt="" width="44" height="44" aria-hidden="true">
-                  <strong>100% контроль</strong>
-                </dt>
-                <dd>качество, комплектность и отгрузка</dd>
-              </div>
-            </dl>
-            <a class="panel-link" href="#proof" data-production-tour-trigger>
-              Смотреть производство
-              <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
-            </a>
-          </aside>
+            </fieldset>
+
+            <output class="quote-builder-summary" data-quote-summary aria-live="polite"></output>
+            <div class="hero-quote-proof" aria-label="Производственные мощности">
+              <span><strong>1000+ т/мес</strong> группы компаний</span>
+              <span><strong>200+ КМ/КМД</strong> Инженерный отдел</span>
+              <span><strong>3 площадки</strong> Выезд на объект</span>
+              <span><strong>100% контроль</strong> отгрузка</span>
+            </div>
+            <button class="btn btn-primary quote-builder-submit" type="button" data-quote-submit>
+              Передать в расчет
+              <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
+            </button>
+          </form>
 
           <div class="hero-workflow reveal" aria-label="Как мы работаем">
             <strong>Как мы работаем</strong>
@@ -181,10 +203,310 @@
               <li class="workflow-arrow" aria-hidden="true" role="presentation"></li>
               <li><span>05</span>Доставка и монтаж</li>
             </ol>
-            <button class="workflow-cta callback-trigger" type="button">
+            <button class="workflow-cta callback-trigger" type="button" data-object-type="Партнерский проект">
               Стать партнером
               <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
             </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="quote-builder quote-builder-support section-light" id="quote-details" aria-labelledby="quote-details-title">
+        <div class="container quote-builder-layout">
+          <div class="quote-builder-copy reveal">
+            <p class="section-kicker">Что будет в КП</p>
+            <h2 id="quote-details-title">Заявка превращается в инженерный расчет, а не в общий звонок</h2>
+            <p>
+              Быстрый расчет в первом экране собирает минимальный набор вводных.
+              Инженеру сразу понятно, какие исходники есть, какой ориентир по объему
+              и нужно ли включать покрытие, доставку или монтаж.
+            </p>
+            <ul class="quote-evidence" aria-label="Что получает заказчик">
+              <li>
+                <strong>Понятный старт</strong>
+                <span>не нужно искать, какие данные отправить первыми</span>
+              </li>
+              <li>
+                <strong>Инженерный контекст</strong>
+                <span>тип конструкции, стадия документации и объем попадают в заявку</span>
+              </li>
+              <li>
+                <strong>Меньше потерь</strong>
+                <span>задача сразу уходит как производственный запрос, а не общий звонок</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="quote-support-panel reveal" aria-label="Состав инженерного расчета">
+            <article>
+              <span>01</span>
+              <strong>Проверка исходников</strong>
+              <p>КМ/КМД, эскиз, ведомость, габариты, тоннаж, узлы и допуски.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <strong>Производственный маршрут</strong>
+              <p>Резка, гибка, сварка, обработка, окраска и контроль комплектности.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <strong>Состав КП</strong>
+              <p>Изготовление, покрытие, доставка, монтаж или выезд на объект.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <strong>Передача в работу</strong>
+              <p>После уточнения задача уходит в расчет с понятным объемом и ответственным следующим шагом.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="quote-output section-dark" id="quote-output" aria-labelledby="quote-output-title">
+        <div class="container quote-output-layout">
+          <div class="quote-output-head reveal">
+            <p class="section-kicker">Пакет КП</p>
+            <h2 id="quote-output-title">Не просто цена, а понятные границы предложения</h2>
+            <p>
+              Для закупки, проектирования и стройки важно не только число в строке.
+              В КП фиксируем, что входит в расчет, какие данные приняты как допущение
+              и что нужно уточнить до запуска металла в производство.
+            </p>
+          </div>
+
+          <div class="quote-output-board reveal" aria-label="Что входит в коммерческое предложение">
+            <article>
+              <span>01</span>
+              <strong>Состав работ</strong>
+              <p>Изготовление, покрытие, доставка, монтаж или отдельная операция по заданию.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <strong>Объем и допущения</strong>
+              <p>Тоннаж, габариты, исходники, стадии КМ/КМД и данные, которые еще нужно подтвердить.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <strong>Сроки и передача</strong>
+              <p>Ориентир по производству, комплектности, отгрузке и следующему ответственному шагу.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <strong>Исключения</strong>
+              <p>Что не входит в текущий расчет, чтобы КП было сопоставимо с другими предложениями.</p>
+            </article>
+          </div>
+
+          <aside class="risk-panel reveal" aria-label="Проверка рисков до запуска металла">
+            <h3>Проверяем до запуска металла</h3>
+            <ul>
+              <li>достаточность КМ/КМД, эскиза или ведомости;</li>
+              <li>узлы, допуски, маркировку и комплектность партии;</li>
+              <li>покрытие, упаковку, отгрузку, монтажные ограничения;</li>
+              <li>разрывы между проектом, производством и объектом.</li>
+            </ul>
+            <button class="btn btn-primary callback-trigger" type="button" data-object-type="Расчет металлоконструкций" data-lead-context="ready" data-prefill-message="Нужно проверить исходные данные до запуска металла: КМ/КМД или эскиз, узлы, допуски, покрытие, комплектность, доставку и монтажные ограничения. Прошу связаться для входной инженерной проверки и подготовки КП.">
+              Проверить исходники
+              <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="quote-factors section-dark" id="quote-factors" data-quote-factors aria-labelledby="quote-factors-title">
+        <div class="container quote-factors-layout">
+          <div class="quote-factors-copy reveal">
+            <p class="section-kicker">Факторы КП</p>
+            <h2 id="quote-factors-title">Что сильнее всего меняет цену, срок и состав работ</h2>
+            <p>
+              У металлоконструкций редко бывает честная цена без контекста.
+              Показываем ключевые параметры до заявки, чтобы закупка, проектировщик
+              и производство сравнивали одинаковый объем работ.
+            </p>
+            <div class="quote-factor-proof" aria-label="Что дает заполнение факторов">
+              <span><strong>быстрее</strong> первичный разбор</span>
+              <span><strong>меньше</strong> скрытых допущений</span>
+              <span><strong>точнее</strong> границы КП</span>
+            </div>
+          </div>
+
+          <div class="quote-factor-workspace reveal" aria-label="Факторы коммерческого предложения">
+            <div class="quote-factor-list" data-quote-factor-list>
+              <button class="quote-factor is-active" type="button" aria-pressed="true" data-factor-value="source" data-factor-label="Исходники" data-factor-line="КМ/КМД, эскиз, ведомость, фото, стадия проекта">
+                <span>01</span>
+                <strong>Исходники</strong>
+                <small>что уже можно считать</small>
+              </button>
+              <button class="quote-factor is-active" type="button" aria-pressed="true" data-factor-value="volume" data-factor-label="Тоннаж и повторяемость" data-factor-line="объем партии, количество типовых элементов, габариты">
+                <span>02</span>
+                <strong>Тоннаж</strong>
+                <small>масса, партия, серии</small>
+              </button>
+              <button class="quote-factor is-active" type="button" aria-pressed="true" data-factor-value="coating" data-factor-label="Покрытие и среда" data-factor-line="грунт, порошок, цинк, цвет, коррозионная среда">
+                <span>03</span>
+                <strong>Покрытие</strong>
+                <small>защита и подготовка</small>
+              </button>
+              <button class="quote-factor" type="button" aria-pressed="false" data-factor-value="geometry" data-factor-label="Сложность узлов" data-factor-line="сварные узлы, отверстия, допуски, сборочность и маркировка">
+                <span>04</span>
+                <strong>Узлы</strong>
+                <small>сложность изготовления</small>
+              </button>
+              <button class="quote-factor" type="button" aria-pressed="false" data-factor-value="logistics" data-factor-label="Доставка и монтаж" data-factor-line="адрес, подъезд, упаковка, подъем и монтажные ограничения">
+                <span>05</span>
+                <strong>Логистика</strong>
+                <small>объект и доставка</small>
+              </button>
+              <button class="quote-factor" type="button" aria-pressed="false" data-factor-value="schedule" data-factor-label="Срок и очередность" data-factor-line="желаемая дата, частичная отгрузка, приоритет партии">
+                <span>06</span>
+                <strong>Срок</strong>
+                <small>очередность работ</small>
+              </button>
+            </div>
+
+            <aside class="quote-factor-summary">
+              <span data-quote-factor-count>3/6 факторов</span>
+              <strong>Что попадет в задачу инженеру</strong>
+              <p data-quote-factor-summary>Исходники, тоннаж и покрытие уже дают основу для первичного КП.</p>
+              <ul data-quote-factor-summary-list>
+                <li>КМ/КМД, эскиз, ведомость, фото, стадия проекта</li>
+                <li>объем партии, количество типовых элементов, габариты</li>
+                <li>грунт, порошок, цинк, цвет, коррозионная среда</li>
+              </ul>
+              <button class="btn btn-primary" type="button" data-quote-factor-submit>
+                Передать факторы в заявку
+                <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
+              </button>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="request-routes section-light" id="request-routes" aria-labelledby="request-routes-title">
+        <div class="container">
+          <div class="section-head section-head-row">
+            <div>
+              <p class="section-kicker">Маршрут заявки</p>
+              <h2 id="request-routes-title">Выберите путь по готовности исходных данных</h2>
+              <p>
+                Не все заявки стартуют одинаково: иногда есть полный КМ/КМД, иногда только эскиз,
+                а иногда нужно проверить объект до расчета. Разделяем эти случаи, чтобы не терять
+                время на лишние уточнения.
+              </p>
+            </div>
+            <a class="text-link" href="#quote">
+              Вернуться к быстрому расчету
+              <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
+            </a>
+          </div>
+
+          <div class="request-route-grid" aria-label="Маршруты заявки по готовности исходных данных">
+            <article class="request-route-card request-route-card--primary reveal">
+              <span class="route-label">Готовый комплект</span>
+              <h3>Есть КМ/КМД или ведомость металла</h3>
+              <p>Подходит, когда нужно быстро получить сопоставимое КП на изготовление, покрытие, доставку или монтаж.</p>
+              <dl class="route-plan">
+                <div>
+                  <dt>Передать</dt>
+                  <dd>КМ/КМД, спецификацию, тоннаж, покрытие, адрес и желаемый срок.</dd>
+                </div>
+                <div>
+                  <dt>Ответ</dt>
+                  <dd>Состав КП, производственный маршрут, допущения и вопросы до запуска.</dd>
+                </div>
+              </dl>
+              <ul class="route-tags" aria-label="Что ускоряет расчет">
+                <li>КМ/КМД</li>
+                <li>тоннаж</li>
+                <li>покрытие</li>
+              </ul>
+              <button class="route-action callback-trigger" type="button" data-object-type="Расчет металлоконструкций" data-lead-context="ready" data-prefill-message="Маршрут заявки: готовый комплект КМ/КМД или ведомость. Нужно подготовить КП на изготовление металлоконструкций с учетом тоннажа, покрытия, адреса объекта и срока. Прошу проверить исходники, зафиксировать допущения и следующий шаг.">
+                Отправить комплект
+              </button>
+            </article>
+
+            <article class="request-route-card reveal">
+              <span class="route-label">Неполные исходники</span>
+              <h3>Есть эскиз, размеры или идея конструкции</h3>
+              <p>Подходит для нестандартных изделий, лестниц, закладных, навесов и задач, где нужно сначала собрать вводные.</p>
+              <dl class="route-plan">
+                <div>
+                  <dt>Передать</dt>
+                  <dd>Эскиз, фото, габариты, условия эксплуатации, материал и желаемую функцию.</dd>
+                </div>
+                <div>
+                  <dt>Ответ</dt>
+                  <dd>Что нужно уточнить, какие решения реализуемы и какой расчет можно готовить дальше.</dd>
+                </div>
+              </dl>
+              <ul class="route-tags" aria-label="Что ускоряет расчет">
+                <li>эскиз</li>
+                <li>фото</li>
+                <li>габариты</li>
+              </ul>
+              <button class="route-action callback-trigger" type="button" data-object-type="Нестандартные конструкции" data-lead-context="sketch" data-prefill-message="Маршрут заявки: неполные исходные данные. Есть эскиз, фото, размеры или идея конструкции. Нужно понять реализуемость, собрать недостающие вводные и подготовить расчет металлоконструкций.">
+                Собрать вводные
+              </button>
+            </article>
+
+            <article class="request-route-card reveal">
+              <span class="route-label">Объект требует проверки</span>
+              <h3>Нужен выезд, замер или монтажные ограничения</h3>
+              <p>Подходит, когда на цену и сроки влияют подъезд, монтаж, упаковка, существующие конструкции или место установки.</p>
+              <dl class="route-plan">
+                <div>
+                  <dt>Передать</dt>
+                  <dd>Адрес, фото площадки, ограничения по доступу, высоте, подъему и монтажу.</dd>
+                </div>
+                <div>
+                  <dt>Ответ</dt>
+                  <dd>План входной проверки, перечень рисков и состав КП с доставкой или монтажом.</dd>
+                </div>
+              </dl>
+              <ul class="route-tags" aria-label="Что ускоряет расчет">
+                <li>адрес</li>
+                <li>фото объекта</li>
+                <li>монтаж</li>
+              </ul>
+              <button class="route-action callback-trigger" type="button" data-object-type="Монтаж металлоконструкций" data-lead-context="site" data-prefill-message="Маршрут заявки: объект требует проверки. Нужен выезд, замер или оценка монтажных ограничений. Есть адрес, фото площадки или описание условий доступа. Прошу связаться и определить следующий шаг для КП.">
+                Запросить выезд
+              </button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="buyer-scenarios section-light" id="scenarios" aria-labelledby="scenarios-title">
+        <div class="container">
+          <div class="section-head section-head-row">
+            <div>
+              <p class="section-kicker">Сценарии работы</p>
+              <h2 id="scenarios-title">Под разные роли на проекте нужен разный ответ</h2>
+            </div>
+            <a class="text-link" href="#quote">
+              Собрать заявку
+              <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
+            </a>
+          </div>
+          <div class="scenario-grid">
+            <article class="scenario-card reveal">
+              <span>Генподрядчик</span>
+              <h3>Нужны сроки, комплектность и управляемый монтаж</h3>
+              <p>В КП важно видеть, что войдет в изготовление, доставку, покрытие и монтажный контур.</p>
+              <button class="scenario-action callback-trigger" type="button" data-object-type="Строительные металлоконструкции" data-lead-context="ready" data-prefill-message="Сценарий: генподрядчик или заказчик объекта. Нужно оценить изготовление, комплектность, доставку и монтаж металлоконструкций. Прошу уточнить исходные данные, сроки и состав КП.">Передать задачу</button>
+            </article>
+            <article class="scenario-card reveal">
+              <span>Проектировщик</span>
+              <h3>Нужно быстро проверить реализуемость решений КМ/КМД</h3>
+              <p>Критичны узлы, допуски, технология изготовления, покрытие и возможные производственные риски.</p>
+              <button class="scenario-action callback-trigger" type="button" data-object-type="Нестандартные конструкции" data-lead-context="sketch" data-prefill-message="Сценарий: проектировщик или инженерная служба. Нужно проверить реализуемость КМ/КМД, узлы, допуски, покрытие и производственные ограничения. Прошу связаться для инженерного уточнения.">Обсудить КМ/КМД</button>
+            </article>
+            <article class="scenario-card reveal">
+              <span>Снабжение</span>
+              <h3>Нужно сопоставимое КП для закупки или тендера</h3>
+              <p>Важны понятные позиции, тоннаж, покрытие, условия отгрузки, срок действия предложения и контакты.</p>
+              <button class="scenario-action callback-trigger" type="button" data-object-type="Расчет металлоконструкций" data-lead-context="ready" data-prefill-message="Сценарий: снабжение или тендерная закупка. Нужно сопоставимое КП с позициями, тоннажем, покрытием, сроками, условиями отгрузки и действия предложения.">Запросить КП</button>
+            </article>
           </div>
         </div>
       </section>
@@ -196,51 +518,75 @@
               <p class="section-kicker">Каталог продукции</p>
               <h2 id="products-title">Металлоконструкции под производство, стройку и инфраструктуру</h2>
             </div>
-            <span class="text-link is-disabled" aria-disabled="true">
+            <a class="text-link" data-config-href="catalogUrl" href="./assets/documents/b2e-metallokonstrukcii-catalog.pdf" download="b2e-metallokonstrukcii-catalog.pdf">
               Смотреть весь каталог
               <img src="./assets/icons/arrow-right-on-yellow.png" srcset="./assets/icons/arrow-right-on-yellow.png 1x, ./assets/icons/arrow-right-on-yellow@2x.png 2x, ./assets/icons/arrow-right-on-yellow@3x.png 3x" alt="" width="22" height="22" aria-hidden="true">
-            </span>
+            </a>
           </div>
           <div class="product-grid">
             <article class="product-card reveal">
               <img src="./assets/generated/product-frame.webp" srcset="./assets/generated/product-frame.webp 1x, ./assets/generated/product-frame@2x.webp 2x" alt="Фото строительного металлического каркаса" width="720" height="460">
               <h3>Строительные металлоконструкции</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Строительные металлоконструкции">
+                <span class="sr-only">Заказать расчет: строительные металлоконструкции</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-embedded.webp" srcset="./assets/generated/product-embedded.webp 1x, ./assets/generated/product-embedded@2x.webp 2x" alt="Фото анкерных закладных деталей для бетона" width="720" height="460">
               <h3>Закладные детали</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Закладные детали">
+                <span class="sr-only">Заказать расчет: закладные детали</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-stairs.webp" srcset="./assets/generated/product-stairs.webp 1x, ./assets/generated/product-stairs@2x.webp 2x" alt="Фото промышленной металлической лестницы и площадки" width="720" height="460">
               <h3>Лестницы металлические</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Лестницы металлические">
+                <span class="sr-only">Заказать расчет: лестницы металлические</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-canopy.webp" srcset="./assets/generated/product-canopy.webp 1x, ./assets/generated/product-canopy@2x.webp 2x" alt="Фото металлического каркаса навеса" width="720" height="460">
               <h3>Навесы</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Навесы">
+                <span class="sr-only">Заказать расчет: навесы</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-gates.webp" srcset="./assets/generated/product-gates.webp 1x, ./assets/generated/product-gates@2x.webp 2x" alt="Фото металлических промышленных ворот" width="720" height="460">
               <h3>Ворота</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Ворота">
+                <span class="sr-only">Заказать расчет: ворота</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-tank.webp" srcset="./assets/generated/product-tank.webp 1x, ./assets/generated/product-tank@2x.webp 2x" alt="Фото промышленных металлических резервуаров" width="720" height="460">
               <h3>Резервуары</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Резервуары">
+                <span class="sr-only">Заказать расчет: резервуары</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-arch.webp" srcset="./assets/generated/product-arch.webp 1x, ./assets/generated/product-arch@2x.webp 2x" alt="Фото арочной стальной конструкции" width="720" height="460">
               <h3>Арочные конструкции</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Арочные конструкции">
+                <span class="sr-only">Заказать расчет: арочные конструкции</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
             <article class="product-card reveal">
               <img src="./assets/generated/product-custom.webp" srcset="./assets/generated/product-custom.webp 1x, ./assets/generated/product-custom@2x.webp 2x" alt="Фото нестандартных стальных балок и рам в производстве" width="720" height="460">
               <h3>Нестандартные конструкции</h3>
-              <span><img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true"></span>
+              <button class="product-card-action callback-trigger" type="button" data-object-type="Нестандартные конструкции">
+                <span class="sr-only">Заказать расчет: нестандартные конструкции</span>
+                <img src="./assets/icons/arrow-right-on-dark.png" srcset="./assets/icons/arrow-right-on-dark.png 1x, ./assets/icons/arrow-right-on-dark@2x.png 2x, ./assets/icons/arrow-right-on-dark@3x.png 3x" alt="" width="28" height="28" aria-hidden="true">
+              </button>
             </article>
           </div>
         </div>
@@ -643,7 +989,7 @@
               <a data-config-href="emailHref" href="mailto:zakaz@b2energy.ru" data-config-text="email">zakaz@b2energy.ru</a>
               <a data-config-href="yandexMapUrl" data-location-map-link href="https://yandex.ru/maps/" target="_blank" rel="noreferrer">Открыть в Яндекс Картах</a>
             </address>
-            <button class="btn btn-primary callback-trigger" type="button">Получить консультацию</button>
+            <button class="btn btn-primary callback-trigger" type="button" data-object-type="Консультация по металлоконструкциям">Получить консультацию</button>
           </aside>
         </div>
       </section>
@@ -723,7 +1069,7 @@
     </div>
 
     <div class="floating-actions" aria-label="Быстрые действия">
-      <button class="float-button phone-float callback-trigger" type="button" aria-label="Заказать обратный звонок">
+      <button class="float-button phone-float callback-trigger" type="button" aria-label="Заказать обратный звонок" data-object-type="Обратный звонок">
         <img src="./assets/icons/phone-dark.png" srcset="./assets/icons/phone-dark.png 1x, ./assets/icons/phone-dark@2x.png 2x, ./assets/icons/phone-dark@3x.png 3x" alt="" width="30" height="30" aria-hidden="true">
         <span>
           <strong data-config-text="phoneDisplay">+7 (965) 057-82-70</strong>
@@ -743,8 +1089,28 @@
       <button class="modal-close" type="button" aria-label="Закрыть окно">x</button>
       <form class="lead-form" id="leadForm">
         <p class="section-kicker">Заявка</p>
-        <h2 id="leadModalTitle">Оставить заявку</h2>
-        <p>Укажите контакты и коротко опишите задачу. Мы свяжемся, чтобы уточнить расчет, изготовление или монтаж.</p>
+        <h2 id="leadModalTitle">Передать задачу в расчет</h2>
+        <p>Укажите контакты и выберите тип проекта. Если есть КМ/КМД, эскиз или ведомость, отметьте это в описании задачи.</p>
+        <label>
+          <span>Тип проекта</span>
+          <select name="objectType">
+            <option>Общая заявка</option>
+            <option>Расчет металлоконструкций</option>
+            <option>Строительные металлоконструкции</option>
+            <option>Закладные детали</option>
+            <option>Лестницы металлические</option>
+            <option>Навесы</option>
+            <option>Ворота</option>
+            <option>Резервуары</option>
+            <option>Арочные конструкции</option>
+            <option>Нестандартные конструкции</option>
+            <option>Монтаж металлоконструкций</option>
+            <option>Резка металла</option>
+            <option>Гибка металла</option>
+            <option>Металлообработка</option>
+            <option>Порошковая окраска</option>
+          </select>
+        </label>
         <label>
           <span>Как к вам обращаться</span>
           <input name="name" type="text" autocomplete="name" placeholder="Имя или компания" required>
@@ -755,9 +1121,45 @@
         </label>
         <label>
           <span>Задача</span>
-          <textarea name="message" rows="4" placeholder="Например: нужен расчет металлоконструкций, резка партии или монтаж"></textarea>
+          <textarea name="message" rows="4" placeholder="Например: каркас 24x60 м, есть КМ; нужна оценка изготовления, покрытия, доставки и монтажа"></textarea>
         </label>
-        <input name="objectType" type="hidden" value="Общая заявка">
+        <div class="lead-readiness" data-lead-readiness aria-label="Готовность заявки к расчету">
+          <div class="lead-readiness-head">
+            <span data-lead-readiness-label>Стартовая заявка</span>
+            <strong data-lead-readiness-score>1/3</strong>
+          </div>
+          <div class="lead-readiness-track" aria-hidden="true">
+            <span data-lead-readiness-bar></span>
+          </div>
+          <p data-lead-readiness-copy>Добавьте исходники, объем и срок, чтобы инженер быстрее подготовил КП.</p>
+          <div class="lead-next-step">
+            <span>После отправки</span>
+            <strong data-lead-next-step>Инженер проверит вводные и подскажет, что нужно уточнить для КП.</strong>
+          </div>
+          <ul data-lead-readiness-list></ul>
+        </div>
+        <div class="lead-brief" data-lead-brief-panel aria-label="Готовый бриф заявки">
+          <span>Готовый бриф</span>
+          <div class="lead-brief-actions">
+            <button class="lead-brief-action" type="button" data-lead-copy-brief>Скопировать</button>
+            <a class="lead-brief-action" data-lead-email-brief href="mailto:zakaz@b2energy.ru">Открыть email</a>
+          </div>
+          <textarea class="lead-brief-text" data-lead-brief-text readonly rows="4" aria-label="Текст готового брифа"></textarea>
+          <p data-lead-brief-status>Бриф обновляется из выбранных вводных.</p>
+        </div>
+        <div class="lead-guidance" data-lead-guidance aria-label="Подсказки по исходным данным">
+          <div class="lead-guidance-head">
+            <span>Пакет исходников</span>
+            <strong data-lead-guidance-title>Что ускорит расчет</strong>
+            <p data-lead-guidance-copy>Выберите подсказку, чтобы добавить важные вводные в описание задачи.</p>
+          </div>
+          <div class="lead-guidance-actions" data-lead-guidance-actions aria-label="Добавить вводные в описание"></div>
+        </div>
+        <ul class="lead-checklist" aria-label="Данные, которые ускоряют расчет">
+          <li>чертежи или эскиз</li>
+          <li>габариты, тоннаж, покрытие</li>
+          <li>адрес объекта и желаемый срок</li>
+        </ul>
         <button class="btn btn-primary" type="submit">Отправить</button>
         <p class="form-status" role="status" aria-live="polite"></p>
       </form>
