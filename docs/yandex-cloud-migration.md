@@ -1,6 +1,6 @@
-# Yandex Cloud migration
+# Yandex Cloud deployment runbook
 
-This project can run on Yandex Cloud without depending on a domain name.
+This repository now treats Yandex Cloud as the primary production target.
 
 ## Architecture
 
@@ -8,53 +8,68 @@ This project can run on Yandex Cloud without depending on a domain name.
 - Backend/API: Yandex Cloud Functions, Node.js runtime.
 - Public entrypoint: Yandex API Gateway.
 - API routes: `/api/leads`, `/api/stats`, `/api/stats/visit`.
-- Future custom domain: attach the domain to API Gateway, not to the bucket.
+- Custom domain: attach the domain to API Gateway, not to the bucket.
+- Secrets: Yandex Lockbox mounted into Cloud Functions as environment variables.
 
-The bucket name is intentionally neutral. Object Storage static website hosting can be tied to a bucket/domain setup, but this project should stay domain-independent until a domain is ready. API Gateway gives one stable URL now and accepts a custom domain later.
+API Gateway keeps the site domain-independent until a domain is ready. The same Gateway serves static files and `/api/*`, so frontend endpoints stay relative.
 
 ## Official sources checked
 
 - Object Storage static website hosting: `https://yandex.cloud/en/docs/storage/operations/hosting/setup`
-- Object Storage AWS CLI: `https://yandex.cloud/en/docs/storage/tools/aws-cli`
-- Cloud Functions Node.js quickstart and handler format:
-  `https://yandex.cloud/en/docs/functions/quickstart/create-function/node-function-quickstart`
-  and `https://yandex.cloud/en/docs/functions/lang/nodejs/handler`
-- `yc serverless function version create` flags: `--runtime`, `--entrypoint`, `--source-path`, `--environment`, `--secret`, `--mount`
-- API Gateway extensions:
-  `x-yc-apigateway-integration:cloud_functions`,
-  `x-yc-apigateway-integration:object_storage`,
-  greedy parameters `{file+}`,
-  and spec variables `${var.*}`
-- `yc serverless api-gateway create/update --spec --variables`
-- `yc serverless api-gateway add-domain --domain --certificate-id`
-- Yandex Cloud MCP GitHub repo: `https://github.com/yandex-cloud/mcp`
+- Yandex Cloud CLI installation: `https://yandex.cloud/en/docs/cli/operations/install-cli`
+- Service-account CLI authentication: `https://yandex.cloud/en/docs/cli/operations/authentication/service-account`
+- Lockbox secrets in Cloud Functions: `https://yandex.cloud/en/docs/functions/operations/function/lockbox-secret-transmit`
+- API Gateway custom domain CLI: `https://yandex.cloud/en/docs/cli/cli-ref/serverless/cli-ref/api-gateway/add-domain`
+- API Gateway custom domain DNS notes: `https://github.com/yandex-cloud/docs/blob/master/en/api-gateway/operations/api-gw-domains.md`
+- SmartCaptcha server validation: `https://yandex.cloud/en/docs/smartcaptcha/concepts/validation`
 
 ## Repo files
 
 - `yandex/function/index.mjs` - Yandex Cloud Functions adapter around existing backend logic.
 - `yandex/gateway/openapi.yaml` - API Gateway OpenAPI spec.
 - `scripts/Build-YandexFunctionPackage.ps1` - packages the function into `dist-yandex/b2e-yandex-function.zip`.
-- `scripts/Deploy-YandexCloud.ps1` - creates/updates buckets, Lockbox secret, Function, Gateway, and uploads `dist`.
+- `scripts/Deploy-YandexCloud.ps1` - creates/updates buckets, Lockbox secret, Function, Gateway, optional domain, and uploads `dist`.
 - `scripts/yandex-smoke.mjs` - live smoke test for Yandex Gateway.
+- `.github/workflows/pages.yml` - GitHub Actions deploy to Yandex Cloud.
 
 Generated `dist-yandex/` is ignored by Git.
 
 ## Local prerequisites
 
-Install and configure these outside the repository:
+Install and configure the Yandex Cloud CLI outside the repository:
 
 ```powershell
 yc init
 yc config list
 ```
 
-`aws` is optional. The deploy script uses `yc storage s3 cp`, so AWS CLI is not required for the normal path. If AWS CLI is used manually, Yandex docs require the Object Storage endpoint `https://storage.yandexcloud.net`.
+Do not put `yc` profiles, OAuth tokens, service account keys, static keys, `.yc`, `.aws`, or secret files in this repo.
 
-Do not put `yc` profiles, OAuth tokens, static keys, `.aws`, `.yc`, or secret files in this repo.
+## Public deploy settings
+
+The deploy script reads these optional env vars and has safe defaults:
+
+```powershell
+$env:YANDEX_SITE_BUCKET = "metallb2e.ru"
+$env:YANDEX_STATS_BUCKET = "b2e-metallokonstrukcii-stats"
+$env:YANDEX_FUNCTION_NAME = "b2e-leads"
+$env:YANDEX_GATEWAY_NAME = "b2e-metallokonstrukcii-gateway"
+$env:YANDEX_SERVICE_ACCOUNT_NAME = "b2e-metallokonstrukcii-sa"
+$env:YANDEX_SECRET_NAME = "b2e-metallokonstrukcii-smtp"
+```
+
+For a domain-ready deploy:
+
+```powershell
+$env:YANDEX_CUSTOM_DOMAIN = "metallb2e.ru"
+$env:YANDEX_CERTIFICATE_ID = "<certificate-id>"
+```
+
+Both values must be set together. The script then attaches the domain to API Gateway and rebuilds canonical URL, sitemap, robots and `llms.txt` for `https://<domain>/`.
 
 ## Secrets
 
-Before running deploy, load the backend secrets into the current PowerShell process. The script uploads non-empty values to Yandex Lockbox and then mounts them into Cloud Functions.
+Before running deploy, load the backend secrets into the current PowerShell process. The script uploads non-empty values to Yandex Lockbox and mounts them into Cloud Functions.
 
 Minimum SMTP set:
 
@@ -69,7 +84,7 @@ $env:SMTP_ENVELOPE_FROM = "zakaz@b2energy.ru"
 $env:SMTP_TO = "zakaz@b2energy.ru"
 ```
 
-Alternative delivery channels are also supported:
+Alternative delivery channels:
 
 ```powershell
 $env:LEAD_WEBHOOK_URL = "<https webhook>"
@@ -77,10 +92,24 @@ $env:TELEGRAM_BOT_TOKEN = "<bot token>"
 $env:TELEGRAM_CHAT_ID = "<chat id>"
 ```
 
-For a repeat deploy without updating Lockbox, use `-SkipSecretUpdate` and set:
+Optional Yandex SmartCaptcha:
+
+```powershell
+$env:SMARTCAPTCHA_SERVER_KEY = "<ysc2_...>"
+```
+
+For a repeat deploy without updating Lockbox:
 
 ```powershell
 $env:YANDEX_FUNCTION_SECRET_KEYS = "SMTP_HOST,SMTP_PORT,SMTP_SECURE,SMTP_USERNAME,SMTP_PASSWORD,SMTP_FROM,SMTP_ENVELOPE_FROM,SMTP_TO"
+npm run yandex:deploy -- -SkipSecretUpdate
+```
+
+For a backend-only redeploy after adapter/function changes:
+
+```powershell
+$env:YANDEX_FUNCTION_SECRET_KEYS = "SMTP_HOST,SMTP_PORT,SMTP_SECURE,SMTP_USERNAME,SMTP_PASSWORD,SMTP_FROM,SMTP_ENVELOPE_FROM,SMTP_TO"
+npm run yandex:deploy -- -SkipSecretUpdate -SkipSiteUpload
 ```
 
 ## Deploy
@@ -88,15 +117,8 @@ $env:YANDEX_FUNCTION_SECRET_KEYS = "SMTP_HOST,SMTP_PORT,SMTP_SECURE,SMTP_USERNAM
 From the repo root:
 
 ```powershell
-npm test
-npm run yandex:package
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Deploy-YandexCloud.ps1 `
-  -SiteBucket "b2e-metallokonstrukcii-site" `
-  -StatsBucket "b2e-metallokonstrukcii-stats" `
-  -FunctionName "b2e-leads" `
-  -GatewayName "b2e-metallokonstrukcii-gateway" `
-  -ServiceAccountName "b2e-metallokonstrukcii-sa" `
-  -SecretName "b2e-metallokonstrukcii-smtp"
+npm run check
+npm run yandex:deploy
 ```
 
 The script:
@@ -104,14 +126,32 @@ The script:
 1. Creates or reuses a service account.
 2. Adds required folder roles: `storage.editor`, `serverless.functions.invoker`, `lockbox.payloadViewer`.
 3. Creates neutral Object Storage buckets for the site and stats.
-4. Uploads backend secrets to Lockbox.
-5. Creates or updates the Cloud Function.
-6. Creates or updates API Gateway with `yandex/gateway/openapi.yaml`.
-7. Rebuilds the static site with:
-   - `B2E_SITE_URL=<gateway-url>/`
-   - `B2E_LEAD_ENDPOINT=/api/leads`
-   - `B2E_STATS_ENDPOINT=/api/stats`
-8. Uploads `dist/` to Object Storage.
+4. Enables SPA-friendly website settings on the site bucket.
+5. Uploads backend secrets to Lockbox.
+6. Creates or updates the Cloud Function.
+7. Creates or updates API Gateway with `yandex/gateway/openapi.yaml`.
+8. Optionally attaches `YANDEX_CUSTOM_DOMAIN` to API Gateway.
+9. Rebuilds the static site with `B2E_SITE_URL` equal to the Gateway URL or custom domain.
+10. Uploads `dist/` to Object Storage.
+
+## GitHub Actions
+
+`.github/workflows/pages.yml` installs the Yandex Cloud CLI non-interactively, configures a service-account profile, runs `npm run check`, deploys, and smoke-tests the Gateway.
+
+Required GitHub Secrets:
+
+- `YC_SERVICE_ACCOUNT_KEY_JSON`
+- `YC_CLOUD_ID`
+- `YC_FOLDER_ID`
+- `SMTP_*` or `LEAD_WEBHOOK_URL`/`TELEGRAM_*`
+
+Optional GitHub Variables:
+
+- `YANDEX_CUSTOM_DOMAIN`
+- `YANDEX_CERTIFICATE_ID`
+- `YANDEX_ALLOWED_ORIGIN`
+- `YANDEX_SKIP_SECRET_UPDATE`
+- `YANDEX_FUNCTION_SECRET_KEYS`
 
 ## Verify
 
@@ -126,14 +166,11 @@ Expected result:
 
 - `/api/stats` returns `200`;
 - CORS preflight for `/api/leads` returns `204`;
-- `/api/leads` returns `200` and SMTP/webhook result is successful.
+- `/api/leads` returns `200` when at least one delivery channel is configured.
 
-## Connect a domain later
+## DNS notes for domain activation
 
-When the domain is ready:
-
-1. Issue or import a certificate in Yandex Certificate Manager.
-2. Attach the domain to API Gateway:
+Use Yandex Certificate Manager for the certificate, then attach it:
 
 ```powershell
 yc serverless api-gateway add-domain b2e-metallokonstrukcii-gateway `
@@ -141,7 +178,6 @@ yc serverless api-gateway add-domain b2e-metallokonstrukcii-gateway `
   --certificate-id <certificate-id>
 ```
 
-3. Point DNS to the Yandex API Gateway domain as required by Yandex Cloud.
-4. Re-run deploy with `-CustomDomain metallb2e.ru -CertificateId <certificate-id>` or set `B2E_SITE_URL=https://metallb2e.ru/` and rebuild/upload the site.
+For third-party DNS, Yandex API Gateway custom domains are suitable for third-level domains or lower. For an apex/second-level domain, use Yandex Cloud DNS and the ANAME scenario described in Yandex docs.
 
-The Function and buckets do not need to be renamed when the domain changes.
+Function and bucket names do not need to change when the domain changes.

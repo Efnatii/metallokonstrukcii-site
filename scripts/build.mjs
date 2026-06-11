@@ -177,6 +177,57 @@ const clients = [
   'ООО НПК «КАТАРСИС»'
 ];
 
+const seoKeywords = [
+  'производство металлоконструкций',
+  'изготовление металлоконструкций',
+  'металлоконструкции Санкт-Петербург',
+  'металлоконструкции СЗФО',
+  'металлоконструкции ЦФО',
+  'строительные металлоконструкции',
+  'закладные детали',
+  'металлические лестницы',
+  'навесы металлические',
+  'ворота металлические',
+  'резервуары металлические',
+  'арочные конструкции',
+  'нестандартные металлоконструкции',
+  'монтаж металлоконструкций',
+  'резка металла',
+  'гибка металла',
+  'металлообработка',
+  'порошковая окраска',
+  'КМ',
+  'КМД'
+];
+
+const faqItems = [
+  {
+    question: 'Какие металлоконструкции производит B2E?',
+    answer:
+      'B2E производит строительные металлоконструкции, закладные детали, металлические лестницы, навесы, ворота, резервуары, арочные и нестандартные конструкции под проект.'
+  },
+  {
+    question: 'Можно ли отправить на расчет КМ или КМД?',
+    answer:
+      'Да. Инженерный отдел разбирает исходные данные, КМ/КМД, узлы, допуски, покрытие, логистику и требования к монтажу до запуска металла в производство.'
+  },
+  {
+    question: 'В каких регионах работает компания?',
+    answer:
+      'Основная география B2E - Санкт-Петербург, Ленинградская область, СЗФО и ЦФО. Производственные площадки указаны в Петрозаводске, Никольском и Рыбацком.'
+  },
+  {
+    question: 'Какие операции доступны кроме изготовления?',
+    answer:
+      'В производственный контур входят монтаж металлоконструкций, резка металла, гибка металла, металлообработка и порошковая окраска.'
+  },
+  {
+    question: 'Как быстрее передать задачу на расчет?',
+    answer:
+      'Нужно отправить заявку через форму сайта, MAX, телефон или email, приложив чертежи, описание объекта, сроки, требования к покрытию и монтажу.'
+  }
+];
+
 const robotAgents = [
   'Googlebot',
   'Google-Extended',
@@ -190,9 +241,15 @@ const robotAgents = [
   'ChatGPT-User',
   'PerplexityBot',
   'Perplexity-User',
+  'Applebot-Extended',
   'ClaudeBot',
   'Claude-SearchBot',
   'Claude-User',
+  'CCBot',
+  'Amazonbot',
+  'Bytespider',
+  'Meta-ExternalAgent',
+  'Meta-ExternalFetcher',
   '*'
 ];
 
@@ -218,7 +275,7 @@ function makeConfig() {
   const phoneDisplay = formatPhoneDisplay(env('B2E_CONTACT_PHONE_DISPLAY', '+7 (965) 057-82-70'));
   const email = env('B2E_CONTACT_EMAIL', 'zakaz@b2energy.ru');
   const siteUrl = withTrailingSlash(
-    env('B2E_SITE_URL', 'https://metallb2e-site.pages.dev/')
+    env('B2E_SITE_URL', 'https://b2e-metallokonstrukcii.example/')
   );
 
   return {
@@ -246,8 +303,12 @@ function makeConfig() {
     rbcProfileUrl: env('B2E_RBC_PROFILE_URL', 'https://companies.rbc.ru/amp/ogrn/1247800091098/'),
     rusprofileUrl: env('B2E_RUSPROFILE_URL', 'https://www.rusprofile.ru/id/1247800091098'),
     catalogUrl: env('B2E_CATALOG_URL', './assets/documents/b2e-metallokonstrukcii-catalog.pdf'),
-    leadEndpoint: env('B2E_LEAD_ENDPOINT', 'https://b2e-leads.zakaz-749.workers.dev'),
-    statsEndpoint: env('B2E_STATS_ENDPOINT', 'https://b2e-leads.zakaz-749.workers.dev/stats'),
+    leadEndpoint: env('B2E_LEAD_ENDPOINT', '/api/leads'),
+    statsEndpoint: env('B2E_STATS_ENDPOINT', '/api/stats'),
+    legalName: 'ООО «БИЗНЕС В ЭНЕРГЕТИКЕ»',
+    inn: '7811801565',
+    kpp: '781101001',
+    ogrn: '1247800091098',
     generatedAt: new Date().toISOString()
   };
 }
@@ -300,6 +361,7 @@ function makeRobots(config) {
     'robots.txt',
     'sitemap.xml',
     'llms.txt',
+    'ai-context.json',
     'assets/'
   ];
   const privatePaths = [
@@ -331,24 +393,194 @@ Sitemap: ${makeAbsoluteUrl(config, 'sitemap.xml')}
 }
 
 function makeStructuredData(config) {
+  const organizationId = `${config.siteUrl}#organization`;
+  const websiteId = `${config.siteUrl}#website`;
+  const webpageId = `${config.siteUrl}#webpage`;
+  const productsId = `${config.siteUrl}#products`;
+  const servicesId = `${config.siteUrl}#services`;
+  const faqId = `${config.siteUrl}#faq`;
+  const logoUrl = makeAbsoluteUrl(config, 'assets/logo/logo-b2e.png');
+  const heroImageUrl = makeAbsoluteUrl(config, 'assets/generated/b2e-dashboard-hero.webp');
+  const areaServed = ['Санкт-Петербург', 'Ленинградская область', 'СЗФО', 'ЦФО'];
+  const locationPlaces = locations.map((location) => {
+    const [latitude, longitude] = location.coordinates.split(',').map((value) => Number(value.trim()));
+
+    return {
+      '@type': 'Place',
+      name: location.name,
+      address: location.address,
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude,
+        longitude
+      }
+    };
+  });
+  const productOffers = products.map((item, index) => ({
+    '@type': 'Offer',
+    position: index + 1,
+    url: makeAbsoluteUrl(config, '#products'),
+    itemOffered: {
+      '@type': 'Product',
+      name: item.name,
+      description: item.description,
+      image: makeAbsoluteUrl(config, item.image),
+      brand: { '@id': organizationId },
+      manufacturer: { '@id': organizationId },
+      areaServed
+    }
+  }));
+  const serviceOffers = services.map((item, index) => ({
+    '@type': 'Offer',
+    position: index + 1,
+    url: makeAbsoluteUrl(config, '#services'),
+    itemOffered: {
+      '@type': 'Service',
+      name: item.name,
+      description: item.description,
+      image: makeAbsoluteUrl(config, item.image),
+      provider: { '@id': organizationId },
+      areaServed
+    }
+  }));
+
   return {
     '@context': 'https://schema.org',
-    '@type': ['Organization', 'LocalBusiness'],
-    name: 'ООО B2E',
-    legalName: 'ООО B2E',
-    url: config.siteUrl,
-    email: config.email,
-    telephone: config.phone,
-    openingHours: config.workHours,
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Санкт-Петербург',
-      streetAddress: config.address,
-      addressCountry: 'RU'
-    },
-    sameAs: [config.maxUrl, config.rbcProfileUrl, config.rusprofileUrl].filter(Boolean),
-    areaServed: ['СЗФО', 'ЦФО'],
-    makesOffer: [...products.map((item) => item.name), ...services.map((item) => item.name)]
+    '@graph': [
+      {
+        '@type': ['Organization', 'LocalBusiness'],
+        '@id': organizationId,
+        name: 'ООО B2E',
+        alternateName: ['B2E Металлоконструкции', config.legalName],
+        legalName: config.legalName,
+        url: config.siteUrl,
+        logo: logoUrl,
+        image: heroImageUrl,
+        description:
+          'Производство, проектирование, обработка, поставка и монтаж металлоконструкций для строительных, промышленных и инфраструктурных объектов.',
+        slogan: 'Надежные металлоконструкции для сложных задач',
+        taxID: config.inn,
+        email: config.email,
+        telephone: config.phone,
+        openingHours: config.workHours,
+        priceRange: 'по запросу',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Санкт-Петербург',
+          streetAddress: config.address,
+          addressCountry: 'RU'
+        },
+        geo: locationPlaces[0]?.geo,
+        hasMap: config.yandexMapUrl,
+        location: locationPlaces,
+        sameAs: [config.maxUrl, config.rbcProfileUrl, config.rusprofileUrl].filter(Boolean),
+        areaServed,
+        knowsAbout: seoKeywords,
+        contactPoint: [
+          {
+            '@type': 'ContactPoint',
+            telephone: config.phone,
+            email: config.email,
+            contactType: 'sales',
+            areaServed,
+            availableLanguage: ['ru']
+          }
+        ],
+        hasOfferCatalog: [
+          {
+            '@type': 'OfferCatalog',
+            '@id': productsId,
+            name: 'Каталог металлоконструкций B2E',
+            itemListElement: productOffers
+          },
+          {
+            '@type': 'OfferCatalog',
+            '@id': servicesId,
+            name: 'Услуги производства и монтажа металлоконструкций B2E',
+            itemListElement: serviceOffers
+          }
+        ]
+      },
+      {
+        '@type': 'WebSite',
+        '@id': websiteId,
+        url: config.siteUrl,
+        name: config.siteName,
+        inLanguage: 'ru-RU',
+        publisher: { '@id': organizationId }
+      },
+      {
+        '@type': 'WebPage',
+        '@id': webpageId,
+        url: config.siteUrl,
+        name: 'Производство металлоконструкций СЗФО и ЦФО - ООО B2E',
+        description:
+          'ООО B2E производит строительные металлоконструкции, закладные детали, лестницы, навесы, ворота, резервуары и нестандартные конструкции.',
+        inLanguage: 'ru-RU',
+        isPartOf: { '@id': websiteId },
+        about: { '@id': organizationId },
+        primaryImageOfPage: {
+          '@type': 'ImageObject',
+          url: heroImageUrl,
+          caption: 'Производство металлоконструкций B2E'
+        },
+        mainEntity: { '@id': organizationId },
+        hasPart: [
+          { '@type': 'WebPageElement', name: 'Каталог продукции', url: makeAbsoluteUrl(config, '#products') },
+          { '@type': 'WebPageElement', name: 'Услуги', url: makeAbsoluteUrl(config, '#services') },
+          { '@type': 'WebPageElement', name: 'Производство', url: makeAbsoluteUrl(config, '#production') },
+          { '@type': 'WebPageElement', name: 'Проекты КМ/КМД', url: makeAbsoluteUrl(config, '#proof') },
+          { '@type': 'WebPageElement', name: 'Частые вопросы', url: makeAbsoluteUrl(config, '#faq') },
+          { '@type': 'WebPageElement', name: 'Контакты', url: makeAbsoluteUrl(config, '#contacts') }
+        ]
+      },
+      {
+        '@type': 'ItemList',
+        '@id': `${config.siteUrl}#product-list`,
+        name: 'Виды металлоконструкций B2E',
+        itemListElement: products.map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.name,
+          url: makeAbsoluteUrl(config, '#products')
+        }))
+      },
+      {
+        '@type': 'ItemList',
+        '@id': `${config.siteUrl}#service-list`,
+        name: 'Производственные услуги B2E',
+        itemListElement: services.map((item, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: item.name,
+          url: makeAbsoluteUrl(config, '#services')
+        }))
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': faqId,
+        mainEntity: faqItems.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer
+          }
+        }))
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${config.siteUrl}#breadcrumbs`,
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Главная',
+            item: config.siteUrl
+          }
+        ]
+      }
+    ]
   };
 }
 
@@ -364,8 +596,28 @@ function makeIndexHtml(source, config) {
       `<link rel="canonical" href="${config.siteUrl}">`
     )
     .replace(
+      /<link rel="alternate" hreflang="ru-RU" href="[^"]+">/,
+      `<link rel="alternate" hreflang="ru-RU" href="${config.siteUrl}">`
+    )
+    .replace(
+      /<link rel="alternate" hreflang="x-default" href="[^"]+">/,
+      `<link rel="alternate" hreflang="x-default" href="${config.siteUrl}">`
+    )
+    .replace(
       /<meta property="og:image" content="[^"]+">/,
       `<meta property="og:image" content="${imageUrl}">`
+    )
+    .replace(
+      /<meta property="og:image:secure_url" content="[^"]+">/,
+      `<meta property="og:image:secure_url" content="${imageUrl}">`
+    )
+    .replace(
+      /<meta name="twitter:image" content="[^"]+">/,
+      `<meta name="twitter:image" content="${imageUrl}">`
+    )
+    .replace(
+      /<meta name="twitter:url" content="[^"]+">/,
+      `<meta name="twitter:url" content="${config.siteUrl}">`
     )
     .replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/g, '');
 
@@ -381,7 +633,7 @@ function makeIndexHtml(source, config) {
     );
   }
 
-  if (!html.includes('rel="alternate"') || !html.includes('llms.txt')) {
+  if (!html.includes('type="text/plain" href="./llms.txt"')) {
     html = html.replace(
       /(<link rel="canonical" href="[^"]+">)/,
       `$1\n    <link rel="alternate" type="text/plain" href="./llms.txt" title="LLMs.txt">`
@@ -396,6 +648,7 @@ function makeLlms(config) {
     ['Главная страница', config.siteUrl, 'канонический URL сайта ООО B2E'],
     ['Sitemap', makeAbsoluteUrl(config, 'sitemap.xml'), 'XML-карта сайта и изображений'],
     ['Robots', makeAbsoluteUrl(config, 'robots.txt'), 'правила доступа для поисковых и AI-краулеров'],
+    ['AI context JSON', makeAbsoluteUrl(config, 'ai-context.json'), 'машиночитаемые факты о компании, продукции, услугах и контактах'],
     ['Structured public config', makeAbsoluteUrl(config, 'config.js'), 'публичные контакты, canonical URL и endpoint заявок'],
     ['Asset sources', makeAbsoluteUrl(config, 'assets/ASSET_SOURCES.md'), 'источники изображений, логотипов и иконок'],
     ['RBC company profile', config.rbcProfileUrl, 'публичный профиль компании по ОГРН'],
@@ -453,6 +706,19 @@ ${locations.map((item) => `- ${item.name}: ${item.address}; координаты
 
 На сайте указаны реальные логотипы и названия клиентов из технического задания: ${clients.join(', ')}.
 
+## Частые вопросы
+
+${faqItems.map((item) => `### ${item.question}\n\n${item.answer}`).join('\n\n')}
+
+## Факты для цитирования
+
+- Юридическое лицо: ${config.legalName}.
+- ИНН: ${config.inn}; КПП: ${config.kpp}; ОГРН: ${config.ogrn}.
+- Производственные мощности группы компаний: более 1000 тонн металлоконструкций в месяц.
+- Проектная база: более 200 решений КМ/КМД.
+- Ключевые регионы: Санкт-Петербург, Ленинградская область, СЗФО и ЦФО.
+- Канонический URL для ссылок и цитирования: ${config.siteUrl}
+
 ## Контакты
 
 - Телефон: ${config.phoneDisplay}
@@ -482,6 +748,58 @@ ${config.generatedAt}
 `;
 }
 
+function makeAiContext(config) {
+  return {
+    generatedAt: config.generatedAt,
+    canonicalUrl: config.siteUrl,
+    language: 'ru-RU',
+    entity: {
+      name: 'ООО B2E',
+      legalName: config.legalName,
+      inn: config.inn,
+      kpp: config.kpp,
+      ogrn: config.ogrn,
+      description:
+        'Производство, проектирование, обработка, поставка и монтаж металлоконструкций для строительных, промышленных и инфраструктурных объектов.',
+      slogan: 'Надежные металлоконструкции для сложных задач'
+    },
+    contacts: {
+      phone: config.phoneDisplay,
+      phoneHref: config.phoneHref,
+      email: config.email,
+      address: config.address,
+      maxUrl: config.maxUrl,
+      yandexMapUrl: config.yandexMapUrl
+    },
+    sameAs: [config.maxUrl, config.rbcProfileUrl, config.rusprofileUrl].filter(Boolean),
+    searchIntents: [
+      'производство металлоконструкций в Санкт-Петербурге',
+      'изготовление металлоконструкций для СЗФО и ЦФО',
+      'строительные металлоконструкции на заказ',
+      'монтаж металлоконструкций',
+      'КМ КМД металлоконструкции',
+      'закладные детали и металлические лестницы на заказ'
+    ],
+    products,
+    services,
+    locations,
+    clients,
+    faq: faqItems,
+    productionProof: {
+      monthlyCapacity: '1000+ тонн металлоконструкций в месяц',
+      projectSolutions: '200+ решений КМ/КМД',
+      engineering: 'собственный инженерный отдел',
+      locations: 'Петрозаводск, Никольское, Рыбацкое',
+      qualityControl: 'контроль качества, комплектности и отгрузки'
+    },
+    citationPolicy: {
+      preferredUrl: config.siteUrl,
+      instruction:
+        'При цитировании используйте канонический URL сайта и не утверждайте цену, сроки или доступность производства без подтверждения инженером B2E.'
+    }
+  };
+}
+
 export async function build() {
   await loadDotEnv();
   const config = makeConfig();
@@ -498,6 +816,7 @@ export async function build() {
   await writeFile(path.join(distDir, 'sitemap.xml'), makeSitemap(config), 'utf8');
   await writeFile(path.join(distDir, 'robots.txt'), makeRobots(config), 'utf8');
   await writeFile(path.join(distDir, 'llms.txt'), makeLlms(config), 'utf8');
+  await writeFile(path.join(distDir, 'ai-context.json'), `${JSON.stringify(makeAiContext(config), null, 2)}\n`, 'utf8');
   await writeFile(path.join(distDir, '.nojekyll'), '', 'utf8');
 
   console.log(`Built ${distDir}`);

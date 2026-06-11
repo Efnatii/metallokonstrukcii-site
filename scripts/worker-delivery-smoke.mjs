@@ -1,7 +1,12 @@
 import process from 'node:process';
 
-const siteUrl = process.env.B2E_SITE_URL || 'https://metallb2e-site.pages.dev/';
-const leadEndpoint = process.env.B2E_LEAD_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev';
+const siteUrl = process.env.B2E_SITE_URL || process.env.YANDEX_GATEWAY_URL || '';
+
+if (!siteUrl) {
+  throw new Error('Set B2E_SITE_URL or YANDEX_GATEWAY_URL to the deployed Yandex API Gateway URL.');
+}
+
+const leadEndpoint = new URL(process.env.B2E_LEAD_ENDPOINT || '/api/leads', siteUrl).href;
 const origin = new URL(siteUrl).origin;
 
 async function readJson(response) {
@@ -52,7 +57,7 @@ async function main() {
   console.log(JSON.stringify(result, null, 2));
 
   if (response.status === 503) {
-    throw new Error('Worker delivery is not configured. Add runtime Worker secrets in Cloudflare: SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD and SMTP_TO.');
+    throw new Error('Worker delivery is not configured. Add runtime secrets in Yandex Lockbox: SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD and SMTP_TO.');
   }
 
   if (!response.ok) {

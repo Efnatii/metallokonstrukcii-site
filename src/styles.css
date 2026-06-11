@@ -813,6 +813,15 @@ h3 {
   max-width: none;
 }
 
+.section-head-row > * {
+  min-width: 0;
+}
+
+.section-head h2 {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
 .section-head-row .text-link {
   justify-self: end;
 }
@@ -2340,6 +2349,52 @@ h3 {
   font-weight: 850;
 }
 
+.faq {
+  padding-top: clamp(42px, 4.6vw, 72px);
+}
+
+.faq-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, .78fr) minmax(0, 1.22fr);
+  gap: clamp(22px, 3.8vw, 54px);
+  align-items: start;
+}
+
+.faq .section-head {
+  position: sticky;
+  top: 112px;
+  margin-bottom: 0;
+}
+
+.faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.faq-item {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 1px solid var(--line-dark);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgb(255 196 0 / 8%), transparent 42%),
+    #fff;
+  box-shadow: 0 18px 42px rgb(16 20 23 / 8%);
+}
+
+.faq-item h3 {
+  color: #151b1f;
+  font-size: clamp(18px, 1.4vw, 23px);
+  font-weight: 950;
+}
+
+.faq-item p {
+  color: var(--muted-dark);
+  font-size: clamp(14px, 1.05vw, 17px);
+}
+
 .contacts-layout {
   grid-template-columns: minmax(0, 1.25fr) minmax(360px, 520px);
 }
@@ -3513,8 +3568,13 @@ h3 {
   .company-flow-route,
   .company-flow-capabilities,
   .company-layout,
+  .faq-layout,
   .contacts-layout {
     grid-template-columns: 1fr;
+  }
+
+  .faq .section-head {
+    position: static;
   }
 
   .footer-layout {

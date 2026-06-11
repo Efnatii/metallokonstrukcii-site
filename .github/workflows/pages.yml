@@ -1,4 +1,4 @@
-name: Deploy Cloudflare Pages
+name: Deploy Yandex Cloud
 
 on:
   push:
@@ -10,14 +10,25 @@ permissions:
   contents: read
 
 concurrency:
-  group: cloudflare-pages
+  group: yandex-cloud
   cancel-in-progress: false
 
 jobs:
-  deploy-pages:
+  deploy-yandex-cloud:
     runs-on: ubuntu-latest
     env:
-      B2E_SITE_URL: ${{ vars.B2E_SITE_URL || 'https://metallb2e-site.pages.dev/' }}
+      YANDEX_PROJECT_NAME: ${{ vars.YANDEX_PROJECT_NAME || 'b2e-metallokonstrukcii' }}
+      YANDEX_SITE_BUCKET: ${{ vars.YANDEX_SITE_BUCKET || 'metallb2e.ru' }}
+      YANDEX_STATS_BUCKET: ${{ vars.YANDEX_STATS_BUCKET || 'b2e-metallokonstrukcii-stats' }}
+      YANDEX_FUNCTION_NAME: ${{ vars.YANDEX_FUNCTION_NAME || 'b2e-leads' }}
+      YANDEX_GATEWAY_NAME: ${{ vars.YANDEX_GATEWAY_NAME || 'b2e-metallokonstrukcii-gateway' }}
+      YANDEX_SERVICE_ACCOUNT_NAME: ${{ vars.YANDEX_SERVICE_ACCOUNT_NAME || 'b2e-metallokonstrukcii-sa' }}
+      YANDEX_SECRET_NAME: ${{ vars.YANDEX_SECRET_NAME || 'b2e-metallokonstrukcii-smtp' }}
+      YANDEX_CUSTOM_DOMAIN: ${{ vars.YANDEX_CUSTOM_DOMAIN }}
+      YANDEX_CERTIFICATE_ID: ${{ vars.YANDEX_CERTIFICATE_ID }}
+      YANDEX_ALLOWED_ORIGIN: ${{ vars.YANDEX_ALLOWED_ORIGIN }}
+      YANDEX_FUNCTION_SECRET_KEYS: ${{ vars.YANDEX_FUNCTION_SECRET_KEYS }}
+      YANDEX_SKIP_SECRET_UPDATE: ${{ vars.YANDEX_SKIP_SECRET_UPDATE }}
       B2E_CONTACT_PHONE: ${{ vars.B2E_CONTACT_PHONE || '+79650578270' }}
       B2E_CONTACT_PHONE_DISPLAY: ${{ vars.B2E_CONTACT_PHONE_DISPLAY || '+7 (965) 057-82-70' }}
       B2E_WORK_HOURS: ${{ vars.B2E_WORK_HOURS || 'Пн-Пт 09:00 - 18:00' }}
@@ -29,10 +40,20 @@ jobs:
       B2E_RBC_PROFILE_URL: ${{ vars.B2E_RBC_PROFILE_URL || 'https://companies.rbc.ru/amp/ogrn/1247800091098/' }}
       B2E_RUSPROFILE_URL: ${{ vars.B2E_RUSPROFILE_URL || 'https://www.rusprofile.ru/id/1247800091098' }}
       B2E_CATALOG_URL: ${{ vars.B2E_CATALOG_URL || './assets/documents/b2e-metallokonstrukcii-catalog.pdf' }}
-      B2E_LEAD_ENDPOINT: ${{ vars.B2E_LEAD_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev' }}
-      B2E_STATS_ENDPOINT: ${{ vars.B2E_STATS_ENDPOINT || 'https://b2e-leads.zakaz-749.workers.dev/stats' }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'metallb2e-site' }}
+      SMTP_HOST: ${{ secrets.SMTP_HOST }}
+      SMTP_PORT: ${{ secrets.SMTP_PORT }}
+      SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      SMTP_FROM: ${{ secrets.SMTP_FROM }}
+      SMTP_FROM_NAME: ${{ secrets.SMTP_FROM_NAME }}
+      SMTP_ENVELOPE_FROM: ${{ secrets.SMTP_ENVELOPE_FROM }}
+      SMTP_TO: ${{ secrets.SMTP_TO }}
+      LEAD_WEBHOOK_URL: ${{ secrets.LEAD_WEBHOOK_URL }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      SMARTCAPTCHA_SERVER_KEY: ${{ secrets.SMARTCAPTCHA_SERVER_KEY }}
+      TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,48 +63,46 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install Wrangler
-        run: npm ci --prefix worker
+      - name: Test and package site
+        run: npm run check
 
-      - name: Test static site and Worker logic
-        run: npm test
-
-      - name: Build static site
-        run: npm run build
-
-      - name: Check Cloudflare credentials
-        id: cloudflare
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Install Yandex Cloud CLI
         run: |
-          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
-            echo "::warning::CLOUDFLARE_ACCOUNT_ID variable or CLOUDFLARE_API_TOKEN secret is missing; Cloudflare Pages deploy is skipped."
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i "$HOME/yandex-cloud" -n
+          echo "$HOME/yandex-cloud/bin" >> "$GITHUB_PATH"
+
+      - name: Configure Yandex Cloud CLI
+        id: yc
+        env:
+          YC_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.YC_SERVICE_ACCOUNT_KEY_JSON }}
+          YC_CLOUD_ID: ${{ secrets.YC_CLOUD_ID }}
+          YC_FOLDER_ID: ${{ secrets.YC_FOLDER_ID }}
+        run: |
+          if [ -z "$YC_SERVICE_ACCOUNT_KEY_JSON" ] || [ -z "$YC_CLOUD_ID" ] || [ -z "$YC_FOLDER_ID" ]; then
+            echo "::warning::YC_SERVICE_ACCOUNT_KEY_JSON, YC_CLOUD_ID or YC_FOLDER_ID is missing; Yandex Cloud deploy is skipped."
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: Ensure Cloudflare Pages project exists
-        if: steps.cloudflare.outputs.enabled == 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set +e
-          create_output="$(./worker/node_modules/.bin/wrangler pages project create "$CLOUDFLARE_PAGES_PROJECT" --production-branch=main 2>&1)"
-          create_status="$?"
-          set -e
-          echo "$create_output"
-          if [ "$create_status" -ne 0 ] && ! echo "$create_output" | grep -Eiq "already exists|409"; then
-            exit "$create_status"
-          fi
+          key_path="$RUNNER_TEMP/yc-service-account-key.json"
+          printf '%s' "$YC_SERVICE_ACCOUNT_KEY_JSON" > "$key_path"
+          yc config profile create github-actions
+          yc config set service-account-key "$key_path"
+          yc config set cloud-id "$YC_CLOUD_ID"
+          yc config set folder-id "$YC_FOLDER_ID"
+          yc config list
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy to Cloudflare Pages
-        if: steps.cloudflare.outputs.enabled == 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Deploy static site, API Gateway and Cloud Function
+        if: steps.yc.outputs.enabled == 'true'
+        shell: pwsh
         run: |
-          ./worker/node_modules/.bin/wrangler pages deploy dist \
-            --project-name "$CLOUDFLARE_PAGES_PROJECT" \
-            --branch main \
-            --commit-hash "$GITHUB_SHA" \
-            --commit-message "$GITHUB_SHA"
+          $deployArgs = @("scripts/Deploy-YandexCloud.ps1")
+          if ($env:YANDEX_SKIP_SECRET_UPDATE -eq "true") {
+            $deployArgs += "-SkipSecretUpdate"
+          }
+          node scripts/run-powershell.mjs @deployArgs
+
+      - name: Smoke test Yandex Gateway
+        if: steps.yc.outputs.enabled == 'true'
+        run: npm run smoke:yandex

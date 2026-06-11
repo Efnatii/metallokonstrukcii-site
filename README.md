@@ -1,161 +1,104 @@
-# Сайт производства металлоконструкций ООО B2E
+# ООО B2E - сайт металлоконструкций
 
-Статический сайт для Cloudflare Pages и Cloudflare Worker для приема заявок. Публичные настройки сайта попадают в `dist/config.js` при сборке. Приватные токены не попадают в сайт: они хранятся в GitHub Actions Secrets и при деплое синхронизируются в Cloudflare Worker Secrets.
+Статический сайт и backend приема заявок для Yandex Cloud. Публичная часть собирается в `dist/`, API работает через Yandex API Gateway и Yandex Cloud Functions, секреты доставки хранятся в Yandex Lockbox.
 
-## Быстрый старт
+## Архитектура
 
-```powershell
-npm run build
-npm start
-```
+- Сайт: Yandex Object Storage bucket, публичная раздача через API Gateway.
+- API заявок и статистики: Yandex Cloud Functions, адаптер `yandex/function/index.mjs`.
+- Единая публичная точка: Yandex API Gateway из `yandex/gateway/openapi.yaml`.
+- Маршруты API: `/api/leads`, `/api/stats`, `/api/stats/visit`.
+- Домен: подключается к API Gateway через `YANDEX_CUSTOM_DOMAIN` и `YANDEX_CERTIFICATE_ID`.
 
-Если PowerShell блокирует `npm.ps1`, используйте:
+Cloudflare больше не является активным deploy-target в `main`. Старый Worker-код сохранен как переносимая бизнес-логика, но стандартные команды, CI и документация ведут на Yandex Cloud.
 
-```powershell
-npm.cmd run build
-npm.cmd start
-```
-
-Локальный сервер поднимается на `http://127.0.0.1:4173/` или на следующем свободном порту.
-
-## Проверки
+## Команды
 
 ```powershell
 npm test
+npm run build
 npm run check
-npm run smoke
-npm run smoke:worker-delivery
+npm run yandex:package
+npm run yandex:deploy
 ```
 
-- `npm test` проверяет сборочный конфиг сайта и логику Worker.
-- `npm run check` дополнительно проверяет синтаксис, сборку и `wrangler deploy --dry-run`.
-- `npm run smoke` проверяет опубликованный Cloudflare Pages сайт, `config.js`, `sitemap.xml` и CORS Cloudflare Worker.
-- `npm run smoke:worker-delivery` отправляет тестовую заявку в опубликованный Worker и должен вернуть `200`; `503` означает, что в Cloudflare Worker не заданы runtime secrets доставки.
-- `npm run yandex:package` собирает ZIP для Yandex Cloud Functions.
-- `npm run smoke:yandex` проверяет опубликованный Yandex API Gateway из `YANDEX_GATEWAY_URL`.
+`npm run check` проверяет синтаксис, unit-тесты, сборку, внутренний аудит и упаковку Yandex Function. `npm run deploy` является алиасом `npm run yandex:deploy`.
 
-## Yandex Cloud
+## Локальная сборка
 
-Подготовлен перенос на Yandex Cloud без привязки к домену: статика лежит в Object Storage, backend работает как Cloud Function, единая публичная точка входа - API Gateway. Домен потом подключается к Gateway отдельно, без переименования bucket/function.
+```powershell
+npm run build
+npm run start
+```
 
-Инструкция и проверенные официальные источники: [docs/yandex-cloud-migration.md](docs/yandex-cloud-migration.md).
+Для production deploy `scripts/Deploy-YandexCloud.ps1` сам выставляет:
 
-## Контент и карты
+- `B2E_SITE_URL=<gateway-url>/` или `https://<custom-domain>/`;
+- `B2E_LEAD_ENDPOINT=/api/leads`;
+- `B2E_STATS_ENDPOINT=/api/stats`.
 
-- Название бренда в интерфейсе, сборке, JSON-LD и `llms.txt`: `ООО B2E`.
-- Текущая визуальная версия реализует утвержденный концепт C как чистую HTML/CSS-структуру: темный industrial dashboard hero, карточка производственных мощностей, KPI-ряд, workflow-линия, светлый каталог продукции сразу после hero и темные производственные секции ниже.
-- В шапке используется горизонтальная PNG-версия логотипа B2E, сгенерированная под темный industrial header: белый знак/wordmark, желтая `2`, без белой плашки.
-- Все интерфейсные и производственные иконки заменены на единый адаптивный PNG-набор 1x/2x/3x из нового сгенерированного ChatGPT Image листа `icons/concept-c-industrial-icons-source.png`; SVG-иконки в интерфейсе не используются.
-- Значок MAX подключен отдельным PNG-набором 1x/2x/3x из полного кода сайтов-примеров в `techtask`.
-- Блок клиентов использует реальные логотипы компаний из ТЗ: АГРОТОРГ/Пятёрочка, Магнит, Гипроавтотранс, Горэлектротранс, Водоканал СПб, НПК Катарсис.
-- Hero, каталог продукции, услуги и блок производства переведены на реальные фото из открытых источников, существующие фото проекта и пользовательские примеры КМ/КМД. Чертежи из обновлений используются только как примеры металлоконструкций и проектной документации, не как фотографии объектов B2E.
-- На страницу добавлен блок `Инженерия и опыт`: пример КМ/КМД и благодарственные письма СЕВЗАПЭНЕРГО и ГК ИНЕРГО. Публичные реквизиты вынесены в hero-плашку и многострочный footer.
-- Кнопки каталога на публичной странице сейчас неактивны до подготовки финального каталога.
-- Карта в контактах - реальная интерактивная Leaflet/OpenStreetMap-карта. Она переключает главный офис и производственные направления из ТЗ: Петрозаводск, Никольское, Рыбацкое, а также отдельную кнопку зоны покрытия с масштабом СЗФО/ЦФО. Для Никольского указан адрес: `Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6`. Главный офис выставлен по координатам 2ГИС для `Санкт-Петербург, улица Седова, 57 лит В`: `59.879804, 30.425277`. Кнопка `Открыть в Яндекс Картах` ведет на выбранную точку или общий масштаб покрытия.
+## Yandex Cloud Deploy
+
+Перед deploy нужен настроенный `yc`:
+
+```powershell
+yc init
+yc config list
+```
+
+Минимальный набор runtime-секретов в текущем PowerShell-процессе:
+
+```powershell
+$env:SMTP_HOST = "smtp.yandex.ru"
+$env:SMTP_PORT = "465"
+$env:SMTP_SECURE = "on"
+$env:SMTP_USERNAME = "<mailbox>"
+$env:SMTP_PASSWORD = "<app-password>"
+$env:SMTP_FROM = "B2E <zakaz@b2energy.ru>"
+$env:SMTP_ENVELOPE_FROM = "zakaz@b2energy.ru"
+$env:SMTP_TO = "zakaz@b2energy.ru"
+```
+
+Запуск:
+
+```powershell
+npm run yandex:deploy
+```
+
+Скрипт создает или обновляет service account, Object Storage buckets, Lockbox secret, Cloud Function, API Gateway, собирает сайт с относительными `/api/*` endpoints и загружает `dist/` в Object Storage.
+
+## Домен
+
+Когда домен и сертификат готовы в Yandex Certificate Manager:
+
+```powershell
+$env:YANDEX_CUSTOM_DOMAIN = "metallb2e.ru"
+$env:YANDEX_CERTIFICATE_ID = "<certificate-id>"
+npm run yandex:deploy
+```
+
+Deploy script привяжет домен к API Gateway, добавит домен и gateway origin в CORS, пересоберет canonical URL/sitemap/robots/llms под домен.
+
+Для DNS учитывайте ограничение Yandex API Gateway: при внешнем DNS домен должен быть третьего уровня или ниже; для домена второго уровня нужен Cloud DNS/ANAME-сценарий.
 
 ## GitHub Actions
 
-В репозитории два workflow:
+`.github/workflows/pages.yml` теперь деплоит в Yandex Cloud. Нужны secrets:
 
-- `.github/workflows/pages.yml` собирает и публикует Cloudflare Pages.
-- `.github/workflows/worker.yml` тестирует, деплоит Cloudflare Worker и синхронизирует приватные Worker Secrets.
+- `YC_SERVICE_ACCOUNT_KEY_JSON`;
+- `YC_CLOUD_ID`;
+- `YC_FOLDER_ID`;
+- `SMTP_*` или `LEAD_WEBHOOK_URL`/`TELEGRAM_*`.
 
-Если `CLOUDFLARE_API_TOKEN` или `CLOUDFLARE_ACCOUNT_ID` не заданы, workflow Worker не падает, а пропускает деплой с warning. Это сделано, чтобы тесты и Pages не ломались из-за еще не добавленных секретов.
+Публичные имена ресурсов задаются через GitHub Variables `YANDEX_*`. Для повторного deploy без обновления Lockbox можно выставить `YANDEX_SKIP_SECRET_UPDATE=true` и `YANDEX_FUNCTION_SECRET_KEYS`.
 
-## Публичные GitHub Variables
-
-Эти значения можно хранить в `Settings -> Secrets and variables -> Actions -> Variables`. Они не являются секретами и могут оказаться в браузере или логах сборки.
-
-| Variable | Назначение |
-| --- | --- |
-| `B2E_SITE_URL` | Публичный URL сайта для canonical, sitemap и `llms.txt`. |
-| `B2E_CONTACT_PHONE` | Телефон для `tel:` ссылки. |
-| `B2E_CONTACT_PHONE_DISPLAY` | Отображаемый телефон. |
-| `B2E_WORK_HOURS` | Отображаемые часы работы в шапке сайта. |
-| `B2E_CONTACT_EMAIL` | Почта для fallback через `mailto:`. |
-| `B2E_MAX_URL` | Ссылка на MAX. |
-| `B2E_ADDRESS` | Адрес компании. |
-| `B2E_YANDEX_MAP_URL` | Ссылка на Яндекс Карты для главного офиса. |
-| `B2E_YANDEX_MAP_EMBED_URL` | Публичный URL iframe Яндекс Карты для совместимости конфигурации. Текущая видимая карта работает через Leaflet/OpenStreetMap с четырьмя точками и зоной покрытия. |
-| `B2E_RBC_PROFILE_URL` | Публичный профиль компании в РБК Компании. |
-| `B2E_RUSPROFILE_URL` | Публичный профиль компании в Руспрофиль. |
-| `B2E_CATALOG_URL` | Публичный URL PDF-каталога для кнопки `Скачать каталог`. |
-| `B2E_LEAD_ENDPOINT` | Публичный URL Worker, сейчас `https://b2e-leads.zakaz-749.workers.dev`. |
-| `B2E_STATS_ENDPOINT` | Публичный URL счетчика посещаемости Worker, сейчас `https://b2e-leads.zakaz-749.workers.dev/stats`. |
-| `CLOUDFLARE_ACCOUNT_ID` | ID аккаунта Cloudflare для деплоя Worker. |
-| `CLOUDFLARE_PAGES_PROJECT` | Имя проекта Cloudflare Pages, по умолчанию `metallb2e-site`. |
-| `WORKER_ALLOWED_ORIGIN` | Разрешенный origin сайта, сейчас `https://metallb2e-site.pages.dev`. |
-| `WORKER_SITE_LABEL` | Название сайта в заявках. |
-| `WORKER_LEAD_SUBJECT` | Тема заявки для Telegram/webhook/SMTP, по умолчанию `Новая заявка на металлоконструкции`. |
-
-## Приватные GitHub Secrets
-
-Эти значения задаются в `Settings -> Secrets and variables -> Actions -> Secrets`. Их нельзя добавлять в `.env`, `config.js`, README, коммиты или `wrangler.jsonc`.
-
-| Secret | Куда используется |
-| --- | --- |
-| `CLOUDFLARE_API_TOKEN` | Деплой Pages и Worker из GitHub Actions. Нужны права Cloudflare Pages Edit и Workers Scripts Write. |
-| `WORKER_LEAD_WEBHOOK_URL` | CRM, Make, Zapier, Formspree или другой webhook для заявок. |
-| `WORKER_TELEGRAM_BOT_TOKEN` | Токен Telegram-бота для отправки заявок. |
-| `WORKER_TELEGRAM_CHAT_ID` | ID Telegram-чата/канала. |
-| `WORKER_SMTP_HOST` | SMTP host для отправки заявки с no-reply почты. |
-| `WORKER_SMTP_PORT` | SMTP port, для Yandex SSL обычно `465`. |
-| `WORKER_SMTP_SECURE` | Режим TLS: `on` для 465 или `starttls` для 587. |
-| `WORKER_SMTP_USERNAME` | SMTP-логин no-reply. |
-| `WORKER_SMTP_PASSWORD` | Пароль приложения SMTP. |
-| `WORKER_SMTP_FROM` | Адрес отправителя. |
-| `WORKER_SMTP_FROM_NAME` | Отображаемое имя отправителя. |
-| `WORKER_SMTP_ENVELOPE_FROM` | Опциональный SMTP envelope sender для `MAIL FROM`; по умолчанию используется `WORKER_SMTP_USERNAME`. |
-| `WORKER_SMTP_TO` | Адрес получателя заявок. |
-| `WORKER_TURNSTILE_SECRET_KEY` | Опциональный секрет Cloudflare Turnstile. |
-
-Workflow загружает только непустые `WORKER_*` secrets в Cloudflare Worker Secrets. Если ни `WORKER_LEAD_WEBHOOK_URL`, ни Telegram-секреты, ни SMTP-секреты не заданы, Worker отвечает `503 Lead destination is not configured`, а сайт откатывается на `mailto:` fallback.
-
-SMTP/IMAP-логины, пароли приложений и почтовые пароли из локальных материалов нельзя добавлять в `src`, `dist`, README, `.env.example`, frontend config или GitHub Variables. Для автоматической доставки заявок используйте приватные `WORKER_SMTP_*` secrets, Telegram или внешний webhook.
-
-## Cloudflare Worker
-
-Код Worker лежит в `worker/`. Он принимает POST-заявки только с `WORKER_ALLOWED_ORIGIN`, валидирует имя/телефон, опционально проверяет Turnstile и отправляет заявку в Telegram, webhook или SMTP.
-
-Этот же Worker отдает backend-счетчик посещаемости для футера: `GET /stats` и `POST /stats/visit`. Подсчет хранится в Durable Object `SiteVisitCounter` с binding `SITE_VISIT_COUNTER`, поэтому значения сохраняются между посетителями, перезагрузками страницы и деплоями Worker.
-
-Для Cloudflare Workers Builds / git-deploy в корне репозитория есть `wrangler.jsonc`. Он указывает на `worker/src/index.js`, поэтому в Cloudflare можно оставить root directory корнем репозитория и deploy command по умолчанию `npx wrangler deploy`.
-
-Если Worker подключен к репозиторию напрямую через Cloudflare Workers Builds, SMTP нужно задавать в Cloudflare как Worker Secrets с runtime-именами без префикса `WORKER_`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`, `SMTP_ENVELOPE_FROM`, `SMTP_TO`. GitHub Secrets вида `WORKER_SMTP_*` используются только workflow `.github/workflows/worker.yml`, который синхронизирует их через `wrangler secret bulk`.
-
-Локально:
+## Проверка после deploy
 
 ```powershell
-npm --prefix worker install
-npm --prefix worker test
-npm --prefix worker run deploy -- --dry-run
+$env:YANDEX_GATEWAY_URL = "https://<gateway-domain>"
+npm run smoke:yandex
 ```
 
-Ручной деплой:
+Ожидается: `/api/stats` возвращает `200`, CORS preflight для `/api/leads` возвращает `204`, тестовая заявка проходит до настроенного канала доставки.
 
-```powershell
-npx --prefix worker wrangler login
-npm --prefix worker run deploy
-```
-
-## Как проверить переменные на сайте
-
-Откройте:
-
-```text
-https://metallb2e-site.pages.dev/config.js
-```
-
-Если переменная изменена в GitHub Variables, но сайт не поменялся, нужно дождаться или вручную перезапустить workflow `Deploy Cloudflare Pages`. Статический сайт получает переменные только во время сборки.
-
-## Безопасность
-
-Все, что попало в `dist/config.js`, доступно любому посетителю. Поэтому туда можно класть только публичные значения: телефоны, email, URL сайта, URL Worker. Токены Telegram, webhook с ключом доступа, Turnstile secret и Cloudflare API token должны храниться только в GitHub Secrets и Cloudflare Worker Secrets.
-
-## SEO и AI-доступность
-
-Сборка генерирует `config.js`, `sitemap.xml`, `robots.txt`, `llms.txt` и `.nojekyll`. HTML содержит семантические секции и structured data для `Organization`/`LocalBusiness`.
-
-В футере выводятся только публичные служебные файлы `robots.txt`, `sitemap.xml`, `llms.txt`, а также copyright сайта. `config.js`, `assets/ASSET_SOURCES.md`, каталог PDF и `.nojekyll` не выводятся в футере.
-
-Дополнительный чеклист соответствия концепту C, ТЗ, env split и browser QA лежит в `docs/DESIGN_QA.md`.
+Подробный runbook: `docs/yandex-cloud-migration.md`.

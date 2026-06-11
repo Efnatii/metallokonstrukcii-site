@@ -61,6 +61,19 @@ test('Yandex function adapter records and reads visit stats through file storage
   });
 });
 
+test('Yandex function adapter ignores empty GET body from API Gateway', async () => {
+  await withEnv(async () => {
+    const response = await handler({
+      ...event({ method: 'GET', path: '/api/stats' }),
+      body: '',
+      isBase64Encoded: false
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(JSON.parse(response.body).stats.allTime, 0);
+  });
+});
+
 test('Yandex function adapter sends leads via existing webhook delivery path', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];

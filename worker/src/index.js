@@ -9,8 +9,8 @@ const MOSCOW_TIME_ZONE = 'Europe/Moscow';
 const SITE_VISIT_COUNTER_NAME = 'b2e-site-visits';
 const VISIT_DATE_PREFIX = 'visit:date:';
 const VISIT_TOTAL_KEY = 'visit:total';
-const DEFAULT_SITE_ROOT = 'https://metallb2e-site.pages.dev/';
-const DEFAULT_ALLOWED_ORIGINS = 'https://metallb2e-site.pages.dev';
+const DEFAULT_SITE_ROOT = 'https://b2e-metallokonstrukcii.example/';
+const DEFAULT_ALLOWED_ORIGINS = 'https://b2e-metallokonstrukcii.example';
 const DEFAULT_SITE_PROFILE = {
   label: 'ООО B2E',
   siteName: 'B2E Металлоконструкции',
@@ -28,7 +28,7 @@ const DEFAULT_SITE_PROFILE = {
 
 function allowedOrigins(env) {
   return String(env.ALLOWED_ORIGIN || DEFAULT_ALLOWED_ORIGINS)
-    .split(',')
+    .split(/[;,]/)
     .map((origin) => origin.trim())
     .filter(Boolean);
 }
@@ -63,12 +63,26 @@ function isAllowedOrigin(origin, env) {
   return allowedOrigins(env).some((pattern) => originMatchesPattern(origin, pattern));
 }
 
+function requestOwnOrigin(request) {
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return '';
+  }
+}
+
+function isAllowedRequestOrigin(request, env) {
+  const origin = request.headers.get('Origin') || requestOwnOrigin(request);
+
+  return isAllowedOrigin(origin, env);
+}
+
 function fallbackAllowedOrigin(env) {
   return allowedOrigins(env).find((origin) => !origin.includes('*')) || DEFAULT_SITE_ROOT.replace(/\/$/, '');
 }
 
 function corsHeaders(request, env) {
-  const origin = request.headers.get('Origin') || '';
+  const origin = request.headers.get('Origin') || requestOwnOrigin(request);
   const allowOrigin = isAllowedOrigin(origin, env) ? origin : fallbackAllowedOrigin(env);
 
   return {
@@ -758,6 +772,53 @@ async function verifyTurnstile(token, request, env) {
   return Boolean(result.success);
 }
 
+async function verifySmartCaptcha(token, request, env) {
+  if (!env.SMARTCAPTCHA_SERVER_KEY) {
+    return true;
+  }
+
+  if (!token) {
+    return false;
+  }
+
+  const body = new URLSearchParams();
+  body.set('secret', env.SMARTCAPTCHA_SERVER_KEY);
+  body.set('token', token);
+  body.set(
+    'ip',
+    request.headers.get('X-Forwarded-For') ||
+      request.headers.get('X-Real-IP') ||
+      request.headers.get('CF-Connecting-IP') ||
+      ''
+  );
+
+  const response = await fetch('https://smartcaptcha.cloud.yandex.ru/validate', {
+    method: 'POST',
+    body
+  });
+
+  if (!response.ok) {
+    return true;
+  }
+
+  const result = await response.json();
+  return result.status === 'ok';
+}
+
+async function verifyCaptcha(input, request, env) {
+  const token =
+    input.smartToken ||
+    input.smartCaptchaToken ||
+    input.captchaToken ||
+    input.turnstileToken;
+
+  if (env.SMARTCAPTCHA_SERVER_KEY) {
+    return verifySmartCaptcha(token, request, env);
+  }
+
+  return verifyTurnstile(token, request, env);
+}
+
 async function sendTelegram(lead, env) {
   if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) {
     return null;
@@ -827,8 +888,7 @@ export default {
       });
     }
 
-    const origin = request.headers.get('Origin') || '';
-    if (!isAllowedOrigin(origin, env)) {
+    if (!isAllowedRequestOrigin(request, env)) {
       return jsonResponse(request, env, { error: 'Forbidden origin' }, { status: 403 });
     }
 
@@ -859,8 +919,8 @@ export default {
       return jsonResponse(request, env, { error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const turnstileOk = await verifyTurnstile(input.turnstileToken, request, env);
-    if (!turnstileOk) {
+    const captchaOk = await verifyCaptcha(input, request, env);
+    if (!captchaOk) {
       return jsonResponse(request, env, { error: 'Captcha validation failed' }, { status: 400 });
     }
 

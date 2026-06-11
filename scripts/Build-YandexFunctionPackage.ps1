@@ -1,6 +1,6 @@
 param(
-  [string]$OutputDir = "dist-yandex\function",
-  [string]$ZipPath = "dist-yandex\b2e-yandex-function.zip"
+  [string]$OutputDir = "dist-yandex/function",
+  [string]$ZipPath = "dist-yandex/b2e-yandex-function.zip"
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,8 +20,8 @@ if (Test-Path -LiteralPath $resolvedOutput) {
 New-Item -ItemType Directory -Force -Path $resolvedOutput | Out-Null
 New-Item -ItemType Directory -Force -Path (Split-Path $resolvedZip -Parent) | Out-Null
 
-$adapterSource = Join-Path $repoRoot "yandex\function\index.mjs"
-$workerSource = Join-Path $repoRoot "worker\src\index.js"
+$adapterSource = Join-Path $repoRoot "yandex/function/index.mjs"
+$workerSource = Join-Path $repoRoot "worker/src/index.js"
 $adapterTarget = Join-Path $resolvedOutput "index.js"
 $workerTarget = Join-Path $resolvedOutput "worker.mjs"
 $packageTarget = Join-Path $resolvedOutput "package.json"

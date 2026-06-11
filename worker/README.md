@@ -1,91 +1,38 @@
-# B2E Leads Cloudflare Worker
+# B2E Leads Backend
 
-Cloudflare Worker принимает заявки с Cloudflare Pages и пересылает их в Telegram, внешний webhook или SMTP. Приватные значения не должны попадать в frontend: они хранятся в Cloudflare Worker Secrets.
+`worker/src/index.js` содержит переносимую бизнес-логику приема заявок, статистики посещений и доставки уведомлений. В `main` этот код запускается через Yandex Cloud Functions adapter `yandex/function/index.mjs`.
 
-## Локальные команды
+## Yandex Cloud runtime
 
-```powershell
-npm install
-npm test
-npm run deploy -- --dry-run
-```
+Активная схема:
 
-Ручной деплой:
+- API Gateway проксирует `/api/*` в Cloud Function.
+- `yandex/function/index.mjs` снимает `/api` prefix и передает запрос в `worker.fetch`.
+- SMTP работает через Node `net`/`tls`, которые adapter передает как `SOCKET_CONNECT`.
+- Статистика хранится в Object Storage mount через file-backed KV.
+- Секреты приходят из Yandex Lockbox как env vars.
 
-```powershell
-npx wrangler login
-npm run deploy
-```
+## Runtime secrets
 
-## Автоматический деплой из GitHub Actions
+Поддерживаются каналы доставки:
 
-Workflow `.github/workflows/worker.yml`:
+| Env var | Назначение |
+| --- | --- |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE` | SMTP transport. |
+| `SMTP_USERNAME`, `SMTP_PASSWORD` | SMTP auth. |
+| `SMTP_FROM`, `SMTP_FROM_NAME`, `SMTP_ENVELOPE_FROM`, `SMTP_TO` | Отправитель и получатели. |
+| `LEAD_WEBHOOK_URL` | Внешний webhook. |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Telegram delivery. |
+| `SMARTCAPTCHA_SERVER_KEY` | Опциональная Yandex SmartCaptcha проверка. |
+| `TURNSTILE_SECRET_KEY` | Legacy fallback, не основной путь для Yandex Cloud. |
 
-1. устанавливает зависимости;
-2. запускает `npm --prefix worker run check`;
-3. деплоит Worker через `wrangler deploy`, если заданы `CLOUDFLARE_ACCOUNT_ID` и `CLOUDFLARE_API_TOKEN`;
-4. собирает непустые GitHub Secrets и загружает их в Cloudflare через `wrangler secret bulk`.
+Если ни один канал доставки не задан, API возвращает `503 Lead destination is not configured`.
 
-## Публичные vars
-
-Публичные vars можно хранить в `wrangler.jsonc` как defaults и переопределять через GitHub Variables:
-
-| GitHub Variable | Worker binding | Назначение |
-| --- | --- | --- |
-| `WORKER_ALLOWED_ORIGIN` | `ALLOWED_ORIGIN` | Origin сайта, которому разрешен POST. |
-| `WORKER_SITE_LABEL` | `SITE_LABEL` | Название сайта в webhook payload. |
-| `WORKER_LEAD_SUBJECT` | `LEAD_SUBJECT` | Тема заявки. |
-
-`CLOUDFLARE_ACCOUNT_ID` тоже хранится в GitHub Variables. Это не Worker binding для кода заявок, а публичный идентификатор аккаунта, который нужен GitHub Actions для деплоя.
-
-## Приватные secrets
-
-| GitHub Secret | Cloudflare Worker Secret | Обязательно |
-| --- | --- | --- |
-| `CLOUDFLARE_API_TOKEN` | не загружается в Worker | Да, для автоматического деплоя Worker из GitHub Actions. |
-| `WORKER_LEAD_WEBHOOK_URL` | `LEAD_WEBHOOK_URL` | Нет, если настроен Telegram. |
-| `WORKER_TELEGRAM_BOT_TOKEN` | `TELEGRAM_BOT_TOKEN` | Нет, если настроен webhook. |
-| `WORKER_TELEGRAM_CHAT_ID` | `TELEGRAM_CHAT_ID` | Нет, если настроен webhook. |
-| `WORKER_SMTP_HOST` | `SMTP_HOST` | Нет, если настроен Telegram или webhook. |
-| `WORKER_SMTP_PORT` | `SMTP_PORT` | Нет, по умолчанию `465`. |
-| `WORKER_SMTP_SECURE` | `SMTP_SECURE` | Нет, `on` для 465 или `starttls` для 587. |
-| `WORKER_SMTP_USERNAME` | `SMTP_USERNAME` | Да, если используется SMTP. |
-| `WORKER_SMTP_PASSWORD` | `SMTP_PASSWORD` | Да, если используется SMTP. |
-| `WORKER_SMTP_FROM` | `SMTP_FROM` | Нет, если совпадает с `SMTP_USERNAME`. |
-| `WORKER_SMTP_FROM_NAME` | `SMTP_FROM_NAME` | Нет. |
-| `WORKER_SMTP_ENVELOPE_FROM` | `SMTP_ENVELOPE_FROM` | Нет, по умолчанию `SMTP_USERNAME` для `MAIL FROM`. |
-| `WORKER_SMTP_TO` | `SMTP_TO` | Да, если используется SMTP. |
-| `WORKER_TURNSTILE_SECRET_KEY` | `TURNSTILE_SECRET_KEY` | Нет, опциональная captcha. |
-
-`CLOUDFLARE_API_TOKEN` остается только в GitHub Secrets и используется GitHub Actions/Wrangler для публикации. Его нельзя загружать в `dist/config.js`, `wrangler.jsonc` или Worker vars.
-
-Если используется прямой Cloudflare Workers Builds / git-deploy из репозитория, задавайте секреты в Cloudflare Worker Settings с runtime-именами без префикса `WORKER_`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_FROM_NAME`, `SMTP_ENVELOPE_FROM`, `SMTP_TO`. Префикс `WORKER_` нужен только для GitHub Actions, где workflow переименовывает secrets перед `wrangler secret bulk`.
-
-Для автоматической доставки заявок нужен хотя бы один канал:
-
-- `WORKER_LEAD_WEBHOOK_URL`
-- или пара `WORKER_TELEGRAM_BOT_TOKEN` + `WORKER_TELEGRAM_CHAT_ID`
-- или SMTP-набор `WORKER_SMTP_HOST`, `WORKER_SMTP_USERNAME`, `WORKER_SMTP_PASSWORD`, `WORKER_SMTP_TO`
-
-Если канала нет, Worker возвращает `503 Lead destination is not configured`; frontend после этого использует `mailto:` fallback.
-
-## Endpoint
-
-Текущий публичный URL:
-
-```text
-https://b2e-leads.zakaz-749.workers.dev
-```
-
-Этот URL не является секретом. Его можно хранить в GitHub Variable `B2E_LEAD_ENDPOINT`.
-
-## Проверка CORS
+## Проверки
 
 ```powershell
-curl.exe -i -X OPTIONS "https://b2e-leads.zakaz-749.workers.dev" `
-  -H "Origin: https://metallb2e-site.pages.dev" `
-  -H "Access-Control-Request-Method: POST" `
-  -H "Access-Control-Request-Headers: Content-Type"
+npm --prefix worker test
+npm --prefix worker run check
 ```
 
-Ожидаемый статус: `204 No Content`, header `Access-Control-Allow-Origin: https://metallb2e-site.pages.dev`.
+Для штатного deploy используйте `npm run yandex:deploy` из корня репозитория.

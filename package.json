@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node --check scripts/build.mjs && node --check scripts/smoke.mjs && node --check scripts/tz-audit.mjs && node --check src/main.js && npm test && npm run build && npm run audit:tz && npm --prefix worker run check",
+    "check": "node --check scripts/build.mjs && node --check scripts/smoke.mjs && node --check scripts/tz-audit.mjs && node --check src/main.js && npm test && npm run build && npm run audit:tz && npm --prefix worker run check && npm run yandex:package",
     "audit:tz": "node scripts/tz-audit.mjs",
     "smoke": "node scripts/smoke.mjs",
     "smoke:worker-delivery": "node scripts/worker-delivery-smoke.mjs",
@@ -14,10 +14,9 @@
     "start": "node scripts/serve.mjs",
     "serve": "node scripts/serve.mjs",
     "test": "node --test tests/*.test.mjs && npm --prefix worker test",
-    "yandex:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-YandexFunctionPackage.ps1",
-    "yandex:deploy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Deploy-YandexCloud.ps1",
-    "worker:dev": "npm --prefix worker run dev",
-    "worker:deploy": "npm --prefix worker run deploy"
+    "deploy": "npm run yandex:deploy",
+    "yandex:package": "node scripts/run-powershell.mjs scripts/Build-YandexFunctionPackage.ps1",
+    "yandex:deploy": "node scripts/run-powershell.mjs scripts/Deploy-YandexCloud.ps1"
   },
   "engines": {
     "node": ">=20"

@@ -1,18 +1,19 @@
 param(
-  [string]$ProjectName = "b2e-metallokonstrukcii",
-  [string]$SiteBucket = "b2e-metallokonstrukcii-site",
-  [string]$StatsBucket = "b2e-metallokonstrukcii-stats",
-  [string]$FunctionName = "b2e-leads",
-  [string]$GatewayName = "b2e-metallokonstrukcii-gateway",
-  [string]$ServiceAccountName = "b2e-metallokonstrukcii-sa",
-  [string]$SecretName = "b2e-metallokonstrukcii-smtp",
-  [string]$Runtime = "nodejs22",
-  [string]$Memory = "256MB",
-  [string]$Timeout = "15s",
+  [string]$ProjectName = "",
+  [string]$SiteBucket = "",
+  [string]$StatsBucket = "",
+  [string]$FunctionName = "",
+  [string]$GatewayName = "",
+  [string]$ServiceAccountName = "",
+  [string]$SecretName = "",
+  [string]$Runtime = "",
+  [string]$Memory = "",
+  [string]$Timeout = "",
   [string]$AllowedOrigin = "",
   [string]$CustomDomain = "",
   [string]$CertificateId = "",
-  [switch]$SkipSecretUpdate
+  [switch]$SkipSecretUpdate,
+  [switch]$SkipSiteUpload
 )
 
 $ErrorActionPreference = "Stop"
@@ -29,9 +30,11 @@ function Resolve-YcCommand {
     return $command.Source
   }
 
-  $defaultPath = Join-Path $env:USERPROFILE "yandex-cloud\bin\yc.exe"
-  if (Test-Path -LiteralPath $defaultPath) {
-    return $defaultPath
+  if ($env:USERPROFILE) {
+    $defaultPath = Join-Path $env:USERPROFILE "yandex-cloud/bin/yc.exe"
+    if (Test-Path -LiteralPath $defaultPath) {
+      return $defaultPath
+    }
   }
 
   throw "yc is not installed or is not in PATH. Install/configure it outside this repository first."
@@ -41,6 +44,44 @@ function Require-Command($Name) {
   if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
     throw "$Name is not installed or is not in PATH. Install/configure it outside this repository first."
   }
+}
+
+function Resolve-Setting($Value, $EnvName, $Fallback) {
+  if (-not [string]::IsNullOrWhiteSpace($Value)) {
+    return $Value
+  }
+
+  $envValue = [Environment]::GetEnvironmentVariable($EnvName, "Process")
+  if (-not [string]::IsNullOrWhiteSpace($envValue)) {
+    return $envValue
+  }
+
+  return $Fallback
+}
+
+function With-TrailingSlash($Url) {
+  if ($Url.EndsWith("/")) {
+    return $Url
+  }
+
+  return "$Url/"
+}
+
+function Normalize-Origin($Value) {
+  return ([string]$Value).Trim().TrimEnd("/")
+}
+
+function Add-Origin([string[]]$Origins, [string]$Origin) {
+  $normalized = Normalize-Origin $Origin
+  if ([string]::IsNullOrWhiteSpace($normalized)) {
+    return @($Origins)
+  }
+
+  if (@($Origins) -notcontains $normalized) {
+    return @($Origins) + $normalized
+  }
+
+  return @($Origins)
 }
 
 function Invoke-YcJson([string[]]$Arguments, [switch]$AllowFailure) {
@@ -71,14 +112,18 @@ function Invoke-Yc([string[]]$Arguments) {
   $previousErrorActionPreference = $ErrorActionPreference
   $ErrorActionPreference = "Continue"
   try {
-    & $script:YcCommand @Arguments
+    $output = & $script:YcCommand @Arguments 2>&1
     $exitCode = $LASTEXITCODE
   } finally {
     $ErrorActionPreference = $previousErrorActionPreference
   }
 
   if ($exitCode -ne 0) {
-    throw "yc $($Arguments -join ' ') failed with exit code $exitCode"
+    throw "yc $($Arguments -join ' ') failed with exit code $exitCode. $($output | Out-String)"
+  }
+
+  if ($output) {
+    $output | ForEach-Object { Write-Host $_ }
   }
 }
 
@@ -171,6 +216,7 @@ function Secret-PayloadFromEnv {
     "LEAD_WEBHOOK_URL",
     "TELEGRAM_BOT_TOKEN",
     "TELEGRAM_CHAT_ID",
+    "SMARTCAPTCHA_SERVER_KEY",
     "TURNSTILE_SECRET_KEY"
   )
   $entries = @()
@@ -207,12 +253,15 @@ function Ensure-Secret($Name) {
   $payload = Secret-PayloadFromEnv
   $secret = Invoke-YcJson @("lockbox", "secret", "get", "--name", $Name) -AllowFailure
   if ($secret) {
-    $payload | & $script:YcCommand lockbox secret add-version --name $Name --payload -
+    $secretOutput = $payload | & $script:YcCommand lockbox secret add-version --name $Name --payload - 2>&1
   } else {
-    $payload | & $script:YcCommand lockbox secret create --name $Name --payload -
+    $secretOutput = $payload | & $script:YcCommand lockbox secret create --name $Name --payload - 2>&1
   }
   if ($LASTEXITCODE -ne 0) {
-    throw "Lockbox secret upload failed."
+    throw "Lockbox secret upload failed. $($secretOutput | Out-String)"
+  }
+  if ($secretOutput) {
+    $secretOutput | ForEach-Object { Write-Host $_ }
   }
 
   $secret = Invoke-YcJson @("lockbox", "secret", "get", "--name", $Name)
@@ -235,9 +284,7 @@ function Deploy-FunctionVersion($FunctionName, $ZipPath, $ServiceAccountId, $Sec
     "ENABLE_FILE_STATS=on",
     "SITE_STATS_MOUNT=/function/storage/site-stats",
     "ALLOWED_ORIGIN=$Origin",
-    "SITE_ROOT=$SiteRoot",
-    "SITE_LABEL=ООО B2E",
-    "LEAD_SUBJECT=Новая заявка на металлоконструкции"
+    "SITE_ROOT=$SiteRoot"
   ) -join ","
 
   $args = @(
@@ -257,6 +304,87 @@ function Deploy-FunctionVersion($FunctionName, $ZipPath, $ServiceAccountId, $Sec
   Invoke-Yc $args
 }
 
+function Get-StaticContentType($Path) {
+  $extension = [System.IO.Path]::GetExtension($Path).ToLowerInvariant()
+
+  switch ($extension) {
+    ".css" { return "text/css; charset=utf-8" }
+    ".geojson" { return "application/geo+json; charset=utf-8" }
+    ".html" { return "text/html; charset=utf-8" }
+    ".js" { return "application/javascript; charset=utf-8" }
+    ".json" { return "application/json; charset=utf-8" }
+    ".md" { return "text/markdown; charset=utf-8" }
+    ".pdf" { return "application/pdf" }
+    ".png" { return "image/png" }
+    ".jpg" { return "image/jpeg" }
+    ".jpeg" { return "image/jpeg" }
+    ".svg" { return "image/svg+xml" }
+    ".txt" { return "text/plain; charset=utf-8" }
+    ".webmanifest" { return "application/manifest+json; charset=utf-8" }
+    ".webp" { return "image/webp" }
+    ".xml" { return "application/xml; charset=utf-8" }
+    default { return "application/octet-stream" }
+  }
+}
+
+function Upload-SiteDist($DistPath, $Bucket) {
+  if (-not (Test-Path -LiteralPath $DistPath)) {
+    throw "Static site dist path does not exist: $DistPath"
+  }
+
+  $resolvedDistPath = (Resolve-Path -LiteralPath $DistPath).Path.TrimEnd("\", "/")
+  Invoke-Yc @("storage", "s3", "rm", "s3://$Bucket/", "--recursive")
+
+  $files = Get-ChildItem -LiteralPath $DistPath -Recurse -File -Force
+  foreach ($file in $files) {
+    $resolvedFilePath = (Resolve-Path -LiteralPath $file.FullName).Path
+    $relativePath = $resolvedFilePath.Substring($resolvedDistPath.Length).TrimStart("\", "/")
+    $objectKey = $relativePath.Replace("\", "/")
+    $contentType = Get-StaticContentType $file.FullName
+    Invoke-Yc @("storage", "s3", "cp", $file.FullName, "s3://$Bucket/$objectKey", "--content-type", $contentType, "--quiet")
+  }
+}
+
+function Ensure-GatewayDomain($GatewayName, $Domain, $CertificateId) {
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $output = & $script:YcCommand serverless api-gateway add-domain $GatewayName `
+      --domain $Domain `
+      --certificate-id $CertificateId 2>&1
+    $exitCode = $LASTEXITCODE
+  } finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+
+  if ($exitCode -ne 0) {
+    $text = ($output | Out-String)
+    if ($text -match "already|exists|conflict|duplicate") {
+      Write-Warning "Domain $Domain appears to be already attached to API Gateway $GatewayName."
+      return
+    }
+    throw "yc serverless api-gateway add-domain failed with exit code $exitCode. $text"
+  }
+}
+
+$ProjectName = Resolve-Setting $ProjectName "YANDEX_PROJECT_NAME" "b2e-metallokonstrukcii"
+$SiteBucket = Resolve-Setting $SiteBucket "YANDEX_SITE_BUCKET" "metallb2e.ru"
+$StatsBucket = Resolve-Setting $StatsBucket "YANDEX_STATS_BUCKET" "b2e-metallokonstrukcii-stats"
+$FunctionName = Resolve-Setting $FunctionName "YANDEX_FUNCTION_NAME" "b2e-leads"
+$GatewayName = Resolve-Setting $GatewayName "YANDEX_GATEWAY_NAME" "b2e-metallokonstrukcii-gateway"
+$ServiceAccountName = Resolve-Setting $ServiceAccountName "YANDEX_SERVICE_ACCOUNT_NAME" "b2e-metallokonstrukcii-sa"
+$SecretName = Resolve-Setting $SecretName "YANDEX_SECRET_NAME" "b2e-metallokonstrukcii-smtp"
+$Runtime = Resolve-Setting $Runtime "YANDEX_FUNCTION_RUNTIME" "nodejs22"
+$Memory = Resolve-Setting $Memory "YANDEX_FUNCTION_MEMORY" "256MB"
+$Timeout = Resolve-Setting $Timeout "YANDEX_FUNCTION_TIMEOUT" "15s"
+$AllowedOrigin = Resolve-Setting $AllowedOrigin "YANDEX_ALLOWED_ORIGIN" ""
+$CustomDomain = Resolve-Setting $CustomDomain "YANDEX_CUSTOM_DOMAIN" ""
+$CertificateId = Resolve-Setting $CertificateId "YANDEX_CERTIFICATE_ID" ""
+
+if (($CustomDomain -and -not $CertificateId) -or ($CertificateId -and -not $CustomDomain)) {
+  throw "Set both YANDEX_CUSTOM_DOMAIN and YANDEX_CERTIFICATE_ID to attach a custom API Gateway domain."
+}
+
 $script:YcCommand = Resolve-YcCommand
 $script:YandexFolderId = (& $script:YcCommand config get folder-id).Trim()
 if ([string]::IsNullOrWhiteSpace($script:YandexFolderId)) {
@@ -266,8 +394,11 @@ Require-Command "node"
 Require-Command "npm"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$packageZip = Join-Path $repoRoot "dist-yandex\b2e-yandex-function.zip"
-$gatewaySpec = Join-Path $repoRoot "yandex\gateway\openapi.yaml"
+$packageZip = Join-Path $repoRoot "dist-yandex/b2e-yandex-function.zip"
+$gatewaySpec = Join-Path $repoRoot "yandex/gateway/openapi.yaml"
+
+$secretId = Ensure-Secret $SecretName
+Write-Output "Lockbox secret ready: $secretId"
 
 $serviceAccountId = Ensure-ServiceAccount $ServiceAccountName
 Ensure-FolderRole $serviceAccountId "storage.editor"
@@ -277,16 +408,14 @@ Ensure-FolderRole $serviceAccountId "lockbox.payloadViewer"
 Ensure-Bucket $SiteBucket -PublicRead
 Ensure-Bucket $StatsBucket
 
-$websiteSettings = Join-Path $repoRoot "dist-yandex\website-settings.json"
+$websiteSettings = Join-Path $repoRoot "dist-yandex/website-settings.json"
 New-Item -ItemType Directory -Force -Path (Split-Path $websiteSettings -Parent) | Out-Null
-Set-Content -Encoding UTF8 -LiteralPath $websiteSettings -Value '{ "index": "index.html", "error": "index.html" }'
+Set-Content -Encoding ASCII -LiteralPath $websiteSettings -Value '{ "index": "index.html", "error": "index.html" }'
 Invoke-Yc @("storage", "bucket", "update", "--name", $SiteBucket, "--website-settings-from-file", $websiteSettings)
 
 $functionId = Ensure-Function $FunctionName
-$secretId = Ensure-Secret $SecretName
-Write-Output "Lockbox secret ready: $secretId"
 
-& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $repoRoot "scripts\Build-YandexFunctionPackage.ps1")
+& (Join-Path $repoRoot "scripts/Build-YandexFunctionPackage.ps1")
 if ($LASTEXITCODE -ne 0) {
   throw "Function package build failed."
 }
@@ -296,28 +425,54 @@ Deploy-FunctionVersion $FunctionName $packageZip $serviceAccountId $SecretName "
 $gatewayVariables = "site_bucket=$SiteBucket,function_id=$functionId,service_account_id=$serviceAccountId"
 $gateway = Ensure-Gateway $GatewayName $gatewaySpec $gatewayVariables
 $gatewayUrl = Gateway-Url $gateway
-$finalOrigin = if ($AllowedOrigin) { $AllowedOrigin } else { $gatewayUrl }
-if ($CustomDomain) {
-  $finalOrigin = "$finalOrigin,https://$CustomDomain"
+
+if ($CustomDomain -and $CertificateId) {
+  Ensure-GatewayDomain $GatewayName $CustomDomain $CertificateId
 }
 
-Deploy-FunctionVersion $FunctionName $packageZip $serviceAccountId $SecretName $finalOrigin "$gatewayUrl/"
+$sitePublicUrl = if ($CustomDomain) {
+  "https://$CustomDomain"
+} elseif ($SiteBucket.Contains(".")) {
+  "http://$SiteBucket"
+} else {
+  $gatewayUrl
+}
+$usesGatewayOrigin = (Normalize-Origin $sitePublicUrl) -eq (Normalize-Origin $gatewayUrl) -or [bool]$CustomDomain
+$leadEndpoint = if ($usesGatewayOrigin) { "/api/leads" } else { "$gatewayUrl/api/leads" }
+$statsEndpoint = if ($usesGatewayOrigin) { "/api/stats" } else { "$gatewayUrl/api/stats" }
+
+$origins = @()
+if ($AllowedOrigin) {
+  foreach ($origin in $AllowedOrigin.Split(",")) {
+    $origins = Add-Origin -Origins $origins -Origin $origin
+  }
+}
+
+$origins = Add-Origin -Origins $origins -Origin $sitePublicUrl
+$origins = Add-Origin -Origins $origins -Origin $gatewayUrl
+$finalOrigin = $origins -join ";"
+
+if ($env:GITHUB_ENV) {
+  Add-Content -Encoding UTF8 -LiteralPath $env:GITHUB_ENV -Value "YANDEX_GATEWAY_URL=$gatewayUrl"
+  Add-Content -Encoding UTF8 -LiteralPath $env:GITHUB_ENV -Value "B2E_SITE_URL=$(With-TrailingSlash $sitePublicUrl)"
+}
+
+Deploy-FunctionVersion $FunctionName $packageZip $serviceAccountId $SecretName $finalOrigin (With-TrailingSlash $sitePublicUrl)
 
 $previousSiteUrl = $env:B2E_SITE_URL
 $previousLead = $env:B2E_LEAD_ENDPOINT
 $previousStats = $env:B2E_STATS_ENDPOINT
 try {
-  $env:B2E_SITE_URL = "$gatewayUrl/"
-  $env:B2E_LEAD_ENDPOINT = "/api/leads"
-  $env:B2E_STATS_ENDPOINT = "/api/stats"
+  $env:B2E_SITE_URL = With-TrailingSlash $sitePublicUrl
+  $env:B2E_LEAD_ENDPOINT = $leadEndpoint
+  $env:B2E_STATS_ENDPOINT = $statsEndpoint
   Push-Location $repoRoot
   npm run build
   if ($LASTEXITCODE -ne 0) {
     throw "Site build failed."
   }
-  & $script:YcCommand storage s3 cp (Join-Path $repoRoot "dist") "s3://$SiteBucket/" --recursive --acl public-read
-  if ($LASTEXITCODE -ne 0) {
-    throw "Site upload failed."
+  if (-not $SkipSiteUpload) {
+    Upload-SiteDist (Join-Path $repoRoot "dist") $SiteBucket
   }
 } finally {
   Pop-Location
@@ -326,13 +481,14 @@ try {
   $env:B2E_STATS_ENDPOINT = $previousStats
 }
 
-if ($CustomDomain -and $CertificateId) {
-  Invoke-Yc @("serverless", "api-gateway", "add-domain", $GatewayName, "--domain", $CustomDomain, "--certificate-id", $CertificateId)
-}
-
 Write-Output "Yandex Cloud deployment ready:"
-Write-Output "  Gateway: $gatewayUrl"
-Write-Output "  Site bucket: $SiteBucket"
-Write-Output "  Stats bucket: $StatsBucket"
-Write-Output "  Function: $FunctionName ($functionId)"
-Write-Output "  Service account: $ServiceAccountName ($serviceAccountId)"
+Write-Output "  Project: $ProjectName"
+  Write-Output "  Gateway: $gatewayUrl"
+Write-Output "  Public site URL: $(With-TrailingSlash $sitePublicUrl)"
+  Write-Output "  Site bucket: $SiteBucket"
+  Write-Output "  Stats bucket: $StatsBucket"
+  Write-Output "  Function: $FunctionName ($functionId)"
+  Write-Output "  Service account: $ServiceAccountName ($serviceAccountId)"
+if ($CustomDomain) {
+  Write-Output "  Custom domain: https://$CustomDomain/"
+}

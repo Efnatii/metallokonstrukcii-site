@@ -21,7 +21,8 @@ const envKeys = [
   'B2E_RBC_PROFILE_URL',
   'B2E_RUSPROFILE_URL',
   'B2E_CATALOG_URL',
-  'B2E_LEAD_ENDPOINT'
+  'B2E_LEAD_ENDPOINT',
+  'B2E_STATS_ENDPOINT'
 ];
 
 function parseConfigJs(source) {
@@ -46,20 +47,23 @@ test('build writes config, sitemap, robots and llms from environment', async () 
     B2E_RBC_PROFILE_URL: 'https://companies.example/rbc',
     B2E_RUSPROFILE_URL: 'https://companies.example/rusprofile',
     B2E_CATALOG_URL: './assets/documents/test-catalog.pdf',
-    B2E_LEAD_ENDPOINT: 'https://b2e-leads.example.workers.dev'
+    B2E_LEAD_ENDPOINT: 'https://b2e-leads.example.workers.dev',
+    B2E_STATS_ENDPOINT: 'https://b2e-leads.example.workers.dev/stats'
   });
 
   try {
     await build();
 
-    const [indexHtml, configJs, sitemap, robots, llms] = await Promise.all([
+    const [indexHtml, configJs, sitemap, robots, llms, aiContextSource] = await Promise.all([
       readFile(path.join(rootDir, 'dist/index.html'), 'utf8'),
       readFile(path.join(rootDir, 'dist/config.js'), 'utf8'),
       readFile(path.join(rootDir, 'dist/sitemap.xml'), 'utf8'),
       readFile(path.join(rootDir, 'dist/robots.txt'), 'utf8'),
-      readFile(path.join(rootDir, 'dist/llms.txt'), 'utf8')
+      readFile(path.join(rootDir, 'dist/llms.txt'), 'utf8'),
+      readFile(path.join(rootDir, 'dist/ai-context.json'), 'utf8')
     ]);
     const config = parseConfigJs(configJs);
+    const aiContext = JSON.parse(aiContextSource);
 
     assert.equal(config.siteUrl, 'https://example.test/metallokonstrukcii-site/');
     assert.equal(config.phoneHref, 'tel:+79990000000');
@@ -70,24 +74,39 @@ test('build writes config, sitemap, robots and llms from environment', async () 
     assert.equal(config.rusprofileUrl, 'https://companies.example/rusprofile');
     assert.equal(config.catalogUrl, './assets/documents/test-catalog.pdf');
     assert.equal(config.leadEndpoint, 'https://b2e-leads.example.workers.dev');
+    assert.equal(config.statsEndpoint, 'https://b2e-leads.example.workers.dev/stats');
     assert.match(indexHtml, /<link rel="canonical" href="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
+    assert.match(indexHtml, /<link rel="alternate" hreflang="ru-RU" href="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
+    assert.match(indexHtml, /<link rel="alternate" type="application\/json" href="\.\/ai-context\.json" title="AI Context">/);
     assert.match(indexHtml, /<meta property="og:url" content="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
     assert.match(indexHtml, /<meta property="og:image" content="https:\/\/example\.test\/metallokonstrukcii-site\/assets\/generated\/b2e-dashboard-hero\.webp">/);
+    assert.match(indexHtml, /<meta property="og:image:secure_url" content="https:\/\/example\.test\/metallokonstrukcii-site\/assets\/generated\/b2e-dashboard-hero\.webp">/);
+    assert.match(indexHtml, /<meta name="twitter:image" content="https:\/\/example\.test\/metallokonstrukcii-site\/assets\/generated\/b2e-dashboard-hero\.webp">/);
+    assert.match(indexHtml, /<meta name="twitter:url" content="https:\/\/example\.test\/metallokonstrukcii-site\/">/);
     assert.match(indexHtml, /<link rel="alternate" type="text\/plain" href="\.\/llms\.txt" title="LLMs\.txt">/);
     assert.match(indexHtml, /<script type="application\/ld\+json">/);
+    assert.match(indexHtml, /FAQPage/);
     assert.match(sitemap, /https:\/\/example\.test\/metallokonstrukcii-site\//);
     assert.match(sitemap, /xmlns:image="http:\/\/www\.google\.com\/schemas\/sitemap-image\/1\.1"/);
     assert.match(sitemap, /assets\/generated\/product-frame\.webp/);
     assert.match(robots, /User-agent: OAI-SearchBot/);
+    assert.match(robots, /User-agent: Applebot-Extended/);
+    assert.match(robots, /Allow: \/metallokonstrukcii-site\/ai-context\.json/);
     assert.match(robots, /Allow: \/metallokonstrukcii-site\/llms\.txt/);
     assert.match(robots, /Sitemap: https:\/\/example\.test\/metallokonstrukcii-site\/sitemap\.xml/);
+    assert.match(llms, /AI context JSON/);
     assert.match(llms, /lead@example\.test/);
     assert.match(llms, /companies\.example\/rbc/);
     assert.match(llms, /companies\.example\/rusprofile/);
     assert.match(llms, /\+7 \(999\) 000-00-00/);
     assert.match(llms, /Строительные металлоконструкции/);
+    assert.match(llms, /Частые вопросы/);
     assert.match(llms, /Петрозаводск/);
     assert.match(llms, /Дата генерации/);
+    assert.equal(aiContext.canonicalUrl, 'https://example.test/metallokonstrukcii-site/');
+    assert.equal(aiContext.entity.inn, '7811801565');
+    assert.ok(aiContext.products.some((item) => item.name === 'Строительные металлоконструкции'));
+    assert.ok(aiContext.faq.some((item) => item.question.includes('КМ или КМД')));
   } finally {
     for (const [key, value] of Object.entries(previousEnv)) {
       if (value === undefined) {

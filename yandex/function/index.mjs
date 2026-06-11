@@ -57,11 +57,18 @@ function requestBody(event) {
 }
 
 function makeRequest(event) {
-  return new Request(requestUrl(event), {
-    method: event.httpMethod || event.method || 'GET',
-    headers: toHeaders(event.headers),
-    body: requestBody(event)
-  });
+  const method = event.httpMethod || event.method || 'GET';
+  const init = {
+    method,
+    headers: toHeaders(event.headers)
+  };
+  const body = requestBody(event);
+
+  if (!['GET', 'HEAD'].includes(method.toUpperCase()) && body !== undefined) {
+    init.body = body;
+  }
+
+  return new Request(requestUrl(event), init);
 }
 
 function normalizeHeaderMap(headers) {

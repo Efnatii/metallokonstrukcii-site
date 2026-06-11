@@ -3,28 +3,40 @@ import test from 'node:test';
 
 import worker, { SiteVisitCounter } from '../src/index.js';
 
-const primaryOrigin = 'https://metallb2e-site.pages.dev';
+const primaryOrigin = 'https://example.gateway.test';
 const rejectedOrigin = 'https://preview.example.invalid';
 const baseEnv = {
   ALLOWED_ORIGIN: primaryOrigin,
+  SITE_ROOT: `${primaryOrigin}/`,
   SITE_LABEL: 'ООО B2E',
   LEAD_SUBJECT: 'Новая заявка на металлоконструкции'
 };
 
-function makeRequest({ method = 'POST', origin = primaryOrigin, path = '/', body } = {}) {
+function makeRequest({
+  method = 'POST',
+  origin = primaryOrigin,
+  urlOrigin = 'https://b2e-leads.test',
+  path = '/',
+  body
+} = {}) {
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (origin !== null) {
+    headers.Origin = origin;
+  }
+
   const init = {
     method,
-    headers: {
-      Origin: origin,
-      'Content-Type': 'application/json'
-    }
+    headers
   };
 
   if (body !== undefined) {
     init.body = typeof body === 'string' ? body : JSON.stringify(body);
   }
 
-  return new Request(`https://b2e-leads.test${path}`, init);
+  return new Request(`${urlOrigin}${path}`, init);
 }
 
 function makeStatsStorage(initial = {}) {
@@ -131,6 +143,20 @@ test('OPTIONS request returns CORS preflight headers', async () => {
   assert.match(response.headers.get('Access-Control-Allow-Methods'), /GET/);
 });
 
+test('OPTIONS request supports semicolon-separated CORS origins', async () => {
+  const secondaryOrigin = 'http://metallb2e.ru';
+  const response = await worker.fetch(
+    makeRequest({ method: 'OPTIONS', origin: secondaryOrigin }),
+    {
+      ...baseEnv,
+      ALLOWED_ORIGIN: `${primaryOrigin};${secondaryOrigin}`
+    }
+  );
+
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get('Access-Control-Allow-Origin'), secondaryOrigin);
+});
+
 test('non-canonical origin is rejected', async () => {
   const response = await worker.fetch(
     makeRequest({ method: 'OPTIONS', origin: rejectedOrigin }),
@@ -147,6 +173,47 @@ test('GET stats returns explicit 503 when stats storage is not configured', asyn
 
   assert.equal(response.status, 503);
   assert.equal(payload.error, 'Site stats storage is not configured');
+});
+
+test('same-origin stats request without Origin header is accepted', async () => {
+  const env = {
+    ...baseEnv,
+    SITE_VISIT_COUNTER: makeDurableObjectNamespace(SiteVisitCounter)
+  };
+  const response = await worker.fetch(
+    makeRequest({
+      method: 'GET',
+      origin: null,
+      path: '/stats',
+      urlOrigin: primaryOrigin
+    }),
+    env
+  );
+  const payload = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(payload.stats, {
+    today: 0,
+    week: 0,
+    month: 0,
+    allTime: 0
+  });
+});
+
+test('request without Origin from non-canonical host is rejected', async () => {
+  const response = await worker.fetch(
+    makeRequest({
+      method: 'GET',
+      origin: null,
+      path: '/stats',
+      urlOrigin: 'https://preview.example.invalid'
+    }),
+    baseEnv
+  );
+  const payload = await response.json();
+
+  assert.equal(response.status, 403);
+  assert.equal(payload.error, 'Forbidden origin');
 });
 
 test('stats visit endpoint records counters in Durable Object storage', async () => {
@@ -348,7 +415,7 @@ test('SMTP keeps no-reply From while using authenticated envelope sender', async
   assert.match(dataCommand, /^Content-Transfer-Encoding: base64$/m);
   assert.match(dataCommand, /^Content-Type: text\/html; charset=UTF-8$/m);
   assert.match(htmlPart, /<h1[^>]*>Новая заявка на металлоконструкции: Metal frame<\/h1>/);
-  assert.match(htmlPart, /<img src="https:\/\/metallb2e-site\.pages\.dev\/assets\/logo\/logo-b2e\.png"/);
+  assert.match(htmlPart, /<img src="https:\/\/example\.gateway\.test\/assets\/logo\/logo-b2e\.png"/);
   assert.match(textPart, /Текст заявки: Metal frame/);
   assert.match(htmlPart, />Текст заявки<\/td>/);
   assert.match(textPart, /Сайт: B2E Металлоконструкции/);
@@ -431,6 +498,57 @@ test('Turnstile secret requires a token before delivery', async () => {
 
   assert.equal(response.status, 400);
   assert.equal(payload.error, 'Captcha validation failed');
+});
+
+test('SmartCaptcha server key requires a token before delivery', async () => {
+  const response = await worker.fetch(makeRequest({ body: validLead() }), {
+    ...baseEnv,
+    SMARTCAPTCHA_SERVER_KEY: 'secret',
+    LEAD_WEBHOOK_URL: 'https://crm.example/hook'
+  });
+  const payload = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(payload.error, 'Captcha validation failed');
+});
+
+test('SmartCaptcha success allows webhook delivery', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+
+  globalThis.fetch = async (url, init) => {
+    calls.push({ url: String(url), body: String(init.body) });
+
+    if (String(url).includes('smartcaptcha.cloud.yandex.ru/validate')) {
+      assert.equal(init.method, 'POST');
+      assert.match(String(init.body), /secret=secret/);
+      assert.match(String(init.body), /token=token/);
+      return new Response(JSON.stringify({ status: 'ok', message: '', host: 'example.gateway.test' }), { status: 200 });
+    }
+
+    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  };
+
+  try {
+    const response = await worker.fetch(
+      makeRequest({ body: validLead({ smartToken: 'token' }) }),
+      {
+        ...baseEnv,
+        SMARTCAPTCHA_SERVER_KEY: 'secret',
+        LEAD_WEBHOOK_URL: 'https://crm.example/hook'
+      }
+    );
+    const payload = await response.json();
+
+    assert.equal(response.status, 200);
+    assert.equal(payload.ok, true);
+    assert.deepEqual(calls.map((call) => call.url), [
+      'https://smartcaptcha.cloud.yandex.ru/validate',
+      'https://crm.example/hook'
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('Turnstile success allows webhook delivery', async () => {

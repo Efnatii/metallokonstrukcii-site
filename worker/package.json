@@ -4,21 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/index.js && npm test && npm run deploy -- --dry-run",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "test": "node --test test/*.test.mjs",
-    "secret:webhook": "wrangler secret put LEAD_WEBHOOK_URL",
-    "secret:telegram-token": "wrangler secret put TELEGRAM_BOT_TOKEN",
-    "secret:telegram-chat": "wrangler secret put TELEGRAM_CHAT_ID",
-    "secret:smtp-host": "wrangler secret put SMTP_HOST",
-    "secret:smtp-username": "wrangler secret put SMTP_USERNAME",
-    "secret:smtp-password": "wrangler secret put SMTP_PASSWORD",
-    "secret:smtp-envelope-from": "wrangler secret put SMTP_ENVELOPE_FROM",
-    "secret:smtp-to": "wrangler secret put SMTP_TO",
-    "secret:turnstile": "wrangler secret put TURNSTILE_SECRET_KEY"
-  },
-  "devDependencies": {
-    "wrangler": "^4.85.0"
+    "check": "node --check src/index.js && npm test",
+    "test": "node --test test/*.test.mjs"
   }
 }

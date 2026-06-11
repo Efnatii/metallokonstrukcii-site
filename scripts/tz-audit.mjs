@@ -2,19 +2,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const read = (filePath) => fs.readFileSync(filePath, 'utf8');
+const readOptional = (filePath) => fs.existsSync(filePath) ? read(filePath) : '';
 
 const html = read('src/index.html');
 const styles = read('src/styles.css');
 const main = read('src/main.js');
 const configJs = read('src/config.js');
 const envExample = read('.env.example');
-const pagesWorkflow = read('.github/workflows/pages.yml');
-const workerWorkflow = read('.github/workflows/worker.yml');
-const rootWrangler = read('wrangler.jsonc');
+const deployWorkflow = read('.github/workflows/pages.yml');
+const workerWorkflow = readOptional('.github/workflows/worker.yml');
+const rootWrangler = readOptional('wrangler.jsonc');
+const workerWrangler = readOptional('worker/wrangler.jsonc');
+const yandexGateway = read('yandex/gateway/openapi.yaml');
+const yandexFunction = read('yandex/function/index.mjs');
+const yandexDeploy = read('scripts/Deploy-YandexCloud.ps1');
+const rootPackage = read('package.json');
+const workerPackage = read('worker/package.json');
 const distHtml = read('dist/index.html');
-const canonicalSiteOrigin = 'https://metallb2e-site.pages.dev';
-const canonicalSiteHost = new URL(canonicalSiteOrigin).hostname;
-const wrongWranglerPagesOrigin = ['https://metallb2e-site', '2v8.pages.dev'].join('-');
 
 const products = [
   'Строительные металлоконструкции',
@@ -59,28 +63,33 @@ const publicVars = [
   'B2E_CATALOG_URL',
   'B2E_LEAD_ENDPOINT',
   'B2E_STATS_ENDPOINT',
-  'CLOUDFLARE_ACCOUNT_ID',
-  'CLOUDFLARE_PAGES_PROJECT',
-  'WORKER_ALLOWED_ORIGIN',
-  'WORKER_SITE_LABEL',
-  'WORKER_LEAD_SUBJECT'
+  'YANDEX_SITE_BUCKET',
+  'YANDEX_STATS_BUCKET',
+  'YANDEX_FUNCTION_NAME',
+  'YANDEX_GATEWAY_NAME',
+  'YANDEX_SERVICE_ACCOUNT_NAME',
+  'YANDEX_SECRET_NAME',
+  'YANDEX_CUSTOM_DOMAIN',
+  'YANDEX_CERTIFICATE_ID'
 ];
 
 const privateSecrets = [
-  'CLOUDFLARE_API_TOKEN',
-  'WORKER_LEAD_WEBHOOK_URL',
-  'WORKER_TELEGRAM_BOT_TOKEN',
-  'WORKER_TELEGRAM_CHAT_ID',
-  'WORKER_SMTP_HOST',
-  'WORKER_SMTP_PORT',
-  'WORKER_SMTP_SECURE',
-  'WORKER_SMTP_USERNAME',
-  'WORKER_SMTP_PASSWORD',
-  'WORKER_SMTP_FROM',
-  'WORKER_SMTP_FROM_NAME',
-  'WORKER_SMTP_ENVELOPE_FROM',
-  'WORKER_SMTP_TO',
-  'WORKER_TURNSTILE_SECRET_KEY'
+  'YC_SERVICE_ACCOUNT_KEY_JSON',
+  'YC_CLOUD_ID',
+  'YC_FOLDER_ID',
+  'SMTP_HOST',
+  'SMTP_PORT',
+  'SMTP_SECURE',
+  'SMTP_USERNAME',
+  'SMTP_PASSWORD',
+  'SMTP_FROM',
+  'SMTP_FROM_NAME',
+  'SMTP_ENVELOPE_FROM',
+  'SMTP_TO',
+  'LEAD_WEBHOOK_URL',
+  'TELEGRAM_BOT_TOKEN',
+  'TELEGRAM_CHAT_ID',
+  'SMARTCAPTCHA_SERVER_KEY'
 ];
 
 function extractBetween(source, start, end) {
@@ -220,9 +229,11 @@ const checks = [
   check(
     'AI/SEO доступность: JSON-LD, robots, sitemap, llms',
     distHtml.includes('application/ld+json') &&
-      ['dist/robots.txt', 'dist/sitemap.xml', 'dist/llms.txt', 'dist/config.js', 'dist/.nojekyll'].every((file) => fs.existsSync(file)) &&
-      read('dist/llms.txt').includes('ООО B2E'),
-    'dist robots/sitemap/llms/config + JSON-LD'
+      ['dist/robots.txt', 'dist/sitemap.xml', 'dist/llms.txt', 'dist/ai-context.json', 'dist/config.js', 'dist/.nojekyll'].every((file) => fs.existsSync(file)) &&
+      read('dist/llms.txt').includes('ООО B2E') &&
+      read('dist/ai-context.json').includes('"canonicalUrl"') &&
+      distHtml.includes('FAQPage'),
+    'dist robots/sitemap/llms/ai-context/config + JSON-LD graph'
   ),
   check(
     'Каталог помечен неактивным, пока нет финального каталога',
@@ -245,30 +256,42 @@ const checks = [
   check(
     'Публичные env переменные рассортированы',
     publicVars.every((value) => envExample.includes(value)) &&
-      pagesWorkflow.includes('vars.B2E_LEAD_ENDPOINT') &&
-      pagesWorkflow.includes('vars.B2E_STATS_ENDPOINT') &&
-      !pagesWorkflow.includes('secrets.B2E_LEAD_ENDPOINT') &&
-      !pagesWorkflow.includes('secrets.B2E_STATS_ENDPOINT'),
-    'GitHub Variables used by Pages build'
+      envExample.includes('B2E_LEAD_ENDPOINT=/api/leads') &&
+      envExample.includes('B2E_STATS_ENDPOINT=/api/stats') &&
+      deployWorkflow.includes('vars.YANDEX_CUSTOM_DOMAIN') &&
+      !deployWorkflow.includes('secrets.B2E_LEAD_ENDPOINT') &&
+      !deployWorkflow.includes('secrets.B2E_STATS_ENDPOINT'),
+    'Yandex public vars + relative API endpoints'
   ),
   check(
-    'Приватные secrets рассортированы и синхронизируются в Worker',
+    'Приватные secrets рассортированы и монтируются в Yandex Function',
     privateSecrets.every((value) => envExample.includes(value)) &&
-      privateSecrets.every((value) => workerWorkflow.includes(`secrets.${value}`)) &&
-      workerWorkflow.includes('wrangler secret bulk') &&
+      ['YC_SERVICE_ACCOUNT_KEY_JSON', 'YC_CLOUD_ID', 'YC_FOLDER_ID'].every((value) => deployWorkflow.includes(`secrets.${value}`)) &&
+      yandexDeploy.includes('lockbox') &&
+      yandexDeploy.includes('--secret') &&
+      yandexDeploy.includes('Function-SecretArgs') &&
       read('worker/src/index.js').includes('sendSmtp'),
-    'GitHub Secrets -> Worker secrets + SMTP'
+    'GitHub Secrets -> yc profile; Lockbox -> Function env + SMTP'
   ),
   check(
-    'Cloudflare git-deploy из корня публикует Worker',
-    rootWrangler.includes('"name": "b2e-leads"') &&
-      rootWrangler.includes('"main": "worker/src/index.js"') &&
-      rootWrangler.includes('"workers_dev": true') &&
-      rootWrangler.includes(canonicalSiteOrigin) &&
-      !rootWrangler.includes(`https://*.${canonicalSiteHost}`) &&
-      !rootWrangler.includes(wrongWranglerPagesOrigin) &&
-      !rootWrangler.includes('"routes"'),
-    'root wrangler.jsonc -> worker/src/index.js'
+    'Yandex API Gateway публикует сайт и backend',
+    yandexGateway.includes('type: object_storage') &&
+      yandexGateway.includes('type: cloud_functions') &&
+      yandexGateway.includes('/api/{proxy+}') &&
+      yandexFunction.includes('SOCKET_CONNECT') &&
+      yandexFunction.includes('SITE_STATS_KV'),
+    'API Gateway object_storage + cloud_functions; Function adapter'
+  ),
+  check(
+    'Cloudflare deploy отключен из активного main-пути',
+    !rootWrangler &&
+      !workerWrangler &&
+      !workerWorkflow &&
+      !deployWorkflow.includes('wrangler') &&
+      !deployWorkflow.includes('Cloudflare') &&
+      !rootPackage.includes('worker:deploy') &&
+      !workerPackage.includes('"deploy": "wrangler deploy"'),
+    'no wrangler configs/workflows/default deploy'
   ),
   check('Все локальные asset refs существуют', missingRefs.length === 0, missingRefs.join(', ') || 'all local refs exist'),
   check('Нет SVG UI-иконок в HTML', !/\.svg(?:"|\s)/.test(html), 'PNG/WebP/JPG references only'),
