@@ -100,7 +100,7 @@ PDF-файлы в `documents/projects/` взяты из файлов, перед
 | Файл | Источник |
 | --- | --- |
 | `documents/projects/warehouse-autobusnaya-gpr-kmd.pdf`, `documents/projects/warehouse-autobusnaya-gpr-kmd.png` | Пользовательский файл `Downloads/Telegram Desktop/01-02-2025-1-ГПР-КМД .pdf`. |
-| `documents/projects/termeks-test-chamber-km.pdf`, `documents/projects/termeks-test-chamber-km.png` | Пользовательский файл `Downloads/Telegram Desktop/КМ ТЕРМЕКС КАМЕРА ИСПЫТАНИЙ (2).pdf`. |
+| `documents/projects/test-chamber-km.pdf`, `documents/projects/test-chamber-km.png` | Пользовательский файл с комплектом КМ испытательной камеры. |
 | `documents/projects/km-17-01-2025.pdf`, `documents/projects/km-17-01-2025.png` | Пользовательский файл `Downloads/Telegram Desktop/17_01-2025-КМ от 31-03-25.pdf`. |
 | `documents/projects/azs-kmd.pdf`, `documents/projects/azs-kmd.png` | Пользовательский файл `Downloads/Telegram Desktop/КМД АЗС.pdf`. |
 | `documents/projects/novosibirsk-carwash-2-posts-kmd.pdf`, `documents/projects/novosibirsk-carwash-2-posts-kmd.png` | Пользовательский файл `Downloads/Telegram Desktop/КМД гНовосибирск. Мойка 2 поста..pdf`. |

@@ -474,6 +474,30 @@
     setVisitStatsUnavailable();
   }
 
+  function setupFaqAccordion() {
+    const root = $('#faq');
+
+    if (!root) {
+      return;
+    }
+
+    const items = $$('details.faq-item', root);
+
+    items.forEach((item) => {
+      item.addEventListener('toggle', () => {
+        if (!item.open) {
+          return;
+        }
+
+        items.forEach((otherItem) => {
+          if (otherItem !== item) {
+            otherItem.open = false;
+          }
+        });
+      });
+    });
+  }
+
   function setupModal() {
     const modal = $('#leadModal');
     const form = $('#leadForm');
@@ -540,11 +564,19 @@
       }
     };
 
-    const openModal = (objectType) => {
+    const openModal = (options = {}) => {
+      const modalOptions = typeof options === 'string' ? { objectType: options } : options;
+      const objectType = String(modalOptions.objectType || '').trim();
+      const message = String(modalOptions.message || '').trim();
+
       restoreForm();
 
-      if (objectType) {
+      if (objectType && form.elements.objectType) {
         form.elements.objectType.value = objectType;
+      }
+
+      if (message && form.elements.message) {
+        form.elements.message.value = message;
       }
 
       if (typeof modal.showModal === 'function') {
@@ -567,6 +599,20 @@
       button.addEventListener('click', () => {
         const typeFromButton = button.dataset.objectType;
         openModal(typeFromButton);
+      });
+    });
+
+    $$('[data-product-lead-trigger]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const productName = $('h3', card)?.textContent.trim();
+        if (!productName) {
+          return;
+        }
+
+        openModal({
+          objectType: productName,
+          message: productName
+        });
       });
     });
 
@@ -691,7 +737,7 @@
 
   function setupLocationMap() {
     const mapNode = $('[data-locations-map]');
-    const externalLink = $('[data-location-map-link]');
+    const externalLinks = $$('[data-location-map-link]');
     const fallbackLink = $('[data-map-fallback-link]');
     const status = $('[data-map-status]');
     const wrap = mapNode?.closest('.map-wrap');
@@ -793,8 +839,8 @@
     };
 
     const setLinks = (location) => {
-      if (externalLink && location.url) {
-        externalLink.setAttribute('href', location.url);
+      if (location.url) {
+        externalLinks.forEach((link) => link.setAttribute('href', location.url));
       }
 
       if (fallbackLink && location.url) {
@@ -1420,6 +1466,7 @@
   setupDesktopStage();
   setupNavigation();
   setupHeaderReveal();
+  setupFaqAccordion();
   setupModal();
   setupFloatingActions();
   setupReveal();

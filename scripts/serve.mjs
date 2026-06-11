@@ -21,6 +21,19 @@ const contentTypes = {
   '.xml': 'application/xml; charset=utf-8'
 };
 
+let localVisitCount = 0;
+
+function sendJson(response, statusCode, body) {
+  response.writeHead(statusCode, {
+    'Content-Type': 'application/json; charset=utf-8',
+    'Cache-Control': 'no-store',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+  });
+  response.end(JSON.stringify(body));
+}
+
 function resolveFilePath(requestUrl) {
   const url = new URL(requestUrl, 'http://127.0.0.1');
   const decodedPath = decodeURIComponent(url.pathname);
@@ -58,6 +71,41 @@ async function sendFile(response, filePath) {
 
 function listen(port) {
   const server = createServer(async (request, response) => {
+    const url = new URL(request.url ?? '/', 'http://127.0.0.1');
+    const pathname = url.pathname.replace(/\/$/, '') || '/';
+
+    if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+      sendJson(response, 204, {});
+      return;
+    }
+
+    if (pathname === '/api/stats' && request.method === 'GET') {
+      sendJson(response, 200, {
+        ok: true,
+        stats: {
+          today: localVisitCount,
+          week: localVisitCount,
+          month: localVisitCount,
+          allTime: localVisitCount
+        }
+      });
+      return;
+    }
+
+    if (pathname === '/api/stats/visit' && request.method === 'POST') {
+      localVisitCount += 1;
+      sendJson(response, 200, {
+        ok: true,
+        stats: {
+          today: localVisitCount,
+          week: localVisitCount,
+          month: localVisitCount,
+          allTime: localVisitCount
+        }
+      });
+      return;
+    }
+
     const filePath = resolveFilePath(request.url ?? '/');
 
     if (!filePath) {

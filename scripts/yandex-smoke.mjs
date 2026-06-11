@@ -1,13 +1,15 @@
 import process from 'node:process';
 
-const gatewayUrl = process.env.YANDEX_GATEWAY_URL || process.env.B2E_SITE_URL || '';
+const gatewayUrl = process.env.YANDEX_GATEWAY_URL || '';
+const siteUrl = process.env.B2E_SITE_URL || gatewayUrl;
+const targetUrl = gatewayUrl || siteUrl;
 
-if (!gatewayUrl) {
+if (!targetUrl) {
   throw new Error('Set YANDEX_GATEWAY_URL or B2E_SITE_URL to the deployed Yandex API Gateway URL.');
 }
 
-const baseUrl = gatewayUrl.replace(/\/$/, '');
-const origin = new URL(baseUrl).origin;
+const baseUrl = targetUrl.replace(/\/$/, '');
+const origin = new URL(siteUrl || baseUrl).origin;
 const leadEndpoint = `${baseUrl}/api/leads`;
 const statsEndpoint = `${baseUrl}/api/stats`;
 
@@ -55,6 +57,7 @@ async function main() {
   const result = {
     ok: response.ok,
     gateway: baseUrl,
+    origin,
     leadEndpoint,
     statsEndpoint,
     statsStatus: stats.status,

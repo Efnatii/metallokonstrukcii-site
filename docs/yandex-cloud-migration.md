@@ -131,7 +131,7 @@ The script:
 6. Creates or updates the Cloud Function.
 7. Creates or updates API Gateway with `yandex/gateway/openapi.yaml`.
 8. Optionally attaches `YANDEX_CUSTOM_DOMAIN` to API Gateway.
-9. Rebuilds the static site with `B2E_SITE_URL` equal to the Gateway URL or custom domain.
+9. Rebuilds the static site with `B2E_SITE_URL` equal to the public HTTPS site URL.
 10. Uploads `dist/` to Object Storage.
 
 ## GitHub Actions
@@ -167,6 +167,10 @@ Expected result:
 - `/api/stats` returns `200`;
 - CORS preflight for `/api/leads` returns `204`;
 - `/api/leads` returns `200` when at least one delivery channel is configured.
+
+When `B2E_SITE_URL` and `YANDEX_GATEWAY_URL` are both set, the smoke test calls
+the Gateway endpoint with the public site origin. This catches `http`/`https`
+CORS mismatches before the form and visitor counter reach production.
 
 ## DNS notes for domain activation
 

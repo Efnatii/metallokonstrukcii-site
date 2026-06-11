@@ -433,7 +433,7 @@ if ($CustomDomain -and $CertificateId) {
 $sitePublicUrl = if ($CustomDomain) {
   "https://$CustomDomain"
 } elseif ($SiteBucket.Contains(".")) {
-  "http://$SiteBucket"
+  "https://$SiteBucket"
 } else {
   $gatewayUrl
 }
@@ -443,12 +443,15 @@ $statsEndpoint = if ($usesGatewayOrigin) { "/api/stats" } else { "$gatewayUrl/ap
 
 $origins = @()
 if ($AllowedOrigin) {
-  foreach ($origin in $AllowedOrigin.Split(",")) {
+  foreach ($origin in ($AllowedOrigin -split "[;,]")) {
     $origins = Add-Origin -Origins $origins -Origin $origin
   }
 }
 
 $origins = Add-Origin -Origins $origins -Origin $sitePublicUrl
+if (-not $CustomDomain -and $SiteBucket.Contains(".")) {
+  $origins = Add-Origin -Origins $origins -Origin "http://$SiteBucket"
+}
 $origins = Add-Origin -Origins $origins -Origin $gatewayUrl
 $finalOrigin = $origins -join ";"
 
