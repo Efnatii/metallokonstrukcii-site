@@ -187,19 +187,29 @@ const checks = [
     'RBC + Rusprofile in config only'
   ),
   check(
-    'Карта интерактивная: 4 точки и сложная зона покрытия',
+    'Карта интерактивная: офис точкой, площадки областями и сложная зона покрытия',
     (html.match(/data-map-key=/g) || []).length === 5 &&
+      (html.match(/data-map-area="true"/g) || []).length === 4 &&
       html.includes('leaflet') &&
       hasAll(html, ['office', 'petrozavodsk', 'nikolskoe', 'rybatskoe', 'coverage']) &&
       main.includes('fitBounds') &&
+      main.includes('L.rectangle') &&
       main.includes('L.geoJSON') &&
-      html.includes('data-map-geojson="./assets/data/coverage-szfo-cfo.geojson"'),
-    `${(html.match(/data-map-key=/g) || []).length} map controls + Leaflet GeoJSON coverage`
+      html.includes('data-map-geojson="./assets/data/coverage-szfo-cfo.geojson"') &&
+      !html.includes('data-map-key="petrozavodsk" data-map-lat') &&
+      !html.includes('mode=whatshere&whatshere%5Bpoint%5D=34.3688041') &&
+      !html.includes('mode=whatshere&whatshere%5Bpoint%5D=30.7861084') &&
+      !html.includes('mode=whatshere&whatshere%5Bpoint%5D=30.5002908'),
+    `${(html.match(/data-map-key=/g) || []).length} map controls + 4 area controls + Leaflet rectangles/GeoJSON`
   ),
   check(
-    'Карта показывает точный адрес Никольского и зону покрытия',
-    hasAll(html, ['г. Никольское, Театральная ул., 6', 'data-map-coverage="true"', 'Санкт-Петербург, Ленинградская область, СЗФО и ЦФО']),
-    'exact Nikolskoe address + clickable coverage'
+    'Площадки показываются областями без точечных Яндекс whatshere-ссылок',
+    hasAll(html, ['г. Никольское, Театральная ул., 6', 'data-map-area="true"', 'data-map-coverage="true"', 'Санкт-Петербург, Ленинградская область, СЗФО и ЦФО']) &&
+      hasAll(main, ['location.area', 'Область:', 'activeMapMode']) &&
+      !html.includes('whatshere%5Bpoint%5D=34.3688041') &&
+      !html.includes('whatshere%5Bpoint%5D=30.7861084') &&
+      !html.includes('whatshere%5Bpoint%5D=30.5002908'),
+    'production locations are area controls'
   ),
   check('Площадки из ТЗ указаны', hasAll(html, ['Петрозаводск', 'Никольское', 'Рыбацкое']), '3 production locations'),
   check(

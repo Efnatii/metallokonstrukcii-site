@@ -1181,6 +1181,8 @@
 
       const polygons = readPolygons(button.dataset.mapPolygons);
       const routeLabel = button.dataset.mapRouteLabel || button.querySelector('strong')?.textContent.trim();
+      const bounds = readBounds(button.dataset.mapBounds) || boundsFromPolygons(polygons);
+      const area = button.dataset.mapArea === 'true' || button.dataset.mapCoverage === 'true';
 
       return {
         key: button.dataset.mapKey || button.dataset.mapName || `${lat},${lng}`,
@@ -1191,11 +1193,12 @@
         routeLabel: routeLabel || button.dataset.mapName || button.textContent.trim(),
         kind: button.dataset.mapKind || 'Площадка',
         url: button.dataset.mapUrl || config.yandexMapUrl,
-        routeUrl: button.dataset.mapRouteUrl || createRouteUrl(lat, lng),
+        routeUrl: button.dataset.mapRouteUrl || (area ? button.dataset.mapUrl : createRouteUrl(lat, lng)),
+        area,
         coverage: button.dataset.mapCoverage === 'true',
         geojsonUrl: readGeoJsonUrl(button.dataset.mapGeojson),
         polygons,
-        bounds: readBounds(button.dataset.mapBounds) || boundsFromPolygons(polygons)
+        bounds
       };
     };
 
@@ -1206,8 +1209,13 @@
       if (routeHref) {
         externalLinks.forEach((link) => {
           link.setAttribute('href', routeHref);
-          link.setAttribute('aria-label', `Построить маршрут: ${routeLabel}`);
-          link.textContent = location.coverage ? 'Маршрут в зону покрытия' : `Маршрут: ${routeLabel}`;
+          if (location.area) {
+            link.setAttribute('aria-label', `Открыть область в Яндекс Картах: ${routeLabel}`);
+            link.textContent = `Область: ${routeLabel}`;
+          } else {
+            link.setAttribute('aria-label', `Построить маршрут: ${routeLabel}`);
+            link.textContent = `Маршрут: ${routeLabel}`;
+          }
         });
       }
 
@@ -1260,6 +1268,8 @@
 
     let map = null;
     const markers = new Map();
+    const areaLayers = new Map();
+    let activeAreaLayer = null;
     let coverageLayer = null;
     let coverageItem = null;
     let coverageLoadPromise = null;
@@ -1287,8 +1297,16 @@
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(map);
 
+      const areaStyle = {
+        color: '#ffc400',
+        weight: 2,
+        opacity: .9,
+        fillColor: '#ffc400',
+        fillOpacity: .12
+      };
+
       locations.forEach(({ button, location }) => {
-        if (location.coverage) {
+        if (location.area) {
           return;
         }
 
@@ -1305,18 +1323,25 @@
         markers.set(location.key, marker);
       });
 
+      locations.forEach(({ button, location }) => {
+        if (!location.area || location.coverage || !location.bounds) {
+          return;
+        }
+
+        const layer = window.L.rectangle(location.bounds, areaStyle)
+          .bindPopup(
+            `<strong>${escapeHtml(location.routeLabel || location.name)}</strong><span>${escapeHtml(location.kind)}</span>`
+          )
+          .on('click', () => activate(button, { move: false }));
+
+        areaLayers.set(location.key, layer);
+      });
+
       coverageItem = locations.find(
         (item) => item.location.coverage && (item.location.geojsonUrl || item.location.polygons.length)
       );
 
       if (coverageItem) {
-        const coverageStyle = {
-          color: '#ffc400',
-          weight: 2,
-          opacity: .9,
-          fillColor: '#ffc400',
-          fillOpacity: .12
-        };
         const coveragePopup = `<strong>${escapeHtml(coverageItem.location.kind)}</strong><span>${escapeHtml(coverageItem.location.name)}</span>`;
         const bindCoverageLayer = (layer) => {
           layer.bindPopup(coveragePopup);
@@ -1325,7 +1350,7 @@
         };
         const makePolygonLayer = () =>
           window.L.featureGroup(
-            coverageItem.location.polygons.map((polygon) => window.L.polygon(polygon, coverageStyle))
+            coverageItem.location.polygons.map((polygon) => window.L.polygon(polygon, areaStyle))
           );
 
         loadCoverageLayer = async () => {
@@ -1348,7 +1373,7 @@
                 return response.json();
               })
               .then((geojson) => {
-                coverageLayer = bindCoverageLayer(window.L.geoJSON(geojson, { style: coverageStyle }));
+                coverageLayer = bindCoverageLayer(window.L.geoJSON(geojson, { style: areaStyle }));
                 return coverageLayer;
               })
               .catch(() => {
@@ -1387,10 +1412,25 @@
       button.setAttribute('aria-pressed', 'true');
       setLinks(location);
       mapNode.dataset.activeMapKey = location.key;
-      mapNode.dataset.activeMapMode = location.coverage ? 'coverage' : 'point';
+      mapNode.dataset.activeMapMode = location.coverage ? 'coverage' : location.area ? 'area' : 'point';
 
       if (map) {
         const isCoverage = Boolean(location.coverage && (location.bounds || location.geojsonUrl || coverageLayer));
+        const isArea = Boolean(location.area && !location.coverage && location.bounds);
+        const areaLayer = isArea ? areaLayers.get(location.key) : null;
+
+        if (activeAreaLayer && activeAreaLayer !== areaLayer && map.hasLayer(activeAreaLayer)) {
+          activeAreaLayer.remove();
+        }
+
+        if (areaLayer) {
+          if (!map.hasLayer(areaLayer)) {
+            areaLayer.addTo(map);
+          }
+          activeAreaLayer = areaLayer;
+        } else {
+          activeAreaLayer = null;
+        }
 
         if (coverageLayer) {
           if (isCoverage && !map.hasLayer(coverageLayer)) {
@@ -1421,7 +1461,12 @@
         }
 
         if (move) {
-          if (isCoverage) {
+          if (isArea) {
+            const fitTarget = areaLayer?.getBounds?.() || location.bounds;
+            if (fitTarget) {
+              map.fitBounds(fitTarget, { padding: [26, 26], animate: true });
+            }
+          } else if (isCoverage) {
             const fitTarget = coverageLayer?.getBounds?.() || location.bounds;
             if (fitTarget) {
               map.fitBounds(fitTarget, { padding: [26, 26], animate: true });
@@ -1436,6 +1481,8 @@
 
         if (marker && openPopup) {
           marker.openPopup();
+        } else if (areaLayer && openPopup) {
+          areaLayer.openPopup(window.L.latLng(location.lat, location.lng));
         } else if (isCoverage && coverageLayer && openPopup) {
           coverageLayer.openPopup(window.L.latLng(location.lat, location.lng));
         }

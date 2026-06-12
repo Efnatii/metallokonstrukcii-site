@@ -43,7 +43,7 @@
     <link rel="preload" href="./assets/generated/b2e-dashboard-hero.webp" as="image">
     <link rel="stylesheet" href="./styles.css">
     <script src="./config.js" defer></script>
-    <script src="./main.js?v=route-links-20260612" defer></script>
+    <script src="./main.js?v=area-cards-20260612" defer></script>
   </head>
   <body>
     <div class="site-stage-shell" data-site-stage-shell>
@@ -653,7 +653,7 @@
               <div class="leaflet-map" id="locationsMap" data-locations-map aria-label="Интерактивная карта площадок B2E"></div>
               <div class="map-status" data-map-status hidden>
                 <strong>Карта временно недоступна</strong>
-                <span>Откройте выбранную точку во внешних Яндекс Картах.</span>
+                <span>Откройте выбранную область или точку во внешних Яндекс Картах.</span>
                 <a data-map-fallback-link href="https://yandex.ru/maps/-/CPSAzCMe" target="_blank" rel="noreferrer">Открыть карту</a>
               </div>
             </div>
@@ -665,28 +665,28 @@
                 </button>
               </article>
               <article class="location-card">
-                <button type="button" data-map-key="petrozavodsk" data-map-lat="61.7892210" data-map-lng="34.3688041" data-map-zoom="11" data-map-name="Петрозаводск" data-map-route-label="Петрозаводск" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=34.3688041%2C61.7892210&mode=whatshere&whatshere%5Bpoint%5D=34.3688041%2C61.7892210&whatshere%5Bzoom%5D=11&z=11">
+                <button type="button" data-map-key="petrozavodsk" data-map-area="true" data-map-lat="61.7892210" data-map-lng="34.3688041" data-map-zoom="11" data-map-bounds="61.735000,34.250000;61.845000,34.515000" data-map-name="Петрозаводск" data-map-route-label="Петрозаводск" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=34.382000%2C61.790000&z=11">
                   <span>Площадка</span>
                   <strong>Петрозаводск</strong>
                   <small>Республика Карелия, Петрозаводск</small>
                 </button>
               </article>
               <article class="location-card">
-                <button type="button" data-map-key="nikolskoe" data-map-lat="59.7034799" data-map-lng="30.7861084" data-map-zoom="17" data-map-name="Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6" data-map-route-label="Никольское" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.7861084%2C59.7034799&mode=whatshere&whatshere%5Bpoint%5D=30.7861084%2C59.7034799&whatshere%5Bzoom%5D=17&z=17">
+                <button type="button" data-map-key="nikolskoe" data-map-area="true" data-map-lat="59.7034799" data-map-lng="30.7861084" data-map-zoom="13" data-map-bounds="59.676000,30.730000;59.725000,30.840000" data-map-name="Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6" data-map-route-label="Никольское" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.786000%2C59.704000&z=13">
                   <span>Площадка</span>
                   <strong>Никольское</strong>
                   <small>Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6</small>
                 </button>
               </article>
               <article class="location-card">
-                <button type="button" data-map-key="rybatskoe" data-map-lat="59.8308399" data-map-lng="30.5002908" data-map-zoom="13" data-map-name="Рыбацкое" data-map-route-label="Рыбацкое" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.5002908%2C59.8308399&mode=whatshere&whatshere%5Bpoint%5D=30.5002908%2C59.8308399&whatshere%5Bzoom%5D=13&z=13">
+                <button type="button" data-map-key="rybatskoe" data-map-area="true" data-map-lat="59.8308399" data-map-lng="30.5002908" data-map-zoom="13" data-map-bounds="59.815000,30.455000;59.852000,30.545000" data-map-name="Рыбацкое" data-map-route-label="Рыбацкое" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.500000%2C59.831000&z=13">
                   <span>Площадка</span>
                   <strong>Рыбацкое</strong>
                   <small>Санкт-Петербург, район Рыбацкое</small>
                 </button>
               </article>
               <article class="location-card location-card-coverage">
-                <button type="button" data-map-key="coverage" data-map-coverage="true" data-map-lat="59.200000" data-map-lng="37.200000" data-map-zoom="5" data-map-bounds="49.5581257,19.4041722;82.0586232,69.9572252" data-map-geojson="./assets/data/coverage-szfo-cfo.geojson" data-map-name="Санкт-Петербург, Ленинградская область, СЗФО и ЦФО" data-map-route-label="СЗФО и ЦФО" data-map-kind="Зона покрытия B2E" data-map-url="https://yandex.ru/maps/?ll=37.200000%2C59.200000&z=5">
+                <button type="button" data-map-key="coverage" data-map-area="true" data-map-coverage="true" data-map-lat="59.200000" data-map-lng="37.200000" data-map-zoom="5" data-map-bounds="49.5581257,19.4041722;82.0586232,69.9572252" data-map-geojson="./assets/data/coverage-szfo-cfo.geojson" data-map-name="Санкт-Петербург, Ленинградская область, СЗФО и ЦФО" data-map-route-label="СЗФО и ЦФО" data-map-kind="Зона покрытия B2E" data-map-url="https://yandex.ru/maps/?ll=37.200000%2C59.200000&z=5">
                   <span>Зона покрытия</span>
                   <strong>СЗФО и ЦФО</strong>
                   <small>Санкт-Петербург, Ленинградская область и выездные объекты</small>
