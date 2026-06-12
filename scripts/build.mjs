@@ -145,6 +145,25 @@ const services = [
   }
 ];
 
+const productAnchors = [
+  'product-stroitelnye-metallokonstruktsii',
+  'product-zakladnye-detali',
+  'product-metallicheskie-lestnitsy',
+  'product-navesy',
+  'product-vorota',
+  'product-rezervuary',
+  'product-arochnye-konstruktsii',
+  'product-nestandartnye-konstruktsii'
+];
+
+const serviceAnchors = [
+  'service-montazh-metallokonstruktsiy',
+  'service-rezka-metalla',
+  'service-gibka-metalla',
+  'service-metalloobrabotka',
+  'service-poroshkovaya-okraska'
+];
+
 const locations = [
   {
     name: 'Главный офис B2E',
@@ -196,6 +215,11 @@ const seoKeywords = [
   'гибка металла',
   'металлообработка',
   'порошковая окраска',
+  'стоимость металлоконструкций',
+  'металлоконструкции цена',
+  'расчет металлоконструкций',
+  'КМ КМД для расчета',
+  'металлоконструкции Санкт-Петербург и Ленинградская область',
   'КМ',
   'КМД'
 ];
@@ -225,6 +249,26 @@ const faqItems = [
     question: 'Как быстрее передать задачу на расчет?',
     answer:
       'Нужно отправить заявку через форму сайта, MAX, телефон или email, приложив чертежи, описание объекта, сроки, требования к покрытию и монтажу.'
+  },
+  {
+    question: 'От чего зависит стоимость металлоконструкций?',
+    answer:
+      'Стоимость считается после проверки чертежей или описания задачи. В расчете важны тоннаж, марка стали, количество сварных узлов, резка, гибка, отверстия, покрытие, комплектность, адрес объекта и требования к монтажу.'
+  },
+  {
+    question: 'Можно ли заказать только резку, гибку или окраску?',
+    answer:
+      'Да. Можно передать отдельную партию на резку металла, гибку, металлообработку, сварку, зачистку или порошковую окраску. Для расчета нужны размеры, материал, количество деталей, допуски и требования к покрытию.'
+  },
+  {
+    question: 'Что делать, если нет готовой КМД?',
+    answer:
+      'Если КМД нет, отправьте КМ, эскиз, габариты, фото места установки или описание конструкции. Инженер уточнит недостающие данные, риски узлов, покрытие, логистику и монтажный сценарий до запуска в производство.'
+  },
+  {
+    question: 'Какие данные подтверждают компанию?',
+    answer:
+      'В футере опубликованы реквизиты ООО «БИЗНЕС В ЭНЕРГЕТИКЕ», ИНН 7811801565, КПП 781101001 и ОГРН 1247800091098. На странице также есть адрес офиса, карта, контакты, клиенты и примеры проектной документации.'
   }
 ];
 
@@ -404,6 +448,8 @@ function makeStructuredData(config) {
   const logoUrl = makeAbsoluteUrl(config, 'assets/logo/logo-b2e.png');
   const heroImageUrl = makeAbsoluteUrl(config, 'assets/generated/b2e-dashboard-hero.webp');
   const areaServed = ['Санкт-Петербург', 'Ленинградская область', 'СЗФО', 'ЦФО'];
+  const productUrl = (index) => makeAbsoluteUrl(config, `#${productAnchors[index] || 'products'}`);
+  const serviceUrl = (index) => makeAbsoluteUrl(config, `#${serviceAnchors[index] || 'services'}`);
   const locationPlaces = locations.map((location) => {
     const [latitude, longitude] = location.coordinates.split(',').map((value) => Number(value.trim()));
 
@@ -421,7 +467,7 @@ function makeStructuredData(config) {
   const productOffers = products.map((item, index) => ({
     '@type': 'Offer',
     position: index + 1,
-    url: makeAbsoluteUrl(config, '#products'),
+    url: productUrl(index),
     itemOffered: {
       '@type': 'Product',
       name: item.name,
@@ -435,7 +481,7 @@ function makeStructuredData(config) {
   const serviceOffers = services.map((item, index) => ({
     '@type': 'Offer',
     position: index + 1,
-    url: makeAbsoluteUrl(config, '#services'),
+    url: serviceUrl(index),
     itemOffered: {
       '@type': 'Service',
       name: item.name,
@@ -462,6 +508,11 @@ function makeStructuredData(config) {
           'Производство, проектирование, обработка, поставка и монтаж металлоконструкций для строительных, промышленных и инфраструктурных объектов.',
         slogan: 'Надежные металлоконструкции для сложных задач',
         taxID: config.inn,
+        identifier: [
+          { '@type': 'PropertyValue', propertyID: 'ИНН', value: config.inn },
+          { '@type': 'PropertyValue', propertyID: 'КПП', value: config.kpp },
+          { '@type': 'PropertyValue', propertyID: 'ОГРН', value: config.ogrn }
+        ],
         email: config.email,
         telephone: config.phone,
         openingHours: config.workHours,
@@ -515,9 +566,9 @@ function makeStructuredData(config) {
         '@type': 'WebPage',
         '@id': webpageId,
         url: config.siteUrl,
-        name: 'Производство металлоконструкций СЗФО и ЦФО - ООО B2E',
+        name: 'Производство и монтаж металлоконструкций в СПб, СЗФО и ЦФО - ООО B2E',
         description:
-          'ООО B2E производит строительные металлоконструкции, закладные детали, лестницы, навесы, ворота, резервуары и нестандартные конструкции.',
+          'ООО B2E производит и монтирует металлоконструкции в Санкт-Петербурге, Ленинградской области, СЗФО и ЦФО: строительные конструкции, закладные детали, лестницы, навесы, ворота, резервуары, КМ/КМД, резка, гибка и окраска.',
         inLanguage: 'ru-RU',
         isPartOf: { '@id': websiteId },
         about: { '@id': organizationId },
@@ -544,7 +595,7 @@ function makeStructuredData(config) {
           '@type': 'ListItem',
           position: index + 1,
           name: item.name,
-          url: makeAbsoluteUrl(config, '#products')
+          url: productUrl(index)
         }))
       },
       {
@@ -555,7 +606,7 @@ function makeStructuredData(config) {
           '@type': 'ListItem',
           position: index + 1,
           name: item.name,
-          url: makeAbsoluteUrl(config, '#services')
+          url: serviceUrl(index)
         }))
       },
       {
@@ -657,11 +708,13 @@ function makeLlms(config) {
     ['Rusprofile company profile', config.rusprofileUrl, 'публичный профиль компании по ОГРН']
   ];
   const primaryIntents = [
-    'производство металлоконструкций в Санкт-Петербурге',
-    'изготовление металлоконструкций для СЗФО и ЦФО',
+    'производство и монтаж металлоконструкций в Санкт-Петербурге',
+    'изготовление металлоконструкций для Ленинградской области, СЗФО и ЦФО',
     'строительные металлоконструкции на заказ',
     'закладные детали, металлические лестницы, навесы, ворота и резервуары',
     'монтаж металлоконструкций, резка, гибка, металлообработка и порошковая окраска',
+    'стоимость металлоконструкций и данные для расчета',
+    'КМ и КМД для расчета металлоконструкций',
     'заявка на расчет металлоконструкций и коммерческое предложение'
   ];
 
@@ -775,10 +828,11 @@ function makeAiContext(config) {
     },
     sameAs: [config.maxUrl, config.rbcProfileUrl, config.rusprofileUrl].filter(Boolean),
     searchIntents: [
-      'производство металлоконструкций в Санкт-Петербурге',
-      'изготовление металлоконструкций для СЗФО и ЦФО',
+      'производство и монтаж металлоконструкций в Санкт-Петербурге',
+      'изготовление металлоконструкций для Ленинградской области, СЗФО и ЦФО',
       'строительные металлоконструкции на заказ',
       'монтаж металлоконструкций',
+      'стоимость металлоконструкций и расчет по чертежам',
       'КМ КМД металлоконструкции',
       'закладные детали и металлические лестницы на заказ'
     ],
