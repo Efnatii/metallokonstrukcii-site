@@ -1038,8 +1038,8 @@
   }
 
   const leafletAssets = {
-    css: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-    script: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    css: new URL('./assets/vendor/leaflet/leaflet.css', document.baseURI).href,
+    script: new URL('./assets/vendor/leaflet/leaflet.js', document.baseURI).href
   };
   let leafletLoadPromise = null;
 

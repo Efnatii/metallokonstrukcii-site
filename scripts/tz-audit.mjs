@@ -175,7 +175,7 @@ const checks = [
   ),
   check(
     'Контакты: Седова 57 лит В, телефон, email, ссылка Яндекс',
-    hasAll(html, ['Седова, 57, лит. В', '+7 (965) 057-82-70', 'zakaz@b2energy.ru', 'Открыть в Яндекс Картах', 'https://yandex.ru/maps/-/CPSAzCMe']),
+    hasAll(html, ['Седова, 57, лит. В', '+7 (965) 057-82-70', 'zakaz@b2energy.ru', 'Санкт-Петербург, ул. Седова, 57, лит. В', 'https://yandex.ru/maps/-/CPSAzCMe']),
     'contact card'
   ),
   check(
