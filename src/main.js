@@ -1328,7 +1328,11 @@
           return;
         }
 
-        const layer = window.L.rectangle(location.bounds, areaStyle)
+        const layer = (
+          location.polygons.length
+            ? window.L.featureGroup(location.polygons.map((polygon) => window.L.polygon(polygon, areaStyle)))
+            : window.L.rectangle(location.bounds, areaStyle)
+        )
           .bindPopup(
             `<strong>${escapeHtml(location.routeLabel || location.name)}</strong><span>${escapeHtml(location.kind)}</span>`
           )

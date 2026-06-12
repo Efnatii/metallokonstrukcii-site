@@ -19,6 +19,7 @@ const yandexDeploy = read('scripts/Deploy-YandexCloud.ps1');
 const rootPackage = read('package.json');
 const workerPackage = read('worker/package.json');
 const distHtml = read('dist/index.html');
+const coverageGeojson = JSON.parse(read('src/assets/data/coverage-szfo-cfo.geojson'));
 
 const products = [
   'Строительные металлоконструкции',
@@ -107,9 +108,29 @@ function hasAll(source, values) {
   return values.every((value) => source.includes(value));
 }
 
+function collectCoordinates(value, out = []) {
+  if (Array.isArray(value) && typeof value[0] === 'number' && typeof value[1] === 'number') {
+    out.push(value);
+  } else if (Array.isArray(value)) {
+    value.forEach((item) => collectCoordinates(item, out));
+  }
+
+  return out;
+}
+
+function getCoordinateBbox(value) {
+  const points = collectCoordinates(value);
+  const lons = points.map(([lon]) => lon);
+  const lats = points.map(([, lat]) => lat);
+
+  return [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)];
+}
+
 function check(name, ok, evidence) {
   return { name, ok: Boolean(ok), evidence };
 }
+
+const coverageBbox = getCoordinateBbox(coverageGeojson.features.map((feature) => feature.geometry.coordinates));
 
 const dropdown = extractBetween(
   html,
@@ -190,9 +211,11 @@ const checks = [
     'Карта интерактивная: офис точкой, площадки областями и сложная зона покрытия',
     (html.match(/data-map-key=/g) || []).length === 5 &&
       (html.match(/data-map-area="true"/g) || []).length === 4 &&
+      (html.match(/data-map-polygons="/g) || []).length === 3 &&
       html.includes('leaflet') &&
       hasAll(html, ['office', 'petrozavodsk', 'nikolskoe', 'rybatskoe', 'coverage']) &&
       main.includes('fitBounds') &&
+      main.includes('L.polygon') &&
       main.includes('L.rectangle') &&
       main.includes('L.geoJSON') &&
       html.includes('data-map-geojson="./assets/data/coverage-szfo-cfo.geojson"') &&
@@ -200,7 +223,7 @@ const checks = [
       !html.includes('mode=whatshere&whatshere%5Bpoint%5D=34.3688041') &&
       !html.includes('mode=whatshere&whatshere%5Bpoint%5D=30.7861084') &&
       !html.includes('mode=whatshere&whatshere%5Bpoint%5D=30.5002908'),
-    `${(html.match(/data-map-key=/g) || []).length} map controls + 4 area controls + Leaflet rectangles/GeoJSON`
+    `${(html.match(/data-map-key=/g) || []).length} map controls + city polygons + Leaflet rectangles/GeoJSON`
   ),
   check(
     'Площадки показываются областями без точечных Яндекс whatshere-ссылок',
@@ -210,6 +233,14 @@ const checks = [
       !html.includes('whatshere%5Bpoint%5D=30.7861084') &&
       !html.includes('whatshere%5Bpoint%5D=30.5002908'),
     'production locations are area controls'
+  ),
+  check(
+    'Зона покрытия исключает Калининград и островные компоненты',
+    coverageGeojson.features.length === 2 &&
+      coverageBbox[0] >= 26.4 &&
+      coverageBbox[3] <= 70.01 &&
+      !JSON.stringify(coverageGeojson).includes('Калининград'),
+    `coverage bbox ${coverageBbox.map((value) => value.toFixed(3)).join(', ')}`
   ),
   check('Площадки из ТЗ указаны', hasAll(html, ['Петрозаводск', 'Никольское', 'Рыбацкое']), '3 production locations'),
   check(
