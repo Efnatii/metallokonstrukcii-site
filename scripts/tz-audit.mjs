@@ -57,6 +57,7 @@ const publicVars = [
   'B2E_MAX_URL',
   'B2E_ADDRESS',
   'B2E_YANDEX_MAP_URL',
+  'B2E_YANDEX_ROUTE_URL',
   'B2E_YANDEX_MAP_EMBED_URL',
   'B2E_RBC_PROFILE_URL',
   'B2E_RUSPROFILE_URL',
@@ -174,9 +175,9 @@ const checks = [
     'no calculator section, nav link, modal option or JS'
   ),
   check(
-    'Контакты: Седова 57 лит В, телефон, email, ссылка Яндекс',
-    hasAll(html, ['Седова, 57, лит. В', '+7 (965) 057-82-70', 'zakaz@b2energy.ru', 'Санкт-Петербург, ул. Седова, 57, лит. В', 'https://yandex.ru/maps/-/CPSAzCMe']),
-    'contact card'
+    'Контакты: Седова 57 лит В, телефон, email, маршрут Яндекс',
+    hasAll(html, ['Седова, 57, лит. В', '+7 (965) 057-82-70', 'zakaz@b2energy.ru', 'Построить в Яндекс Картах', 'mode=routes', 'https://yandex.ru/maps/-/CPSAzCMe']),
+    'contact card + route'
   ),
   check(
     'Публичные профили сохранены в конфигурации, но скрыты из контента',

@@ -3,6 +3,7 @@
 
   const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
   const officePoint = encodeURIComponent('30.425277,59.879804');
+  const officeRouteUrl = 'https://yandex.ru/maps/?mode=routes&rtext=~59.879804%2C30.425277&rtt=auto';
 
   const defaults = {
     siteName: 'ООО B2E - производство металлоконструкций',
@@ -16,6 +17,7 @@
     maxUrl: 'https://max.ru/u/f9LHodD0cOIq9CnGVeR2XIVeHPu_GpeOl3tdE_eGIeC3kbz6i8FikJr_4IM',
     address: defaultAddress,
     yandexMapUrl: 'https://yandex.ru/maps/-/CPSAzCMe',
+    yandexRouteUrl: officeRouteUrl,
     yandexMapEmbedUrl: `https://yandex.ru/map-widget/v1/?ll=${officePoint}&mode=whatshere&whatshere%5Bpoint%5D=${officePoint}&whatshere%5Bzoom%5D=17&z=17`,
     rbcProfileUrl: 'https://companies.rbc.ru/amp/ogrn/1247800091098/',
     rusprofileUrl: 'https://www.rusprofile.ru/id/1247800091098',
@@ -1166,6 +1168,9 @@
       ];
     };
 
+    const createRouteUrl = (lat, lng) =>
+      `https://yandex.ru/maps/?mode=routes&rtext=~${encodeURIComponent(`${lat},${lng}`)}&rtt=auto`;
+
     const readLocation = (button) => {
       const lat = Number(button.dataset.mapLat);
       const lng = Number(button.dataset.mapLng);
@@ -1175,6 +1180,7 @@
       }
 
       const polygons = readPolygons(button.dataset.mapPolygons);
+      const routeLabel = button.dataset.mapRouteLabel || button.querySelector('strong')?.textContent.trim();
 
       return {
         key: button.dataset.mapKey || button.dataset.mapName || `${lat},${lng}`,
@@ -1182,8 +1188,10 @@
         lng,
         zoom: Number(button.dataset.mapZoom) || 13,
         name: button.dataset.mapName || button.textContent.trim(),
+        routeLabel: routeLabel || button.dataset.mapName || button.textContent.trim(),
         kind: button.dataset.mapKind || 'Площадка',
         url: button.dataset.mapUrl || config.yandexMapUrl,
+        routeUrl: button.dataset.mapRouteUrl || createRouteUrl(lat, lng),
         coverage: button.dataset.mapCoverage === 'true',
         geojsonUrl: readGeoJsonUrl(button.dataset.mapGeojson),
         polygons,
@@ -1192,8 +1200,15 @@
     };
 
     const setLinks = (location) => {
-      if (location.url) {
-        externalLinks.forEach((link) => link.setAttribute('href', location.url));
+      const routeHref = location.routeUrl || location.url;
+      const routeLabel = location.routeLabel || location.name;
+
+      if (routeHref) {
+        externalLinks.forEach((link) => {
+          link.setAttribute('href', routeHref);
+          link.setAttribute('aria-label', `Построить маршрут: ${routeLabel}`);
+          link.textContent = location.coverage ? 'Маршрут в зону покрытия' : `Маршрут: ${routeLabel}`;
+        });
       }
 
       if (fallbackLink && location.url) {

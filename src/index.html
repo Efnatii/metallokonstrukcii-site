@@ -43,7 +43,7 @@
     <link rel="preload" href="./assets/generated/b2e-dashboard-hero.webp" as="image">
     <link rel="stylesheet" href="./styles.css">
     <script src="./config.js" defer></script>
-    <script src="./main.js?v=map-leaflet-local-20260612" defer></script>
+    <script src="./main.js?v=route-links-20260612" defer></script>
   </head>
   <body>
     <div class="site-stage-shell" data-site-stage-shell>
@@ -647,13 +647,9 @@
                 <p class="section-kicker">Офис и площадки</p>
                 <h3>Карта для выезда и логистики</h3>
               </div>
-              <a class="map-route-link" data-location-map-link href="https://yandex.ru/maps/-/CPSAzCMe" target="_blank" rel="noreferrer">Открыть маршрут</a>
+              <a class="map-route-link" data-location-map-link href="https://yandex.ru/maps/?mode=routes&amp;rtext=~59.879804%2C30.425277&amp;rtt=auto" target="_blank" rel="noreferrer" aria-label="Построить маршрут: Седова 57 лит В">Маршрут: Седова 57</a>
             </div>
             <div class="map-wrap" data-map-wrap>
-              <div class="map-overview" aria-hidden="true">
-                <span>Главный офис</span>
-                <strong>Седова 57, лит. В</strong>
-              </div>
               <div class="leaflet-map" id="locationsMap" data-locations-map aria-label="Интерактивная карта площадок B2E"></div>
               <div class="map-status" data-map-status hidden>
                 <strong>Карта временно недоступна</strong>
@@ -663,34 +659,34 @@
             </div>
             <div class="location-list" aria-label="Адреса и площадки компании">
               <article class="location-card is-active">
-                <button type="button" data-map-key="office" data-map-lat="59.879804" data-map-lng="30.425277" data-map-zoom="17" data-map-name="Седова 57 лит В" data-map-kind="Главный офис" data-map-url="https://yandex.ru/maps/-/CPSAzCMe">
+                <button type="button" data-map-key="office" data-map-lat="59.879804" data-map-lng="30.425277" data-map-zoom="17" data-map-name="Седова 57 лит В" data-map-route-label="Седова 57" data-map-kind="Главный офис" data-map-url="https://yandex.ru/maps/-/CPSAzCMe">
                   <span>Главный офис</span>
                   <strong>Санкт-Петербург, ул. Седова, 57, лит. В</strong>
                 </button>
               </article>
               <article class="location-card">
-                <button type="button" data-map-key="petrozavodsk" data-map-lat="61.7892210" data-map-lng="34.3688041" data-map-zoom="11" data-map-name="Петрозаводск" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=34.3688041%2C61.7892210&mode=whatshere&whatshere%5Bpoint%5D=34.3688041%2C61.7892210&whatshere%5Bzoom%5D=11&z=11">
+                <button type="button" data-map-key="petrozavodsk" data-map-lat="61.7892210" data-map-lng="34.3688041" data-map-zoom="11" data-map-name="Петрозаводск" data-map-route-label="Петрозаводск" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=34.3688041%2C61.7892210&mode=whatshere&whatshere%5Bpoint%5D=34.3688041%2C61.7892210&whatshere%5Bzoom%5D=11&z=11">
                   <span>Площадка</span>
                   <strong>Петрозаводск</strong>
                   <small>Республика Карелия, Петрозаводск</small>
                 </button>
               </article>
               <article class="location-card">
-                <button type="button" data-map-key="nikolskoe" data-map-lat="59.7034799" data-map-lng="30.7861084" data-map-zoom="17" data-map-name="Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.7861084%2C59.7034799&mode=whatshere&whatshere%5Bpoint%5D=30.7861084%2C59.7034799&whatshere%5Bzoom%5D=17&z=17">
+                <button type="button" data-map-key="nikolskoe" data-map-lat="59.7034799" data-map-lng="30.7861084" data-map-zoom="17" data-map-name="Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6" data-map-route-label="Никольское" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.7861084%2C59.7034799&mode=whatshere&whatshere%5Bpoint%5D=30.7861084%2C59.7034799&whatshere%5Bzoom%5D=17&z=17">
                   <span>Площадка</span>
                   <strong>Никольское</strong>
                   <small>Ленинградская обл., Тосненский р-н, г. Никольское, Театральная ул., 6</small>
                 </button>
               </article>
               <article class="location-card">
-                <button type="button" data-map-key="rybatskoe" data-map-lat="59.8308399" data-map-lng="30.5002908" data-map-zoom="13" data-map-name="Рыбацкое" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.5002908%2C59.8308399&mode=whatshere&whatshere%5Bpoint%5D=30.5002908%2C59.8308399&whatshere%5Bzoom%5D=13&z=13">
+                <button type="button" data-map-key="rybatskoe" data-map-lat="59.8308399" data-map-lng="30.5002908" data-map-zoom="13" data-map-name="Рыбацкое" data-map-route-label="Рыбацкое" data-map-kind="Площадка" data-map-url="https://yandex.ru/maps/?ll=30.5002908%2C59.8308399&mode=whatshere&whatshere%5Bpoint%5D=30.5002908%2C59.8308399&whatshere%5Bzoom%5D=13&z=13">
                   <span>Площадка</span>
                   <strong>Рыбацкое</strong>
                   <small>Санкт-Петербург, район Рыбацкое</small>
                 </button>
               </article>
               <article class="location-card location-card-coverage">
-                <button type="button" data-map-key="coverage" data-map-coverage="true" data-map-lat="59.200000" data-map-lng="37.200000" data-map-zoom="5" data-map-bounds="49.5581257,19.4041722;82.0586232,69.9572252" data-map-geojson="./assets/data/coverage-szfo-cfo.geojson" data-map-name="Санкт-Петербург, Ленинградская область, СЗФО и ЦФО" data-map-kind="Зона покрытия B2E" data-map-url="https://yandex.ru/maps/?ll=37.200000%2C59.200000&z=5">
+                <button type="button" data-map-key="coverage" data-map-coverage="true" data-map-lat="59.200000" data-map-lng="37.200000" data-map-zoom="5" data-map-bounds="49.5581257,19.4041722;82.0586232,69.9572252" data-map-geojson="./assets/data/coverage-szfo-cfo.geojson" data-map-name="Санкт-Петербург, Ленинградская область, СЗФО и ЦФО" data-map-route-label="СЗФО и ЦФО" data-map-kind="Зона покрытия B2E" data-map-url="https://yandex.ru/maps/?ll=37.200000%2C59.200000&z=5">
                   <span>Зона покрытия</span>
                   <strong>СЗФО и ЦФО</strong>
                   <small>Санкт-Петербург, Ленинградская область и выездные объекты</small>
@@ -727,9 +723,9 @@
                 <span>Email</span>
                 <strong data-config-text="email">zakaz@b2energy.ru</strong>
               </a>
-              <a class="contact-line contact-line-link" data-config-href="yandexMapUrl" href="https://yandex.ru/maps/" target="_blank" rel="noreferrer">
-                <span>Маршрут</span>
-                <strong>Санкт-Петербург, ул. Седова, 57, лит. В</strong>
+              <a class="contact-line contact-line-link contact-line-route" data-config-href="yandexRouteUrl" href="https://yandex.ru/maps/?mode=routes&amp;rtext=~59.879804%2C30.425277&amp;rtt=auto" target="_blank" rel="noreferrer" aria-label="Построить маршрут до главного офиса B2E">
+                <span>Маршрут до офиса</span>
+                <strong>Построить в Яндекс Картах</strong>
               </a>
             </address>
             <ol class="contact-steps" aria-label="Что подготовить для расчета">

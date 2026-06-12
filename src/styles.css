@@ -2798,37 +2798,6 @@ html.effects-rich .company-work-cut-frame {
   color: #111;
 }
 
-.map-overview {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  z-index: 430;
-  display: grid;
-  gap: 2px;
-  max-width: min(300px, calc(100% - 36px));
-  padding: 12px 14px;
-  border: 1px solid rgb(255 255 255 / 18%);
-  border-radius: var(--radius);
-  background: rgb(7 16 22 / 82%);
-  box-shadow: 0 16px 44px rgb(0 0 0 / 26%);
-  backdrop-filter: blur(10px);
-}
-
-.map-overview span {
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 930;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.map-overview strong {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 900;
-  line-height: 1.18;
-}
-
 .b2e-map-marker img {
   width: 30px;
   height: 42px;
@@ -3101,6 +3070,27 @@ html.production-tour-active .site-header.is-hidden {
   transition: color 160ms ease;
 }
 
+.contact-line-route {
+  align-items: center;
+}
+
+.contact-line-route strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid rgb(255 196 0 / 46%);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-transform: uppercase;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
 .contact-line-link:hover,
 .contact-line-link:focus-visible {
   outline: none;
@@ -3109,6 +3099,13 @@ html.production-tour-active .site-header.is-hidden {
 .contact-line-link:hover strong,
 .contact-line-link:focus-visible strong {
   color: var(--accent);
+}
+
+.contact-line-route:hover strong,
+.contact-line-route:focus-visible strong {
+  border-color: rgb(255 196 0 / 72%);
+  background: rgb(255 196 0 / 12%);
+  color: #fff;
 }
 
 .contact-steps {
@@ -4980,13 +4977,6 @@ html.production-tour-active .site-header.is-hidden {
 
   .map-route-link {
     width: 100%;
-  }
-
-  .map-overview {
-    top: 12px;
-    right: 12px;
-    max-width: calc(100% - 24px);
-    padding: 10px 12px;
   }
 
   .contact-card {

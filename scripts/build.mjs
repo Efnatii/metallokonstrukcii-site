@@ -271,6 +271,7 @@ function formatPhoneDisplay(value) {
 function makeConfig() {
   const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
   const defaultMapPoint = encodeURIComponent('30.425277,59.879804');
+  const defaultRouteUrl = 'https://yandex.ru/maps/?mode=routes&rtext=~59.879804%2C30.425277&rtt=auto';
   const phone = env('B2E_CONTACT_PHONE', '+79650578270');
   const phoneDisplay = formatPhoneDisplay(env('B2E_CONTACT_PHONE_DISPLAY', '+7 (965) 057-82-70'));
   const email = env('B2E_CONTACT_EMAIL', 'zakaz@b2energy.ru');
@@ -296,6 +297,7 @@ function makeConfig() {
       'B2E_YANDEX_MAP_URL',
       'https://yandex.ru/maps/-/CPSAzCMe'
     ),
+    yandexRouteUrl: env('B2E_YANDEX_ROUTE_URL', defaultRouteUrl),
     yandexMapEmbedUrl: env(
       'B2E_YANDEX_MAP_EMBED_URL',
       `https://yandex.ru/map-widget/v1/?ll=${defaultMapPoint}&mode=whatshere&whatshere%5Bpoint%5D=${defaultMapPoint}&whatshere%5Bzoom%5D=17&z=17`
