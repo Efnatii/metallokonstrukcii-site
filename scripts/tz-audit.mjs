@@ -117,7 +117,7 @@ const dropdown = extractBetween(
 );
 const modalSelect = extractBetween(html, '<select name="objectType">', '</select>');
 const footer = html.match(/<footer class="site-footer"[^>]*>[\s\S]*?<\/footer>/)?.[0] || '';
-const productTitles = extractTexts(html, /<article class="product-card[^"]*">[\s\S]*?<h3>([\s\S]*?)<\/h3>/g);
+const productTitles = extractTexts(html, /<(?:article|button)\b[^>]*class="product-card[^"]*"[^>]*>[\s\S]*?<h3>([\s\S]*?)<\/h3>/g);
 const serviceTitles = extractTexts(html, /<article class="service-card[^"]*">[\s\S]*?<h3>([\s\S]*?)<\/h3>/g);
 const dropdownProducts = extractTexts(dropdown, /<a href="#products">([^<]+)<\/a>/g);
 const modalOptions = extractTexts(modalSelect, /<option>([^<]+)<\/option>/g);

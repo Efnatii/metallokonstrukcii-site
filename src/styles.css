@@ -15,9 +15,17 @@
   --accent-ink: #26382c;
   --shadow: 0 28px 80px rgb(0 0 0 / 34%);
   --radius: 4px;
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --site-header-height: 84px;
   color-scheme: light;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@supports (top: constant(safe-area-inset-top)) {
+  :root {
+    --safe-area-top: constant(safe-area-inset-top);
+  }
 }
 
 * {
@@ -66,7 +74,7 @@ body::before {
     repeating-linear-gradient(90deg, transparent 0 118px, rgb(255 196 0 / 7%) 119px, transparent 120px),
     repeating-linear-gradient(0deg, transparent 0 118px, rgb(255 255 255 / 4%) 119px, transparent 120px);
   opacity: .26;
-  animation: blueprint-drift 54s linear infinite;
+  animation: none;
 }
 
 body.modal-open {
@@ -125,8 +133,8 @@ address {
   grid-template-columns: minmax(210px, 360px) minmax(0, 1fr) minmax(390px, auto);
   align-items: center;
   gap: clamp(12px, 1.35vw, 24px);
-  min-height: 84px;
-  padding: 10px clamp(22px, 2.7vw, 42px);
+  min-height: calc(var(--site-header-height) + var(--safe-area-top));
+  padding: calc(10px + var(--safe-area-top)) clamp(22px, 2.7vw, 42px) 10px;
   border-bottom: 1px solid rgb(255 255 255 / 12%);
   background: linear-gradient(180deg, rgb(5 7 9 / 98%), rgb(9 12 14 / 94%));
   box-shadow: 0 18px 64px rgb(0 0 0 / 34%);
@@ -146,7 +154,7 @@ address {
 }
 
 .site-header + main {
-  padding-top: 84px;
+  padding-top: calc(var(--site-header-height) + var(--safe-area-top));
 }
 
 .brand {
@@ -521,7 +529,7 @@ h3 {
     repeating-linear-gradient(90deg, transparent 0 118px, rgb(255 196 0 / 12%) 119px, transparent 120px),
     repeating-linear-gradient(0deg, transparent 0 118px, rgb(255 255 255 / 4%) 119px, transparent 120px);
   opacity: .18;
-  animation: hero-grid 42s linear infinite;
+  animation: none;
 }
 
 .hero::after {
@@ -542,7 +550,7 @@ h3 {
     url("./assets/generated/b2e-dashboard-hero.webp") center / cover no-repeat;
   filter: saturate(.92) contrast(1.08);
   transform: scale(1.012);
-  animation: hero-pan 28s ease-in-out infinite alternate;
+  animation: none;
 }
 
 .hero-grid {
@@ -970,17 +978,10 @@ h3 {
   width: min(48vw, 760px);
   height: auto;
   opacity: .78;
-  filter:
-    saturate(1.02)
-    contrast(1.2)
-    brightness(1.1)
-    drop-shadow(0 0 1px rgb(255 255 255 / 96%))
-    drop-shadow(0 0 8px rgb(255 255 255 / 58%))
-    drop-shadow(0 0 22px rgb(255 255 255 / 34%))
-    drop-shadow(0 30px 70px rgb(0 0 0 / 64%));
+  filter: drop-shadow(0 24px 48px rgb(0 0 0 / 54%));
   transform: rotate(var(--float-rotate));
   transform-origin: center;
-  animation: company-float 7.5s ease-in-out infinite alternate;
+  animation: none;
 }
 
 .company-float--truss {
@@ -1407,14 +1408,7 @@ h3 {
   aspect-ratio: var(--service-visual-aspect);
   opacity: .96;
   pointer-events: none;
-  filter:
-    saturate(1.06)
-    contrast(1.22)
-    brightness(1.12)
-    drop-shadow(0 0 1px rgb(255 255 255 / 98%))
-    drop-shadow(0 0 9px rgb(255 255 255 / 64%))
-    drop-shadow(0 0 22px rgb(255 255 255 / 38%))
-    drop-shadow(0 22px 44px rgb(0 0 0 / 62%));
+  filter: drop-shadow(0 18px 34px rgb(0 0 0 / 52%));
   transition: transform 240ms ease, filter 240ms ease, opacity 240ms ease;
 }
 
@@ -1531,14 +1525,82 @@ h3 {
 .service-card:hover .service-card-visual,
 .service-card:focus-within .service-card-visual {
   opacity: 1;
+  filter: drop-shadow(0 22px 42px rgb(0 0 0 / 58%));
+}
+
+html.effects-rich body::before {
+  animation: blueprint-drift 54s linear infinite;
+}
+
+html.effects-rich .hero::before {
+  animation: hero-grid 42s linear infinite;
+}
+
+html.effects-rich .hero-media {
+  animation: hero-pan 28s ease-in-out infinite alternate;
+  will-change: transform, background-position;
+}
+
+html.effects-rich .company-float {
+  filter:
+    saturate(1.02)
+    contrast(1.18)
+    brightness(1.08)
+    drop-shadow(0 0 1px rgb(255 255 255 / 88%))
+    drop-shadow(0 0 8px rgb(255 255 255 / 48%))
+    drop-shadow(0 0 22px rgb(255 255 255 / 28%))
+    drop-shadow(0 30px 70px rgb(0 0 0 / 64%));
+  animation: company-float 7.5s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+html.effects-rich .service-card-visual {
+  filter:
+    saturate(1.06)
+    contrast(1.22)
+    brightness(1.12)
+    drop-shadow(0 0 1px rgb(255 255 255 / 92%))
+    drop-shadow(0 0 9px rgb(255 255 255 / 52%))
+    drop-shadow(0 0 22px rgb(255 255 255 / 32%))
+    drop-shadow(0 22px 44px rgb(0 0 0 / 62%));
+}
+
+html.effects-rich .service-card:hover .service-card-visual,
+html.effects-rich .service-card:focus-within .service-card-visual {
   filter:
     saturate(1.1)
     contrast(1.28)
     brightness(1.18)
     drop-shadow(0 0 1px rgb(255 255 255 / 100%))
-    drop-shadow(0 0 13px rgb(255 255 255 / 72%))
-    drop-shadow(0 0 30px rgb(255 255 255 / 44%))
+    drop-shadow(0 0 13px rgb(255 255 255 / 64%))
+    drop-shadow(0 0 30px rgb(255 255 255 / 38%))
     drop-shadow(0 26px 54px rgb(0 0 0 / 66%));
+}
+
+html.effects-rich .service-card-visual--cut::before,
+html.effects-rich .service-card-visual--cut::after {
+  content: "";
+}
+
+html.effects-rich .service-card-visual--cut::before {
+  animation: cut-line-trace 2.9s ease-in-out infinite;
+}
+
+html.effects-rich .service-card-visual--cut::after {
+  animation: cut-spark-pulse 2.9s ease-in-out infinite;
+}
+
+html.effects-rich .service-card-visual--cut .company-work-still,
+html.effects-rich .service-card-visual--machining .company-work-still {
+  animation: cut-machine-breathe 4.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+html.effects-rich .company-work-frame,
+html.effects-rich .company-work-cut-frame {
+  animation-duration: 4.8s;
+  animation-iteration-count: infinite;
+  animation-timing-function: steps(1, end);
 }
 
 .service-card:hover,
@@ -2892,53 +2954,19 @@ h3 {
 .proof-main,
 .proof-doc,
 .projects-showcase,
+.trust-docs,
+.company-scene,
+.clients-grid,
+.map-column,
+.contact-card,
 .clients-grid article,
 .location-card,
 .site-footer {
   scroll-margin-top: 110px;
 }
 
-.proof-main.is-tour-highlight,
-.proof-doc.is-tour-highlight,
-.projects-showcase.is-tour-highlight,
-.clients-grid article.is-tour-highlight,
-.location-card.is-tour-highlight button {
-  position: relative;
-  z-index: 2;
-  outline: 0;
-  border-color: rgb(255 196 0 / 76%);
-  box-shadow:
-    inset 0 0 0 1px rgb(255 196 0 / 58%),
-    0 0 0 1px rgb(255 196 0 / 20%),
-    0 18px 48px rgb(16 20 23 / 16%);
-  animation: none;
-  transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    background 180ms ease,
-    filter 180ms ease;
-}
-
-.site-footer.is-tour-highlight {
-  position: relative;
-  z-index: 2;
-  outline: 0;
-  box-shadow: inset 0 0 0 1px rgb(255 196 0 / 46%);
-}
-
-.proof-main.is-tour-highlight,
-.proof-doc.is-tour-highlight,
-.projects-showcase.is-tour-highlight,
-.clients-grid article.is-tour-highlight {
-  background:
-    linear-gradient(135deg, rgb(255 196 0 / 9%), rgb(255 255 255 / 0%) 42%),
-    #fff;
-}
-
-.location-card.is-tour-highlight button {
-  background:
-    linear-gradient(135deg, rgb(255 196 0 / 18%), rgb(255 255 255 / 7%)),
-    rgb(255 255 255 / 6%);
+html.production-tour-active .site-header.is-hidden {
+  transform: translate3d(0, 0, 0);
 }
 
 .contact-card {
@@ -3575,12 +3603,17 @@ h3 {
 .reveal {
   opacity: 1;
   transform: none;
-  animation: reveal-soft 620ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
-.reveal.is-visible {
+.js .reveal {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.js .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
+  animation: reveal-soft 420ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
 @keyframes reveal-soft {
@@ -3887,6 +3920,15 @@ h3 {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  .js .reveal.is-visible {
+    animation: none;
   }
 }
 
@@ -4325,6 +4367,10 @@ h3 {
 }
 
 @media (max-width: 760px) {
+  :root {
+    --site-header-height: 64px;
+  }
+
   main > section {
     scroll-margin-top: 74px;
   }
@@ -4336,17 +4382,17 @@ h3 {
 
   .site-header {
     grid-template-columns: minmax(0, 1fr) 42px;
-    min-height: 64px;
-    padding: 8px 12px;
+    min-height: calc(var(--site-header-height) + var(--safe-area-top));
+    padding: calc(8px + var(--safe-area-top)) 12px 8px;
   }
 
   .site-header + main {
-    padding-top: 64px;
+    padding-top: calc(var(--site-header-height) + var(--safe-area-top));
   }
 
   .nav-toggle {
     position: fixed;
-    top: 11px;
+    top: calc(11px + var(--safe-area-top));
     right: auto;
     left: min(calc(100vw - 54px), 336px);
     z-index: 70;
@@ -4601,14 +4647,7 @@ h3 {
 
   .company-float {
     opacity: .68;
-    filter:
-      saturate(1)
-      contrast(1.16)
-      brightness(1.08)
-      drop-shadow(0 0 1px rgb(255 255 255 / 92%))
-      drop-shadow(0 0 7px rgb(255 255 255 / 52%))
-      drop-shadow(0 0 18px rgb(255 255 255 / 30%))
-      drop-shadow(0 20px 48px rgb(0 0 0 / 62%));
+    filter: drop-shadow(0 18px 36px rgb(0 0 0 / 54%));
   }
 
   .company-float--truss {
@@ -5101,7 +5140,7 @@ h3 {
   .site-header {
     grid-template-columns: minmax(160px, 210px) minmax(0, 1fr) minmax(390px, 470px);
     gap: 12px;
-    padding: 10px 41px;
+    padding: calc(10px + var(--safe-area-top)) 41px 10px;
   }
 
   .brand {

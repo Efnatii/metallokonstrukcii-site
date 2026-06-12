@@ -1,4 +1,6 @@
 (function () {
+  document.documentElement.classList.add('js');
+
   const defaultAddress = 'Санкт-Петербург, ул. Седова, 57, лит. В, помещ. 11-Н, ком. 3';
   const officePoint = encodeURIComponent('30.425277,59.879804');
 
@@ -25,6 +27,144 @@
   const config = { ...defaults, ...(window.B2E_CONFIG || {}) };
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+  function setupAdaptiveEffects() {
+    const root = document.documentElement;
+    const motionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const getCoreCount = () => navigator.hardwareConcurrency || 4;
+    const getMemory = () => navigator.deviceMemory || 4;
+    let lockedByRuntime = false;
+
+    const setEffectsMode = (rich, reason) => {
+      root.classList.toggle('effects-rich', rich);
+      root.classList.toggle('effects-reduced', !rich);
+      root.dataset.effectsMode = rich ? 'rich' : 'reduced';
+      root.dataset.effectsReason = reason;
+    };
+
+    const prefersReducedMotion = () => Boolean(motionQuery?.matches);
+    const hasLimitedConnection = () => {
+      const effectiveType = connection?.effectiveType || '';
+
+      return Boolean(connection?.saveData) || effectiveType === 'slow-2g' || effectiveType === '2g';
+    };
+
+    const getHardwareTier = () => {
+      const cores = getCoreCount();
+      const memory = getMemory();
+
+      if (cores <= 2 || memory <= 2) {
+        return 'low';
+      }
+
+      if (cores <= 4 || memory <= 4) {
+        return 'balanced';
+      }
+
+      return 'high';
+    };
+
+    const getStaticMode = () => {
+      if (prefersReducedMotion()) {
+        return { rich: false, reason: 'reduced-motion' };
+      }
+
+      if (hasLimitedConnection()) {
+        return { rich: false, reason: 'limited-connection' };
+      }
+
+      const tier = getHardwareTier();
+
+      if (tier === 'low') {
+        return { rich: false, reason: 'low-hardware' };
+      }
+
+      return { rich: true, reason: `${tier}-hardware` };
+    };
+
+    const applyStaticMode = () => {
+      if (lockedByRuntime) {
+        return;
+      }
+
+      const mode = getStaticMode();
+      setEffectsMode(mode.rich, mode.reason);
+    };
+
+    const sampleFramePacing = () => {
+      if (!root.classList.contains('effects-rich')) {
+        return;
+      }
+
+      const samples = [];
+      let previous = performance.now();
+
+      const measure = (now) => {
+        samples.push(now - previous);
+        previous = now;
+
+        if (samples.length < 44) {
+          window.requestAnimationFrame(measure);
+          return;
+        }
+
+        const slowFrames = samples.filter((duration) => duration > 24).length;
+        const averageFrame = samples.reduce((sum, duration) => sum + duration, 0) / samples.length;
+
+        if (slowFrames > 12 || averageFrame > 22) {
+          lockedByRuntime = true;
+          setEffectsMode(false, 'frame-pacing');
+        } else {
+          setEffectsMode(true, 'frame-pacing-ok');
+        }
+      };
+
+      window.requestAnimationFrame(measure);
+    };
+
+    const resetAdaptiveMode = () => {
+      lockedByRuntime = false;
+      applyStaticMode();
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(sampleFramePacing, { timeout: 1800 });
+      } else {
+        window.setTimeout(sampleFramePacing, 900);
+      }
+    };
+
+    applyStaticMode();
+
+    if ('PerformanceObserver' in window) {
+      try {
+        let longTaskCount = 0;
+        const observer = new PerformanceObserver((list) => {
+          if (!root.classList.contains('effects-rich')) {
+            return;
+          }
+
+          const entries = list.getEntries();
+          longTaskCount += entries.filter((entry) => entry.duration > 180).length;
+
+          if (entries.some((entry) => entry.duration > 320) || longTaskCount >= 2) {
+            lockedByRuntime = true;
+            setEffectsMode(false, 'long-task');
+            observer.disconnect();
+          }
+        });
+
+        observer.observe({ entryTypes: ['longtask'] });
+        window.setTimeout(() => observer.disconnect(), 15000);
+      } catch {
+        // The longtask entry type is not supported in every browser.
+      }
+    }
+
+    motionQuery?.addEventListener?.('change', resetAdaptiveMode);
+    connection?.addEventListener?.('change', resetAdaptiveMode);
+    resetAdaptiveMode();
+  }
 
   function formatPhoneDisplay(value) {
     const digits = String(value).replace(/\D/g, '');
@@ -83,6 +223,9 @@
     const designWidth = 1519;
     const maxUpscale = 1.32;
     let frameRequest = 0;
+    let anchorScrollTimer = 0;
+    let anchorScrollSequence = 0;
+    const anchorScrollTimeouts = new Set();
 
     if (!shell || !stage) {
       return;
@@ -160,7 +303,130 @@
       const header = $('.site-header');
       const headerHeight = header?.getBoundingClientRect().height || 0;
 
-      return Math.ceil(headerHeight + 16);
+      return Math.ceil(headerHeight);
+    };
+
+    const getTargetTransformY = (target) => {
+      const transform = getComputedStyle(target).transform;
+
+      if (!transform || transform === 'none') {
+        return 0;
+      }
+
+      const stageScale = root.classList.contains('site-stage-active')
+        ? Number(root.style.getPropertyValue('--site-stage-scale')) || 1
+        : 1;
+
+      try {
+        return new DOMMatrixReadOnly(transform).m42 * stageScale;
+      } catch {
+        const matrix = transform.match(/^matrix\(([^)]+)\)$/);
+
+        if (!matrix) {
+          return 0;
+        }
+
+        const values = matrix[1].split(',').map((value) => Number(value.trim()));
+
+        return (values[5] || 0) * stageScale;
+      }
+    };
+
+    const getHashScrollTop = (target) => {
+      if (target.matches('.site-header')) {
+        return 0;
+      }
+
+      const targetTop = target.getBoundingClientRect().top - getTargetTransformY(target);
+      const rawTop = window.scrollY + targetTop - getAnchorOffset(target);
+      const scrollingElement = document.scrollingElement || document.documentElement;
+      const maxTop = Math.max(0, scrollingElement.scrollHeight - window.innerHeight);
+
+      return Math.min(maxTop, Math.max(0, Math.round(rawTop)));
+    };
+
+    const clearAnchorScrollTimers = () => {
+      window.clearTimeout(anchorScrollTimer);
+      anchorScrollTimeouts.forEach((timer) => window.clearTimeout(timer));
+      anchorScrollTimeouts.clear();
+    };
+
+    const finishAnchorScroll = () => {
+      clearAnchorScrollTimers();
+      root.dataset.anchorScrolling = 'false';
+    };
+
+    const cancelAnchorScroll = () => {
+      anchorScrollSequence += 1;
+      window.scrollTo({
+        top: window.scrollY,
+        behavior: 'auto'
+      });
+      finishAnchorScroll();
+    };
+
+    const finishAnchorScrollWhenSettled = (sequence, timeout = 2600) => {
+      const startedAt = performance.now();
+      let previousY = window.scrollY;
+      let stableFrames = 0;
+
+      const tick = (now) => {
+        if (anchorScrollSequence !== sequence) {
+          return;
+        }
+
+        const currentY = window.scrollY;
+        const isStable = Math.abs(currentY - previousY) <= 0.5;
+        stableFrames = isStable ? stableFrames + 1 : 0;
+        previousY = currentY;
+
+        if ((stableFrames >= 10 && now - startedAt > 220) || now - startedAt >= timeout) {
+          finishAnchorScroll();
+          return;
+        }
+
+        window.requestAnimationFrame(tick);
+      };
+
+      window.requestAnimationFrame(tick);
+    };
+
+    const alignHashScroll = (hash) => {
+      const target = getHashTarget(hash);
+      if (!target) {
+        return false;
+      }
+
+      syncStage();
+      $('.site-header')?.classList.remove('is-hidden');
+
+      const top = getHashScrollTop(target);
+
+      window.scrollTo({
+        top,
+        behavior: 'auto'
+      });
+      return true;
+    };
+
+    const settleHashScroll = (hash, delays) => {
+      clearAnchorScrollTimers();
+      const sequence = ++anchorScrollSequence;
+
+      delays.forEach((delay) => {
+        const timer = window.setTimeout(() => {
+          anchorScrollTimeouts.delete(timer);
+          if (anchorScrollSequence === sequence && window.location.hash === hash) {
+            alignHashScroll(hash);
+          }
+        }, delay);
+        anchorScrollTimeouts.add(timer);
+      });
+      anchorScrollTimer = window.setTimeout(() => {
+        if (anchorScrollSequence === sequence) {
+          finishAnchorScroll();
+        }
+      }, Math.max(...delays, 0) + 80);
     };
 
     const scrollToHash = (hash, behavior = 'auto') => {
@@ -170,20 +436,22 @@
       }
 
       syncStage();
+      root.dataset.anchorScrolling = 'true';
       $('.site-header')?.classList.remove('is-hidden');
 
-      const rawTop =
-        target.matches('.site-header')
-          ? 0
-          : window.scrollY + target.getBoundingClientRect().top - getAnchorOffset(target);
-      const scrollingElement = document.scrollingElement || document.documentElement;
-      const maxTop = Math.max(0, scrollingElement.scrollHeight - window.innerHeight);
-      const top = Math.min(maxTop, Math.max(0, Math.round(rawTop)));
-
       window.scrollTo({
-        top,
+        top: getHashScrollTop(target),
         behavior
       });
+
+      if (behavior === 'smooth') {
+        clearAnchorScrollTimers();
+        const sequence = ++anchorScrollSequence;
+        finishAnchorScrollWhenSettled(sequence);
+      } else {
+        settleHashScroll(hash, [0, 80, 220]);
+      }
+
       return true;
     };
 
@@ -216,9 +484,33 @@
       event.preventDefault();
       history.pushState(null, '', hash);
       scrollToHash(hash, 'smooth');
+
+      if (event.detail > 0 && link instanceof HTMLElement) {
+        link.blur();
+      }
     });
 
+    const cancelAnchorScrollOnUserIntent = (event) => {
+      if (root.dataset.anchorScrolling !== 'true') {
+        return;
+      }
+
+      if (event.type === 'keydown') {
+        const scrollKeys = ['ArrowDown', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp', ' '];
+
+        if (!scrollKeys.includes(event.key)) {
+          return;
+        }
+      }
+
+      cancelAnchorScroll();
+    };
+
     window.addEventListener('hashchange', correctCurrentHash);
+    window.addEventListener('wheel', cancelAnchorScrollOnUserIntent, { capture: true, passive: true });
+    window.addEventListener('touchstart', cancelAnchorScrollOnUserIntent, { capture: true, passive: true });
+    window.addEventListener('touchmove', cancelAnchorScrollOnUserIntent, { capture: true, passive: true });
+    window.addEventListener('keydown', cancelAnchorScrollOnUserIntent, true);
     window.addEventListener('resize', scheduleSync);
     window.visualViewport?.addEventListener('resize', scheduleSync);
     desktopQuery.addEventListener?.('change', scheduleSync);
@@ -267,6 +559,7 @@
   }
 
   function setupHeaderReveal() {
+    const root = document.documentElement;
     const header = $('.site-header');
     const navToggle = $('.nav-toggle');
     const nav = $('.site-nav');
@@ -295,7 +588,13 @@
       const delta = currentScrollY - lastScrollY;
       const hideAfter = Math.max(96, header.offsetHeight + 16);
 
-      if (currentScrollY <= 4 || isMenuOpen() || header.contains(document.activeElement)) {
+      if (
+        root.dataset.anchorScrolling === 'true' ||
+        root.classList.contains('production-tour-active') ||
+        currentScrollY <= 4 ||
+        isMenuOpen() ||
+        header.contains(document.activeElement)
+      ) {
         showHeader();
       } else if (delta > 8 && currentScrollY > hideAfter) {
         header.classList.add('is-hidden');
@@ -467,7 +766,7 @@
         markVisitRecorded(todayKey);
         return;
       } catch (error) {
-        console.error(error);
+        // Static previews may not expose stats endpoints; fall back quietly.
       }
     }
 
@@ -729,10 +1028,64 @@
           }
         });
       },
-      { threshold: 0.2 }
+      {
+        rootMargin: '0px 0px 180px 0px',
+        threshold: 0.01
+      }
     );
 
     items.forEach((item) => observer.observe(item));
+  }
+
+  const leafletAssets = {
+    css: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+    script: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+  };
+  let leafletLoadPromise = null;
+
+  function loadLeafletAssets() {
+    if (window.L) {
+      return Promise.resolve(window.L);
+    }
+
+    if (leafletLoadPromise) {
+      return leafletLoadPromise;
+    }
+
+    leafletLoadPromise = new Promise((resolve, reject) => {
+      if (!document.querySelector(`link[href="${leafletAssets.css}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = leafletAssets.css;
+        document.head.append(link);
+      }
+
+      const resolveWhenReady = () => {
+        if (window.L) {
+          resolve(window.L);
+        } else {
+          reject(new Error('Leaflet loaded without exposing window.L'));
+        }
+      };
+
+      const existingScript = document.querySelector(`script[src="${leafletAssets.script}"]`);
+
+      if (existingScript) {
+        existingScript.addEventListener('load', resolveWhenReady, { once: true });
+        existingScript.addEventListener('error', reject, { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = leafletAssets.script;
+      script.async = true;
+      script.defer = true;
+      script.addEventListener('load', resolveWhenReady, { once: true });
+      script.addEventListener('error', reject, { once: true });
+      document.head.append(script);
+    });
+
+    return leafletLoadPromise;
   }
 
   function setupLocationMap() {
@@ -897,7 +1250,16 @@
     let coverageLoadPromise = null;
     let loadCoverageLayer = async () => coverageLayer;
 
-    if (window.L) {
+    const initializeMap = () => {
+      if (map) {
+        return;
+      }
+
+      if (!window.L) {
+        showMapStatus();
+        return;
+      }
+
       const start = activeItem.location;
       map = window.L.map(mapNode, {
         scrollWheelZoom: false,
@@ -974,8 +1336,7 @@
                 coverageLayer = bindCoverageLayer(window.L.geoJSON(geojson, { style: coverageStyle }));
                 return coverageLayer;
               })
-              .catch((error) => {
-                console.error(error);
+              .catch(() => {
                 showMapStatus();
                 return null;
               });
@@ -994,9 +1355,7 @@
 
       hideMapStatus();
       setTimeout(() => map.invalidateSize(), 100);
-    } else {
-      showMapStatus();
-    }
+    };
 
     const activate = (button, options = {}) => {
       const { move = true, openPopup = true } = options;
@@ -1068,12 +1427,63 @@
       }
     };
 
+    const activateCurrentLocation = () => {
+      const currentButton =
+        buttons.find((button) => button.getAttribute('aria-pressed') === 'true') ||
+        activeItem.button;
+
+      activate(currentButton, {
+        move: currentButton !== activeItem.button,
+        openPopup: false
+      });
+    };
+
+    const requestMap = () => {
+      if (map || mapNode.dataset.mapState === 'loading') {
+        return;
+      }
+
+      mapNode.dataset.mapState = 'loading';
+      void loadLeafletAssets()
+        .then(() => {
+          initializeMap();
+          mapNode.dataset.mapState = map ? 'ready' : 'error';
+          activateCurrentLocation();
+        })
+        .catch(() => {
+          leafletLoadPromise = null;
+          mapNode.dataset.mapState = 'error';
+          showMapStatus();
+        });
+    };
+
     buttons.forEach((button) => {
       button.setAttribute('aria-pressed', 'false');
-      button.addEventListener('click', () => activate(button));
+      button.addEventListener('click', () => {
+        requestMap();
+        activate(button);
+      });
     });
 
-    activate(activeItem.button, { move: false });
+    activate(activeItem.button, { move: false, openPopup: false });
+    mapNode.addEventListener('pointerenter', requestMap, { once: true });
+    mapNode.addEventListener('focusin', requestMap, { once: true });
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            requestMap();
+          }
+        },
+        { rootMargin: '360px 0px', threshold: 0.01 }
+      );
+
+      observer.observe(wrap || mapNode);
+    } else {
+      window.setTimeout(requestMap, 0);
+    }
   }
 
   function setupProductionTour() {
@@ -1104,18 +1514,32 @@
       $$('.is-tour-highlight').forEach((node) => node.classList.remove('is-tour-highlight'));
     };
 
-    const getScrollOffset = () => {
-      const scale = Number(getComputedStyle(document.documentElement).getPropertyValue('--site-stage-scale')) || 1;
-      const desktopOffset = 96 * scale;
+    const getVisibleBand = () => {
+      const header = $('.site-header');
+      header?.classList.remove('is-hidden');
 
-      return document.documentElement.classList.contains('site-stage-active')
-        ? desktopOffset
-        : window.innerWidth <= 760
-          ? 82
-          : 96;
+      const headerHeight = header?.getBoundingClientRect().height || 0;
+      const topPadding = window.innerWidth <= 760 ? 14 : 18;
+      const bottomPadding = window.innerWidth <= 760 ? 96 : 78;
+      const top = Math.ceil(headerHeight + topPadding);
+      const bottom = Math.max(top + 180, window.innerHeight - bottomPadding);
+
+      return {
+        top,
+        bottom,
+        height: Math.max(180, bottom - top)
+      };
     };
 
-    const waitForScrollTarget = (targetTop, currentRun, timeout = 1600) => new Promise((resolve) => {
+    const getMaxScrollTop = () => {
+      const scrollingElement = document.scrollingElement || document.documentElement;
+
+      return Math.max(0, scrollingElement.scrollHeight - window.innerHeight);
+    };
+
+    const clampScrollTop = (top) => Math.min(getMaxScrollTop(), Math.max(0, Math.round(top)));
+
+    const waitForScrollSettled = (currentRun, timeout = 1700) => new Promise((resolve) => {
       const startedAt = Date.now();
       let previousY = window.scrollY;
       let stableFrames = 0;
@@ -1127,13 +1551,12 @@
         }
 
         const currentY = window.scrollY;
-        const isNearTarget = Math.abs(currentY - targetTop) <= 2;
         const isStable = Math.abs(currentY - previousY) <= 0.5;
 
         stableFrames = isStable ? stableFrames + 1 : 0;
         previousY = currentY;
 
-        if (isNearTarget || stableFrames >= 8 || Date.now() - startedAt >= timeout) {
+        if (stableFrames >= 8 || Date.now() - startedAt >= timeout) {
           resolve();
           return;
         }
@@ -1145,12 +1568,13 @@
     });
 
     const scrollToPosition = async (top, currentRun = tourRun) => {
+      $('.site-header')?.classList.remove('is-hidden');
       window.scrollTo({
-        top,
+        top: clampScrollTop(top),
         behavior: 'smooth'
       });
 
-      await waitForScrollTarget(top, currentRun);
+      await waitForScrollSettled(currentRun);
       await waitWhileCurrent(80, currentRun);
     };
 
@@ -1160,48 +1584,43 @@
       }
 
       const rect = node.getBoundingClientRect();
-      const scrollOffset = getScrollOffset();
-      const centeredTop = window.scrollY + rect.top + (rect.height / 2) - (window.innerHeight / 2);
-      const sectionTop = window.scrollY + rect.top - scrollOffset;
-      const scrollingElement = document.scrollingElement || document.documentElement;
-      const maxTop = Math.max(0, scrollingElement.scrollHeight - window.innerHeight);
-      const top = Math.min(maxTop, Math.max(0, Math.round(
-        block === 'top'
-          ? window.scrollY + rect.top
-          : block === 'center'
-          ? centeredTop
-          : block === 'section'
-            ? centeredTop
-            : sectionTop
-      )));
+      const band = getVisibleBand();
+      const nodeTop = window.scrollY + rect.top;
+      const nodeBottom = window.scrollY + rect.bottom;
+      let top = nodeTop - band.top;
+
+      if (block === 'center' && rect.height < band.height) {
+        top = nodeTop - band.top - ((band.height - rect.height) / 2);
+      } else if (block === 'end') {
+        top = nodeBottom - band.bottom;
+      } else if (block === 'nearest') {
+        if (rect.top >= band.top && rect.bottom <= band.bottom) {
+          return;
+        }
+
+        top = rect.height > band.height || rect.top < band.top
+          ? nodeTop - band.top
+          : nodeBottom - band.bottom;
+      }
 
       await scrollToPosition(top, currentRun);
     };
 
-    const scrollThroughNode = async (node, currentRun = tourRun, options = {}) => {
+    const showNodeExtent = async (node, currentRun = tourRun, options = {}) => {
       if (!node || currentRun !== tourRun) {
         return false;
       }
-
-      const scrollOffset = getScrollOffset();
-      const scrollingElement = document.scrollingElement || document.documentElement;
-      const maxTop = Math.max(0, scrollingElement.scrollHeight - window.innerHeight);
-      const rect = node.getBoundingClientRect();
-      const top = Math.min(maxTop, Math.max(0, Math.round(window.scrollY + rect.top - scrollOffset)));
-
-      await scrollToPosition(top, currentRun);
 
       if (!await waitWhileCurrent(options.pause || 620, currentRun)) {
         return false;
       }
 
       const updatedRect = node.getBoundingClientRect();
-      const bottomTop = Math.min(maxTop, Math.max(top, Math.round(
-        window.scrollY + updatedRect.bottom - window.innerHeight + Math.min(scrollOffset, 96)
-      )));
+      const band = getVisibleBand();
+      const shouldShowBottom = updatedRect.height > band.height + 24;
 
-      if (bottomTop > top + 24) {
-        await scrollToPosition(bottomTop, currentRun);
+      if (shouldShowBottom) {
+        await scrollToNode(node, 'end', currentRun);
 
         if (!await waitWhileCurrent(options.pause || 620, currentRun)) {
           return false;
@@ -1212,11 +1631,7 @@
     };
 
     const ensureVisible = async (node, currentRun) => {
-      const rect = node.getBoundingClientRect();
-
-      if (rect.top < 120 || rect.bottom > window.innerHeight - 120) {
-        await scrollToNode(node, 'center', currentRun);
-      }
+      await scrollToNode(node, 'nearest', currentRun);
     };
 
     const setHash = (hash) => {
@@ -1238,9 +1653,23 @@
       }
 
       clearHighlights();
-      node.classList.add('is-tour-highlight');
+
+      if (options.showExtent) {
+        await scrollToNode(node, options.scrollMode || 'start', currentRun);
+
+        if (currentRun !== tourRun) {
+          return false;
+        }
+
+        const shouldContinue = await showNodeExtent(node, currentRun, {
+          pause: options.duration || 1050
+        });
+
+        return shouldContinue;
+      }
+
       if (options.ensureItemVisible !== false) {
-        await ensureVisible(node, currentRun);
+        await scrollToNode(node, options.scrollMode || 'nearest', currentRun);
       }
 
       if (currentRun !== tourRun) {
@@ -1249,23 +1678,48 @@
 
       await waitWhileCurrent(options.duration || 1050, currentRun);
 
-      if (currentRun === tourRun) {
-        node.classList.remove('is-tour-highlight');
-      }
-
       return currentRun === tourRun;
+    };
+
+    const resolveTourItems = (definitions, sectionNode) => {
+      const list = typeof definitions === 'function' ? definitions(sectionNode) : definitions;
+
+      return (list || []).flatMap((definition) => {
+        if (definition instanceof Element) {
+          return [{ node: definition }];
+        }
+
+        if (definition?.target === 'section') {
+          return [{ ...definition, node: sectionNode }];
+        }
+
+        if (typeof definition?.node === 'function') {
+          return [{ ...definition, node: definition.node(sectionNode) }].filter((item) => item.node);
+        }
+
+        if (definition?.node instanceof Element) {
+          return [definition];
+        }
+
+        if (!definition?.selector) {
+          return [];
+        }
+
+        const root = definition.global ? document : sectionNode;
+        const nodes = definition.all
+          ? $$(definition.selector, root)
+          : [$(definition.selector, root)].filter(Boolean);
+
+        return nodes.map((node) => ({ ...definition, node }));
+      });
     };
 
     const runGroup = async ({
       hash,
       section,
       items,
-      beforeItem,
-      itemDuration = 1050,
       sectionPause = 260,
-      scrollBlock = 'section',
-      scrollTarget,
-      showFullSection = false
+      introSelector
     }, currentRun) => {
       const sectionNode = $(section);
 
@@ -1273,38 +1727,22 @@
         return false;
       }
 
-      const scrollNode = scrollTarget ? $(scrollTarget, sectionNode) || $(scrollTarget) || sectionNode : sectionNode;
+      const introNode = introSelector ? $(introSelector, sectionNode) || sectionNode : sectionNode;
 
       setHash(hash);
-      await scrollToNode(scrollNode, scrollBlock, currentRun);
+      await scrollToNode(introNode, 'start', currentRun);
 
       if (!await waitWhileCurrent(sectionPause, currentRun)) {
         return false;
       }
 
-      if (showFullSection) {
-        const focusNode = items()[0] || scrollNode;
-
-        focusNode.classList.add('is-visible');
-        clearHighlights();
-        focusNode.classList.add('is-tour-highlight');
-
-        const shouldContinue = await scrollThroughNode(scrollNode, currentRun, {
-          pause: itemDuration
-        });
-
-        if (currentRun === tourRun) {
-          focusNode.classList.remove('is-tour-highlight');
-        }
-
-        return shouldContinue;
-      }
-
-      for (const item of items()) {
-        const shouldContinue = await highlightNode(item, currentRun, {
-          beforeHighlight: () => beforeItem?.(item),
-          ensureItemVisible: false,
-          duration: itemDuration
+      for (const item of resolveTourItems(items, sectionNode)) {
+        const shouldContinue = await highlightNode(item.node, currentRun, {
+          beforeHighlight: () => item.beforeHighlight?.(item.node),
+          duration: item.duration,
+          ensureItemVisible: item.ensureItemVisible,
+          scrollMode: item.scrollMode,
+          showExtent: item.showExtent
         });
 
         if (!shouldContinue) {
@@ -1379,6 +1817,7 @@
     const startTourUi = () => {
       isTourActive = true;
       cancelArmedAt = Date.now() + 180;
+      $('.site-header')?.classList.remove('is-hidden');
       document.documentElement.classList.add('production-tour-active');
       if (hint) {
         hint.hidden = false;
@@ -1397,44 +1836,60 @@
 
       const groups = [
         {
+          hash: '#company',
+          section: '#company',
+          introSelector: '.company-map-panel',
+          sectionPause: 420,
+          items: [
+            { selector: '.company-map-panel', duration: 980, showExtent: true },
+            { selector: '.company-flow-capabilities', duration: 980, showExtent: true },
+            { selector: '.company-flow-route', duration: 980, showExtent: true }
+          ]
+        },
+        {
           hash: '#proof',
           section: '#proof',
-          scrollTarget: '.projects-showcase',
-          items: () => $$('.projects-showcase'),
-          itemDuration: 1600,
-          sectionPause: 520,
-          showFullSection: true
+          introSelector: '.projects-showcase-head',
+          sectionPause: 360,
+          items: [
+            { selector: '.projects-showcase', duration: 980, showExtent: true },
+            { selector: '.trust-docs', duration: 920, showExtent: true }
+          ]
         },
         {
           hash: '#clients',
           section: '#clients',
-          items: () => $$('.clients-grid article'),
-          itemDuration: 920
+          introSelector: '.section-head',
+          items: [
+            { selector: '.clients-grid', duration: 1050, showExtent: true }
+          ]
         },
         {
           hash: '#contacts',
           section: '#contacts',
-          scrollTarget: '.map-column',
-          items: () => $$('.location-card'),
-          itemDuration: 920,
-          sectionPause: 260,
-          beforeItem: (item) => {
-            item.querySelector('button')?.click();
-          }
+          introSelector: '.map-head',
+          sectionPause: 320,
+          items: [
+            { selector: '.map-column', duration: 880, showExtent: true },
+            {
+              selector: '.location-card',
+              all: true,
+              duration: 520,
+              scrollMode: 'nearest',
+              beforeHighlight: (item) => {
+                item.querySelector('button')?.click();
+              }
+            },
+            { selector: '.contact-card', duration: 920, showExtent: true }
+          ]
         },
         {
           hash: '#footer',
           section: '#footer',
-          items: () => $$('.site-footer'),
-          itemDuration: 1600,
-          sectionPause: 260
-        },
-        {
-          hash: '#company',
-          section: '#company',
-          items: () => [],
-          sectionPause: 900,
-          scrollBlock: 'top'
+          sectionPause: 260,
+          items: [
+            { target: 'section', duration: 1100, showExtent: true }
+          ]
         }
       ];
 
@@ -1461,6 +1916,7 @@
     });
   }
 
+  setupAdaptiveEffects();
   applyConfig();
   void setupVisitStats();
   setupDesktopStage();
