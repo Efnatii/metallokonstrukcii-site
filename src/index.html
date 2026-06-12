@@ -654,7 +654,10 @@
               <div class="map-status" data-map-status hidden>
                 <strong>Карта временно недоступна</strong>
                 <span>Откройте выбранную область или точку во внешних Яндекс Картах.</span>
-                <a data-map-fallback-link href="https://yandex.ru/maps/-/CPSAzCMe" target="_blank" rel="noreferrer">Открыть карту</a>
+                <div class="map-status-actions">
+                  <button type="button" data-map-retry>Повторить загрузку</button>
+                  <a data-map-fallback-link href="https://yandex.ru/maps/-/CPSAzCMe" target="_blank" rel="noreferrer">Открыть в Яндекс Картах</a>
+                </div>
               </div>
             </div>
             <div class="location-list" aria-label="Адреса и площадки компании">

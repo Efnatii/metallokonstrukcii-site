@@ -2834,6 +2834,32 @@ html.effects-rich .company-work-cut-frame {
   display: none;
 }
 
+.map-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.map-status-actions button,
+.map-status-actions a {
+  min-height: 38px;
+  padding: 11px 14px;
+  border: 1px solid rgb(255 196 0 / 58%);
+  border-radius: var(--radius);
+  background: rgb(255 196 0 / 10%);
+  color: var(--color-accent);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.map-status-actions button:hover,
+.map-status-actions a:hover {
+  background: var(--color-accent);
+  color: #111;
+}
+
 .location-list {
   display: grid;
   grid-template-columns: repeat(5, minmax(118px, 1fr));

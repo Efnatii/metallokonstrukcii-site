@@ -1073,17 +1073,44 @@
       const existingScript = document.querySelector(`script[src="${leafletAssets.script}"]`);
 
       if (existingScript) {
-        existingScript.addEventListener('load', resolveWhenReady, { once: true });
-        existingScript.addEventListener('error', reject, { once: true });
-        return;
+        if (existingScript.dataset.leafletStatus === 'failed') {
+          existingScript.remove();
+        } else if (existingScript.dataset.leafletStatus === 'loaded' || window.L) {
+          window.setTimeout(resolveWhenReady, 0);
+          return;
+        } else {
+          existingScript.addEventListener('load', resolveWhenReady, { once: true });
+          existingScript.addEventListener(
+            'error',
+            () => {
+              existingScript.dataset.leafletStatus = 'failed';
+              existingScript.remove();
+              reject(new Error('Leaflet asset failed to load'));
+            },
+            { once: true }
+          );
+          return;
+        }
       }
+
+      const markLoaded = () => {
+        script.dataset.leafletStatus = 'loaded';
+        resolveWhenReady();
+      };
+
+      const markFailed = () => {
+        script.dataset.leafletStatus = 'failed';
+        script.remove();
+        reject(new Error('Leaflet asset failed to load'));
+      };
 
       const script = document.createElement('script');
       script.src = leafletAssets.script;
       script.async = true;
       script.defer = true;
-      script.addEventListener('load', resolveWhenReady, { once: true });
-      script.addEventListener('error', reject, { once: true });
+      script.dataset.leafletStatus = 'loading';
+      script.addEventListener('load', markLoaded, { once: true });
+      script.addEventListener('error', markFailed, { once: true });
       document.head.append(script);
     });
 
@@ -1094,6 +1121,7 @@
     const mapNode = $('[data-locations-map]');
     const externalLinks = $$('[data-location-map-link]');
     const fallbackLink = $('[data-map-fallback-link]');
+    const retryButton = $('[data-map-retry]');
     const status = $('[data-map-status]');
     const wrap = mapNode?.closest('.map-wrap');
     const cards = $$('.location-card');
@@ -1274,6 +1302,7 @@
     let coverageItem = null;
     let coverageLoadPromise = null;
     let loadCoverageLayer = async () => coverageLayer;
+    let mapRetryCount = 0;
 
     const initializeMap = () => {
       if (map) {
@@ -1514,14 +1543,28 @@
         .then(() => {
           initializeMap();
           mapNode.dataset.mapState = map ? 'ready' : 'error';
+          mapRetryCount = 0;
           activateCurrentLocation();
         })
         .catch(() => {
           leafletLoadPromise = null;
           mapNode.dataset.mapState = 'error';
           showMapStatus();
+          if (mapRetryCount < 2) {
+            mapRetryCount += 1;
+            window.setTimeout(() => {
+              if (!map && mapNode.dataset.mapState === 'error') {
+                requestMap();
+              }
+            }, 900 * mapRetryCount);
+          }
         });
     };
+
+    retryButton?.addEventListener('click', () => {
+      mapRetryCount = 0;
+      requestMap();
+    });
 
     buttons.forEach((button) => {
       button.setAttribute('aria-pressed', 'false');

@@ -218,12 +218,15 @@ const checks = [
       main.includes('L.polygon') &&
       main.includes('L.rectangle') &&
       main.includes('L.geoJSON') &&
+      main.includes('leafletStatus') &&
+      main.includes('mapRetryCount') &&
       html.includes('data-map-geojson="./assets/data/coverage-szfo-cfo.geojson"') &&
+      html.includes('data-map-retry') &&
       !html.includes('data-map-key="petrozavodsk" data-map-lat') &&
       !html.includes('mode=whatshere&whatshere%5Bpoint%5D=34.3688041') &&
       !html.includes('mode=whatshere&whatshere%5Bpoint%5D=30.7861084') &&
       !html.includes('mode=whatshere&whatshere%5Bpoint%5D=30.5002908'),
-    `${(html.match(/data-map-key=/g) || []).length} map controls + city polygons + Leaflet rectangles/GeoJSON`
+    `${(html.match(/data-map-key=/g) || []).length} map controls + city polygons + retryable Leaflet/GeoJSON`
   ),
   check(
     'Площадки показываются областями без точечных Яндекс whatshere-ссылок',
